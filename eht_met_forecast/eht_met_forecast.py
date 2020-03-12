@@ -487,18 +487,8 @@ def read_stations(filename):
     with open(filename, 'r') as f:
         return json.load(f)
 
-        
-def main(args=None):
-    parser = ArgumentParser(description='gfs-tau-fetcher command line tool')
-    parser.add_argument('--vex', action='append', help='station(s) to fetch')
-    parser.add_argument('--stations', action='store', default='stations.json', help='station configuration file (default: stations.json)')
-    parser.add_argument('--backfill', action='store', default=0, type=int, help='hours to backfill')
-    parser.add_argument('--cycle', action='store', help='gfs cycle to fetch (e.g. 2020031200)')
-    args = parser.parse_args(args=args)
 
-    station_locations = read_stations(args.stations)
-    station_dict = dict([(v['vex'], v) for v in station_locations])
-
+def interpret_args(args, station_dict):
     if not args.vex:
         stations = station_dict.keys()
     else:
@@ -532,6 +522,22 @@ def main(args=None):
         dt_gfs_lag = datetime.timedelta(hours=-hours_ago)
         gfs_cycle = (gfs_starting_cycle + dt_gfs_lag)
         cycles.append(gfs_cycle)
+
+    return stations, cycles
+
+
+def main(args=None):
+    parser = ArgumentParser(description='gfs-tau-fetcher command line tool')
+    parser.add_argument('--vex', action='append', help='station(s) to fetch')
+    parser.add_argument('--stations', action='store', default='stations.json', help='station configuration file (default: stations.json)')
+    parser.add_argument('--backfill', action='store', default=0, type=int, help='hours to backfill')
+    parser.add_argument('--cycle', action='store', help='gfs cycle to fetch (e.g. 2020031200)')
+    args = parser.parse_args(args=args)
+
+    station_locations = read_stations(args.stations)
+    station_dict = dict([(v['vex'], v) for v in station_locations])
+
+    stations, cycles = interpret_args(args, station_dict)
 
     for vex in stations:
         station = station_dict[vex]

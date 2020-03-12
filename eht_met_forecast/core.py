@@ -514,7 +514,9 @@ def interpret_args(args, station_dict):
                     print('unknown vex', v, file=sys.stderr)
                     print_vexes = True
     if print_vexes:
-        print('valid vexes are: ', ', '.join(station_dict.keys()), file=sys.stderr)
+        print('valid vexes are:', file=sys.stderr)
+        for k, v in station_dict.items():
+            print(' ', k, v['name'], file=sys.stderr)
 
     cycles = []
     if args.cycle:

@@ -532,7 +532,7 @@ def interpret_args(args, station_dict):
 
 
 def main(args=None):
-    parser = ArgumentParser(description='gfs-tau-fetcher command line tool')
+    parser = ArgumentParser(description='eht-met-forecast command line tool')
     parser.add_argument('--vex', action='append', help='station(s) to fetch')
     parser.add_argument('--stations', action='store', default='stations.json', help='station configuration file (default: stations.json)')
     parser.add_argument('--backfill', action='store', default=0, type=int, help='hours to backfill')
@@ -556,6 +556,9 @@ def main(args=None):
             os.makedirs(outdir, exist_ok=True)
             with open(outfile, 'w') as f:
                 make_forecast_table(station, gfs_cycle, f)
+    else:
+        print('no valid stations to fetch', file=sys.stderr)
+        exit(1)
 
 
 if __name__ == '__main__':

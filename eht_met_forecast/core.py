@@ -13,7 +13,7 @@ import json
 
 import pygrib
 
-from timer_utils import record_latency, dump_latency_histograms
+from .timer_utils import record_latency, dump_latency_histograms
 
 sites = [
     {'name': 'sma', 'desc': 'the SMA', 'lat': 19.824, 'lon': -155.478, 'alt': 4080},
@@ -491,7 +491,7 @@ def make_forecast_table(site, gfs_cycle, f):
 
 def read_stations(filename):
     if filename is None:
-        filename = os.path.split(__file__)[0] + '/../data/stations.json'
+        filename = os.path.split(__file__)[0] + '/data/stations.json'
     with open(filename, 'r') as f:
         return json.load(f)
 

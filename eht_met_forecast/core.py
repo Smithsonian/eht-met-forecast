@@ -190,6 +190,7 @@ def grib2_to_am_layers(grib_buffer, lat, lon, alt):
         except Exception as e:
             # stderr is being captured so we can't print to it
             # example: RuntimeError: b'End of resource reached when reading message'
+            # example: UserWarning: file temp.grb has multi-field messages, keys inside multi-field messages will not be indexed correctly
             msg = 'pygrib raised {}, length of input was {}'.format(str(e), len(grib_buffer))
             raise RuntimeError(msg)
 
@@ -489,6 +490,7 @@ def read_stations(filename):
 
 
 def interpret_args(args, station_dict):
+    print_vexes = False
     if not args.vex:
         stations = station_dict.keys()
     else:
@@ -503,6 +505,9 @@ def interpret_args(args, station_dict):
                     stations.append(v)
                 else:
                     print('unknown vex', v, file=sys.stderr)
+                    print_vexes = True
+    if print_vexes:
+        print('valid vexes are: ', ', '.join(station_dict.keys()), file=sys.stderr)
 
     cycles = []
     if args.cycle:

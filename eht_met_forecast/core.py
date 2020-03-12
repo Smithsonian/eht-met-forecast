@@ -59,10 +59,15 @@ LAYER_HEADER = """
 """
 
 
-def latest_gfs_cycle_time():
+def latest_gfs_cycle_time(now=None):
+    if now is None:
+        now = datetime.datetime.utcnow()
+    else:
+        now = datetime.datetime.fromtimestamp(now)
+
     gfs_lag = 5.2  # hours
     dt_gfs_lag = datetime.timedelta(hours=gfs_lag)
-    dt_gfs     = datetime.datetime.utcnow() - dt_gfs_lag
+    dt_gfs     = now - dt_gfs_lag
     dt_gfs     = dt_gfs.replace(hour=int(dt_gfs.hour / 6) * 6, minute=0, second=0, microsecond=0)
     return dt_gfs
 

@@ -195,21 +195,13 @@ RH_TOP_PLEVEL = 29.
 STRAT_H2O_VMR = 5e-6
 
 
-def grib2_to_am_layers(grib_buffer, lat, lon, alt):
-    with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb') as f:
-        f.write(grib_buffer)
-        try:
-            grbindx = pygrib.index(f.name, "name", "level")
-        except Exception as e:
-            # stderr is being captured so we can't print to it
-            # example: RuntimeError: b'End of resource reached when reading message'
-            # example: UserWarning: file temp.grb has multi-field messages, keys inside multi-field messages will not be indexed correctly
-            msg = 'pygrib raised {}, length of input was {}'.format(str(e), len(grib_buffer))
-            raise RuntimeError(msg)
+def grib2_to_am_layers(gribname, lat, lon, alt):
+    grbindx = pygrib.index(gribname, "name", "level")
 
     # in memory -- not sure what syntax actually works for this?
     # need to .index() after creation
-    # grbindx = pygrib.fromstring(grib_buffer)
+    # gribfile = pygrib.fromstring(grib_buffer)
+    # gribindx = ???
 
     latlon_delta = float(LATLON_GRID_STR[0:1]) + 0.01 * float(LATLON_GRID_STR[2:])
     leftlon = math.floor(lon / latlon_delta) * latlon_delta
@@ -391,23 +383,40 @@ def print_am_layers(alt, Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr):
 def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour):
     grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour)
 
-    if len(grib_buffer) < 20000:  # should be 28kb
-        print('suspiciously small grib file of length', len(grib_buffer), file=sys.stderr)
+    grib_problem = False
+    with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb') as f:
+        f.write(grib_buffer)
+        f.flush()
+        try:
+            Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr = grib2_to_am_layers(f.name, lat, lon, alt)
+        except Exception as e:
+            # example: RuntimeError: b'End of resource reached when reading message'
+            # example: UserWarning: file temp.grb has multi-field messages, keys inside multi-field messages will not be indexed correctly
+            grib_problem = str(e)
 
-    my_stdout = io.StringIO()
-    my_stderr = io.StringIO()
-    with contextlib.redirect_stdout(my_stdout):
-        with contextlib.redirect_stderr(my_stderr):
-            print_am_header(gfs_cycle, forecast_hour, lat, lon, alt)
-            Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr = grib2_to_am_layers(grib_buffer, lat, lon, alt)
-            print_am_layers(alt, Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr)
+    if not grib_problem:
+        my_stdout = io.StringIO()
+        with contextlib.redirect_stdout(my_stdout):
+            try:
+                print_am_header(gfs_cycle, forecast_hour, lat, lon, alt)
+                print_am_layers(alt, Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr)
+            except Exception as e:
+                # example: ZeroDivisionError after a bunch of
+                #   ECCODES INFO    :  grib_file_open: cannot open file foo.grb (No such file or directory)
+                grib_problem = str(e)
 
-    if my_stderr.tell():
-        success = False
-    else:
-        success = True
+    if grib_problem:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='layers-err-', suffix='.grb', dir='.', delete=False) as tfile:
+            print('some problem turning the grib into layers, saving ', tfile.name, file=sys.stderr)
+            tfile.write(grib_buffer)
+            tfile.flush()
+            fname = tfile.name[:-4]+'.info'
+            with open(fname, 'w') as f:
+                print(grib_problem, file=f)
+                print('lat', lat, 'lon', lon, 'alt', alt, 'gfs_cycle', gfs_cycle, 'forecast_hour', forecast_hour, file=f)
+        return
 
-    return success, my_stdout.getvalue(), my_stderr.getvalue()
+    return my_stdout.getvalue()
 
 
 def run_am(layers_amc):
@@ -415,17 +424,18 @@ def run_am(layers_amc):
 
     args = (am_executable, '-')
 
-    completed = subprocess.run(args, input=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = completed.stdout
+    completed = subprocess.run(args, input=stdin, capture_output=True)
+    returncode = completed.returncode
+    stdout = completed.stdout.decode()  # one line with the integrated opacity
+    stderr = completed.stderr.decode()  # verbose stuff
 
-    return output.decode()
-    # after I learn if stderr really needs to be interleaved, split it out?
+    return returncode, stdout, stderr
 
 
-def summarize_am(am_output):
+def summarize_am(am_output, am_error):
     lwp = 0.
     iwp = 0.
-    for line in am_output.splitlines():
+    for line in am_error.splitlines():
         if line.startswith('#'):
             if 'h2o' in line:
                 pwv = float(line.split()[2])
@@ -435,10 +445,10 @@ def summarize_am(am_output):
                 iwp = float(line.split()[2])
             if 'o3' in line:
                 o3 = float(line.split()[2])
-        elif line and line[0].isdigit():
-            parts = line.split()
-            tau = float(parts[1])
-            Tb = float(parts[2])
+
+    parts = am_output.split()
+    tau = float(parts[1])
+    Tb = float(parts[2])
 
     MM_PWV   = 3.3427e21
     KG_ON_M2 = 3.3427e21
@@ -457,30 +467,38 @@ def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f):
 def compute_one_hour(site, gfs_cycle, forecast_hour, f):
     print('fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
-        success, layers_amc, layers_err = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour)
-    if not success:
-        with tempfile.NamedTemporaryFile(mode='w', prefix='layers-err-', dir='.', delete=False) as tfile:
-            print('some problem turning the grib into layers, saving stderr to', tfile.name)
-            tfile.write(layers_err)
-            return  # no line emitted
+        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour)
+    if layers_amc is None:
+        return  # no line emitted
 
     dt_forecast_hour = gfs_cycle + datetime.timedelta(hours=forecast_hour)
+    am_problem = False
     with record_latency('run am'):
-        am_output = run_am(layers_amc)
+        returncode, am_output, am_error = run_am(layers_amc)
+    if returncode not in (0, 1):
+        # am exits 1 for warnings: '! Warning: Water ice was encountered on a layer where models were'
+        am_problem = 'saw returncode of {}'.format(returncode)
 
-    try:
-        tau, Tb, pwv, lwp, iwp, o3 = summarize_am(am_output)
-    except UnboundLocalError:
-        with tempfile.NamedTemporaryFile(mode='w', prefix='weird-am-output-', dir='.', delete=False) as tfile:
-            print('Did not see complete output from AM, saving AM output to', tfile.name)
+    if not am_problem:
+        try:
+            tau, Tb, pwv, lwp, iwp, o3 = summarize_am(am_output, am_error)
+        except Exception as e:
+            am_problem = str(e)
+
+    if am_problem:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='am-problem-', dir='.', delete=False) as tfile:
+            print('problem running am, saving input and output to', tfile.name, file=sys.stderr)
             # example: -(35) : The volume mixing ratio must be in the range 0 to 1.
             # ! Error: parse error.
+            tfile.write('am_problem: {}\n'.format(am_problem))
             tfile.write('Input:\n\n')
             tfile.write(header_amc)
             tfile.write(layers_amc)
             tfile.write('\nOutput:\n\n')
+            tfile.write(am_error)
             tfile.write(am_output)
             return  # no line emitted
+
     print_final_output(dt_forecast_hour.strftime(GFS_TIMESTAMP), tau, Tb, pwv, lwp, iwp, o3, f)
     dump_latency_histograms()
     time.sleep(1)

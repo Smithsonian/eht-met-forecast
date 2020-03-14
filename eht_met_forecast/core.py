@@ -588,26 +588,26 @@ def main(args=None):
 
     stations, cycles = interpret_args(args, station_dict)
 
+    if not stations:
+        print('no valid stations to fetch', file=sys.stderr)
+
     for vex in stations:
         station = station_dict[vex]
         for gfs_cycle in cycles:
-            print('processing station', vex, 'cycle', gfs_cycle.strftime(GFS_TIMESTAMP), file=sys.stderr)
+            print('checking station', vex, 'cycle', gfs_cycle.strftime(GFS_TIMESTAMP), file=sys.stderr)
             outdir = '{}/{}'.format(args.dir, vex)
             outfile = '{}/{}'.format(outdir, gfs_cycle.strftime(GFS_TIMESTAMP))
             if ok(outfile, verbose=verbose):
                 if verbose:
-                    print('outfile {} seems ok, not re-fetching'.format(outfile), file=sys.stderr)
+                    print('  outfile {} seems ok, not re-fetching'.format(outfile), file=sys.stderr)
                 continue
             if verbose or args.dry_run:
-                print('processing', outfile, file=sys.stderr)
+                print('  processing', vex, outfile, file=sys.stderr)
                 if args.dry_run:
                     continue
             os.makedirs(outdir, exist_ok=True)
             with open(outfile, 'w') as f:
                 make_forecast_table(station, gfs_cycle, f)
-    else:
-        print('no valid stations to fetch', file=sys.stderr)
-        exit(1)
 
 
 if __name__ == '__main__':

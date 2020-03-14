@@ -21,7 +21,6 @@ sites = [
 
 
 expected_lines = 210
-datadir = 'output'
 appdir = '.'
 header_amc = '''
 #
@@ -72,14 +71,19 @@ def latest_gfs_cycle_time(now=None):
     return dt_gfs
 
 
-def ok(outfile):
+def ok(outfile, verbose=False):
     if not os.path.exists(outfile):
+        if verbose:
+            print(outfile, 'does not exist', file=sys.stderr)
         return False
     with open(outfile) as f:
         count = len(f.readlines())
         if count != expected_lines:
-            print('GREG saw', count, 'lines')
+            print(outfile, 'saw', count, 'lines, not good')
             return False
+    if verbose:
+        print(outfile, 'exists and has the correct count')
+    return True
 
 
 table_line_string = '{:1s}{:>16s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s}'
@@ -569,7 +573,15 @@ def main(args=None):
     parser.add_argument('--stations', action='store', help='station configuration file (default: builtin list)')
     parser.add_argument('--backfill', action='store', default=0, type=int, help='hours to backfill')
     parser.add_argument('--cycle', action='store', help='gfs cycle to fetch (e.g. 2020031200)')
+    parser.add_argument('--dir', action='store', default='eht-met-forecast-output',
+                        help='directory to store output (default: eht-met-forecast-output')
+    parser.add_argument('--dry-run', '-n', action='store_true', help='Show what would be done. Implies -v')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
     args = parser.parse_args(args=args)
+
+    verbose = args.verbose
+    if args.dry_run:
+        verbose = True
 
     station_locations = read_stations(args.stations)
     station_dict = dict([(v['vex'], v) for v in station_locations])
@@ -580,11 +592,16 @@ def main(args=None):
         station = station_dict[vex]
         for gfs_cycle in cycles:
             print('processing station', vex, 'cycle', gfs_cycle.strftime(GFS_TIMESTAMP), file=sys.stderr)
-            outdir = '{}/{}'.format(datadir, vex)
+            outdir = '{}/{}'.format(args.dir, vex)
             outfile = '{}/{}'.format(outdir, gfs_cycle.strftime(GFS_TIMESTAMP))
-            if ok(outfile):
-                print('outfile {} seems ok, not re-fetching'.format(outfile), file=sys.stder)
+            if ok(outfile, verbose=verbose):
+                if verbose:
+                    print('outfile {} seems ok, not re-fetching'.format(outfile), file=sys.stderr)
                 continue
+            if verbose or args.dry_run:
+                print('processing', outfile, file=sys.stderr)
+                if args.dry_run:
+                    continue
             os.makedirs(outdir, exist_ok=True)
             with open(outfile, 'w') as f:
                 make_forecast_table(station, gfs_cycle, f)

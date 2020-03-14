@@ -153,12 +153,16 @@ def fetch_gfs_download(url, params):
                 print("Download failed with status code {0}".format(r.status_code),
                       file=sys.stderr, end='')
                 print('content is', r.content, file=sys.stderr)
-        except requests.exceptions.ConnectTimeout:
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
             print("Connection timed out.", file=sys.stderr, end='')
             errflag = 1
         except requests.exceptions.ReadTimeout:
             print("Data download timed out.", file=sys.stderr, end='')
             errflag = 1
+        except requests.exceptions.RequestException as e:
+            print("Surprising exception of", str(e)+".", file=sys.stderr, end='')
+            errflag = 1
+
         if (errflag):
             retry = retry - 1
             if (retry):

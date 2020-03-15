@@ -134,7 +134,7 @@ def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):
     return url, params
 
 
-def fetch_gfs_download(url, params):
+def fetch_gfs_download(url, params, wait=False, verbose=False):
     # Timeouts and retries
     CONN_TIMEOUT        = 4        # Initial server response timeout in seconds
     READ_TIMEOUT        = 4        # Stalled download timeout in seconds
@@ -147,12 +147,17 @@ def fetch_gfs_download(url, params):
             r = requests.get(url, params=params, timeout=(CONN_TIMEOUT, READ_TIMEOUT))
             if r.status_code == requests.codes.ok:
                 errflag = 0
+            elif r.status_code == 404 and wait:
+                errflag = 1
+                retry += 1
+                print('Data not yet available (404)', file=sys.stderr, end='')
             else:
                 errflag = 1
-                print('url was', r.url, file=sys.stderr)
                 print("Download failed with status code {0}".format(r.status_code),
                       file=sys.stderr, end='')
-                print('content is', r.content, file=sys.stderr)
+                if verbose:
+                    print('url:', r.url, file=sys.stderr)
+                    print('content:', r.content, file=sys.stderr)
         except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
             print("Connection timed out.", file=sys.stderr, end='')
             errflag = 1
@@ -170,8 +175,7 @@ def fetch_gfs_download(url, params):
                 time.sleep(RETRY_DELAY)
             else:
                 print("  Giving up.", file=sys.stderr)
-                print("Failed URL was: ", file=sys.stderr)
-                print(url, file=sys.stderr)
+                print("Failed URL was: ", url, file=sys.stderr)
                 exit(1)
         else:
             break
@@ -179,9 +183,9 @@ def fetch_gfs_download(url, params):
     return r.content
 
 
-def download_gfs(lat, lon, alt, gfs_cycle, forecast_hour):
+def download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False):
     url, params = form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour)
-    grib_buffer = fetch_gfs_download(url, params)
+    grib_buffer = fetch_gfs_download(url, params, wait=wait, verbose=verbose)
     return grib_buffer
 
 
@@ -388,8 +392,8 @@ def print_am_layers(alt, Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr):
         print("column iwp_abs_Rayleigh {0:.3e} kg*m^-2".format(cti))
 
 
-def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour):
-    grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour)
+def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False):
+    grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=wait, verbose=verbose)
 
     grib_problem = False
     with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb') as f:
@@ -472,10 +476,10 @@ def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f):
     print(out, file=sys.stderr)
 
 
-def compute_one_hour(site, gfs_cycle, forecast_hour, f):
+def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=False):
     print('fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
-        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour)
+        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose)
     if layers_amc is None:
         return  # no line emitted
 
@@ -511,12 +515,12 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f):
     time.sleep(1)
 
 
-def make_forecast_table(site, gfs_cycle, f):
+def make_forecast_table(site, gfs_cycle, f, wait=False, verbose=False):
     print_table_line(table_header, f)
     for forecast_hour in range(0, 121):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose)
     for forecast_hour in range(123, 385, 3):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose)
 
 
 def read_stations(filename):
@@ -578,6 +582,7 @@ def main(args=None):
     parser.add_argument('--cycle', action='store', help='gfs cycle to fetch (e.g. 2020031200)')
     parser.add_argument('--dir', action='store', default='eht-met-forecast-output',
                         help='directory to store output (default: eht-met-forecast-output')
+    parser.add_argument('--wait', action='store_true', help='Retry forever on 404, awaiting data availability')
     parser.add_argument('--dry-run', '-n', action='store_true', help='Show what would be done. Implies -v')
     parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
     args = parser.parse_args(args=args)
@@ -611,7 +616,7 @@ def main(args=None):
                     continue
             os.makedirs(outdir, exist_ok=True)
             with open(outfile, 'w') as f:
-                make_forecast_table(station, gfs_cycle, f)
+                make_forecast_table(station, gfs_cycle, f, wait=args.wait, verbose=args.verbose)
     dump_latency_histograms()
 
 

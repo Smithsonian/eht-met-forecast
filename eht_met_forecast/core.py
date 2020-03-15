@@ -508,7 +508,6 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f):
             return  # no line emitted
 
     print_final_output(dt_forecast_hour.strftime(GFS_TIMESTAMP), tau, Tb, pwv, lwp, iwp, o3, f)
-    dump_latency_histograms()
     time.sleep(1)
 
 
@@ -594,6 +593,7 @@ def main(args=None):
 
     if not stations:
         print('no valid stations to fetch', file=sys.stderr)
+        exit(1)
 
     for vex in stations:
         station = station_dict[vex]
@@ -612,6 +612,7 @@ def main(args=None):
             os.makedirs(outdir, exist_ok=True)
             with open(outfile, 'w') as f:
                 make_forecast_table(station, gfs_cycle, f)
+    dump_latency_histograms()
 
 
 if __name__ == '__main__':

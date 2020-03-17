@@ -1,4 +1,5 @@
 import time
+import sys
 from contextlib import contextmanager
 
 from hdrh.histogram import HdrHistogram
@@ -19,11 +20,11 @@ def record_latency(name):
         
 
 def dump_latency_histograms():
-    print('name', 't50', 't90', 't95', 't99')
+    print('name', 't50', 't90', 't95', 't99', file=sys.stderr)
     for name in sorted(hists.keys()):
         hist = hists[name]
         t50 = hist.get_value_at_percentile(50.0) / 1000.
         t90 = hist.get_value_at_percentile(90.0) / 1000.
         t95 = hist.get_value_at_percentile(95.0) / 1000.
         t99 = hist.get_value_at_percentile(99.0) / 1000.
-        print(' ', name, t50, t90, t95, t99)
+        print(' ', name, t50, t90, t95, t99, file=sys.stderr)

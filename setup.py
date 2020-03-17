@@ -36,7 +36,7 @@ setup(
     install_requires=requires,
     entry_points='''
         [console_scripts]
-        eht-met-forecast = eht_met_forecast.core:main
+        eht-met-forecast = eht_met_forecast.cli:main
     ''',
     scripts=scripts,
     classifiers=[

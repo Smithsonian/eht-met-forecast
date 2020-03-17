@@ -1,0 +1,104 @@
+import datetime
+import requests
+import sys
+import time
+
+from .latlon import box
+from .constants import GFS_DAYHOUR, GFS_HOUR, LATLON_GRID_STR, LATLON_DELTA, LEVELS
+
+
+def latest_gfs_cycle_time(now=None):
+    if now is None:
+        now = datetime.datetime.utcnow()
+    else:
+        now = datetime.datetime.fromtimestamp(now)
+
+    gfs_lag = 5.2  # hours
+    dt_gfs_lag = datetime.timedelta(hours=gfs_lag)
+    dt_gfs = now - dt_gfs_lag
+    dt_gfs = dt_gfs.replace(hour=int(dt_gfs.hour / 6) * 6, minute=0, second=0, microsecond=0)
+    return dt_gfs
+
+
+def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):
+    CGI_URL = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_{}_1hr.pl"
+    url = CGI_URL.format(LATLON_GRID_STR)
+
+    leftlon, rightlon, bottomlat, toplat = box(lat, lon, LATLON_DELTA)
+
+    gfs_dayhour = gfs_cycle.strftime(GFS_DAYHOUR)
+    gfs_hour = gfs_cycle.strftime(GFS_HOUR)
+    gfs_product = 'f{:03d}'.format(forecast_hour)
+
+    params = {
+        'dir': '/gfs.{}'.format(gfs_dayhour),
+        'file': 'gfs.t{}z.pgrb2.{}.{}'.format(gfs_hour, LATLON_GRID_STR, gfs_product),
+        'subregion': '',
+        'leftlon': leftlon,
+        'rightlon': rightlon,
+        'toplat': toplat,
+        'bottomlat': bottomlat,
+    }
+
+    for lev in LEVELS:
+        params['lev_{:d}_mb'.format(lev)] = 'on'
+    VARIABLES = ("CLWMR", "ICMR", "HGT", "O3MR", "RH", "TMP")
+    for var in VARIABLES:
+        params['var_' + var] = 'on'
+
+    return url, params
+
+
+def fetch_gfs_download(url, params, wait=False, verbose=False):
+    # Timeouts and retries
+    CONN_TIMEOUT        = 4        # Initial server response timeout in seconds
+    READ_TIMEOUT        = 4        # Stalled download timeout in seconds
+    RETRY_DELAY         = 60       # Delay before retry (NOAA requests 60 s)
+    MAX_DOWNLOAD_TRIES  = 4
+
+    retry = MAX_DOWNLOAD_TRIES
+    while retry > 0:
+        try:
+            r = requests.get(url, params=params, timeout=(CONN_TIMEOUT, READ_TIMEOUT))
+            if r.status_code == requests.codes.ok:
+                errflag = 0
+            elif r.status_code == 404 and wait:
+                errflag = 1
+                retry += 1
+                print('Data not yet available (404)', file=sys.stderr, end='')
+            else:
+                errflag = 1
+                print("Download failed with status code {0}".format(r.status_code),
+                      file=sys.stderr, end='')
+                if verbose:
+                    print('url:', r.url, file=sys.stderr)
+                    print('content:', r.content, file=sys.stderr)
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
+            print("Connection timed out.", file=sys.stderr, end='')
+            errflag = 1
+        except requests.exceptions.ReadTimeout:
+            print("Data download timed out.", file=sys.stderr, end='')
+            errflag = 1
+        except requests.exceptions.RequestException as e:
+            print("Surprising exception of", str(e)+".", file=sys.stderr, end='')
+            errflag = 1
+
+        if (errflag):
+            retry = retry - 1
+            if (retry):
+                print("  Retrying...", file=sys.stderr)
+                time.sleep(RETRY_DELAY)
+            else:
+                print("  Giving up.", file=sys.stderr)
+                print("Failed URL was: ", url, file=sys.stderr)
+                exit(1)
+        else:
+            break
+
+    return r.content
+
+
+def download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False):
+    url, params = form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour)
+    grib_buffer = fetch_gfs_download(url, params, wait=wait, verbose=verbose)
+    return grib_buffer

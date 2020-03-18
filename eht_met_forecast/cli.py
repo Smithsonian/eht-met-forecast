@@ -72,8 +72,7 @@ def main(args=None):
     if args.dry_run:
         verbose = True
 
-    station_locations = read_stations(args.stations)
-    station_dict = dict([(v['vex'], v) for v in station_locations])
+    station_dict = read_stations(args.stations)
 
     stations, cycles = interpret_args(args, station_dict)
 

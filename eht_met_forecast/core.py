@@ -139,4 +139,15 @@ def read_stations(filename):
     if filename is None:
         filename = os.path.split(__file__)[0] + '/data/stations.json'
     with open(filename, 'r') as f:
-        return json.load(f)
+        stations = json.load(f)
+
+    stations_dict = {}
+    for s in stations:
+        if 'vex' in s:
+            stations_dict[s['vex']] = s
+        elif 'name' in s:
+            stations_dict[s['name']] = s
+        else:
+            raise ValueError('need vex or name')
+
+    return stations_dict

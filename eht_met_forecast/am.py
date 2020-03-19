@@ -1,6 +1,7 @@
 import subprocess
 import pygrib
 import math
+import os
 
 from .constants import LEVELS, GFS_DAY, LATLON_DELTA
 from .latlon import box
@@ -14,8 +15,7 @@ f 225 GHz 225 GHz 1 GHz
 output f GHz tau Tb K
 T0 2.7 K
 '''
-
-am_executable = '/usr/local/bin/am'
+# XXX hint: this for 345 ghz 'f  345 GHz 345 GHz 1 GHz'
 
 LAYER_HEADER = """
 #
@@ -240,7 +240,7 @@ def print_am_layers(alt, Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr):
 def run_am(layers_amc):
     stdin = header_amc.encode() + layers_amc.encode()
 
-    args = (am_executable, '-')
+    args = (os.environ['AM'], '-')
 
     completed = subprocess.run(args, input=stdin, capture_output=True)
     returncode = completed.returncode

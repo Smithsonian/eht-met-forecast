@@ -59,8 +59,8 @@ def main(args=None):
     parser.add_argument('--stations', action='store', help='station configuration file (default: builtin list)')
     parser.add_argument('--backfill', action='store', default=0, type=int, help='hours to backfill')
     parser.add_argument('--cycle', action='store', help='gfs cycle to fetch (e.g. 2020031200)')
-    parser.add_argument('--dir', action='store', default='eht-met-forecast-output',
-                        help='directory to store output (default: eht-met-forecast-output')
+    parser.add_argument('--dir', action='store', default='eht-met-data',
+                        help='directory to store output (default: eht-met-data')
     parser.add_argument('--wait', action='store_true', help='Retry forever on 404, awaiting data availability')
     parser.add_argument('--dry-run', '-n', action='store_true', help='Show what would be done. Implies -v')
     parser.add_argument('--one', action='store_true', help='Just do one hour. Used for testing')

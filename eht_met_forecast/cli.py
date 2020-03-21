@@ -40,7 +40,10 @@ def interpret_args(args, station_dict):
             c += '00'
         gfs_starting_cycle = datetime.datetime.strptime(c, '%Y%m%d%H')
     else:
-        gfs_starting_cycle = latest_gfs_cycle_time()
+        lag = None
+        if not args.wait:
+            lag = 5.2  # hours
+        gfs_starting_cycle = latest_gfs_cycle_time(lag=lag)
 
     end_hours = 1
     if args.backfill:

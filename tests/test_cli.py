@@ -32,4 +32,5 @@ def test_cli(capsys):
                     assert err == t_out['stderr']
                 if 'stdout' in t_out:
                     out = re.sub(r'#.*\n', '', out)
-                    assert out == t_out['stdout']
+                    out = out[12:]
+                    assert out == t_out['stdout'][12:]

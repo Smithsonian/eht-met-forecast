@@ -7,17 +7,17 @@ from .latlon import box
 from .constants import GFS_DAYHOUR, GFS_HOUR, LATLON_GRID_STR, LATLON_DELTA, LEVELS
 
 
-def latest_gfs_cycle_time(now=None):
+def latest_gfs_cycle_time(now=None, lag=None):
     if now is None:
-        now = datetime.datetime.utcnow()
+        dt_gfs = datetime.datetime.utcnow()
     else:
-        now = datetime.datetime.fromtimestamp(now)
+        dt_gfs = datetime.datetime.fromtimestamp(now)
 
-    gfs_lag = 5.2  # hours
-    dt_gfs_lag = datetime.timedelta(hours=gfs_lag)
-    dt_gfs = now - dt_gfs_lag
-    dt_gfs = dt_gfs.replace(hour=int(dt_gfs.hour / 6) * 6, minute=0, second=0, microsecond=0)
-    return dt_gfs
+    if lag:
+        dt_gfs_lag = datetime.timedelta(hours=lag)
+        dt_gfs -= dt_gfs_lag
+
+    return dt_gfs.replace(hour=int(dt_gfs.hour / 6) * 6, minute=0, second=0, microsecond=0)
 
 
 def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):

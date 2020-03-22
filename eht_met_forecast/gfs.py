@@ -49,12 +49,14 @@ def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):
     return url, params
 
 
+# Timeouts and retries
+CONN_TIMEOUT        = 4        # Initial server response timeout in seconds
+READ_TIMEOUT        = 4        # Stalled download timeout in seconds
+RETRY_DELAY         = 60       # Delay before retry (NOAA requests 60 s)
+MAX_DOWNLOAD_TRIES  = 4
+
+
 def fetch_gfs_download(url, params, wait=False, verbose=False):
-    # Timeouts and retries
-    CONN_TIMEOUT        = 4        # Initial server response timeout in seconds
-    READ_TIMEOUT        = 4        # Stalled download timeout in seconds
-    RETRY_DELAY         = 60       # Delay before retry (NOAA requests 60 s)
-    MAX_DOWNLOAD_TRIES  = 4
 
     retry = MAX_DOWNLOAD_TRIES
     while retry > 0:
@@ -66,6 +68,10 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
                 errflag = 1
                 retry += 1
                 print('Data not yet available (404)', file=sys.stderr, end='')
+            elif r.status_code in {403, 429, 503}:
+                # I've never seen NOMADS send these but they are typical "slow down" status codes
+                errflag = 1
+                print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
             else:
                 errflag = 1
                 print("Download failed with status code {0}".format(r.status_code),

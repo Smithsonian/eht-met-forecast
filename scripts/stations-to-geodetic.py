@@ -4,6 +4,10 @@ from astropy import units as u
 from astropy.coordinates import EarthLocation
 
 stations = [
+    # Nq:NOEMA Pv:PV Gl:GLT Sz:SPT Ax:APEX Aa:ALMA Lm:LMT Kp:KP Mg:SMT Sw:SMA Mm:JCMT
+    # PICO=PICOVEL=IRAM30M
+    # NOEMA=PDBURE
+    # THULE=GLT
     {'name': 'PDBURE', 'vex': 'Nq', 'x': 4524000.43000, 'y': 468042.14000, 'z': 4460309.76000},
     {'name': 'PICOVEL', 'vex': 'Pv', 'x': 5088967.74544, 'y': -301681.18586, 'z': 3825012.20561},
     {'name': 'THULE', 'vex': 'Gl', 'x': 541547.00000, 'y': -1387978.60000, 'z': 6180982.00000},

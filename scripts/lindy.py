@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.offsetbox import AnchoredText
 import numpy as np
 
 import eht_met_forecast.data
@@ -75,7 +76,14 @@ def do_plot(station, datadir, outputdir, force=False):
         plt.plot(df.date.values, df.tau225.values, color='black', alpha=1./len(data))
 
     # ensemble estimator
-    plt.fill_between(est.date.values, est.est_mean.values/est.est_err, est.est_mean.values*est.est_err, alpha=0.25)
+    plt.fill_between(est.date.values, est.est_mean.values/est.est_err,
+                     est.est_mean.values*est.est_err, alpha=0.25)
+
+    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 5))
+    days = pd.date_range(start=start, end=stop, freq='D')
+    for d in days:
+        plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
+    # do this to get pandas date fmt on xlabel
     est.set_index('date').est_mean.plot(label=site + ' ensemble') # do this to get pandas date fmt on xlabel
 
     # formatting
@@ -85,8 +93,10 @@ def do_plot(station, datadir, outputdir, force=False):
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')
+    plt.gca().add_artist(AnchoredText(station['name'], loc=2))
     plt.xlabel('UT date')
     plt.ylabel('tau225')
+    plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
 
     wide(14, 5)
     plt.savefig(outname, dpi=75)
@@ -94,7 +104,7 @@ def do_plot(station, datadir, outputdir, force=False):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--stations', action='store', help='site to plot')
+parser.add_argument('--stations', action='store', help='location of stations.json file')
 parser.add_argument('--vex', action='store', help='site to plot')
 parser.add_argument('--datadir', action='store', default='eht-met-data', help='data directory')
 parser.add_argument('--outputdir', action='store', default='eht-met-plots', help='output directory for plots')
@@ -119,4 +129,4 @@ for vex in stations:
     try:
         do_plot(station, args.datadir, args.outputdir, force=args.force)
     except Exception as ex:
-        print('station {} saw {}'.format(vex, str(ex)), file=sys.stderr)
+        print('station {} saw exception {}'.format(vex, str(ex)), file=sys.stderr)

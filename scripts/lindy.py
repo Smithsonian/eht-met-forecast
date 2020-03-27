@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import argparse
 import os
+from os.path import expanduser
 import sys
 from collections import defaultdict
+import datetime
 
 import pandas as pd
 import matplotlib
@@ -50,14 +52,11 @@ tfloor = 6. # hours from start for which to assume fixed model error
 tpow = 2. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 
-allest = defaultdict(dict)
-#allint = defaultdict(dict)
-date0s = {}
-
-
-def do_plot(station, datadir, outputdir, force=False):
+def do_plot(station, gfs_cycle, allest, datadir, outputdir, force=False):
     site = station.get('vex') or station['name']
-    gfs_cycle, data = eht_met_forecast.data.read(site, datadir)
+    data = eht_met_forecast.data.read(site, gfs_cycle, basedir=datadir)
+    if data is None:
+        return
 
     outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
@@ -68,15 +67,18 @@ def do_plot(station, datadir, outputdir, force=False):
     alldata['sigma'] = (tfloor + alldata['age'].dt.total_seconds()/3600.)**2.
     latest = alldata.groupby('date').first() # most recent prediction
     date0 = np.max(latest['date0'])
-    date0s[gfs_cycle] = date0
+
+    gfs_cycle_dt = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
+    if date0 != gfs_cycle_dt:
+        print('gfs_cycle and the first date in the csv disagree', file=sys.stderr)
+        print('gfs_cycle', gfs_cycle)
+        print('date0', eht_met_forecast.data.dt_to_gfs_cycle(date0))
+        raise ValueError
 
     # ensemble estimator with errors
     est = alldata.groupby('date').apply(wavg).reset_index()
     allest[site][gfs_cycle] = est
 
-    #allint[site][gfs_cycle] = interp1d(est.date.values.astype(int),
-    #                                   est.est_mean.values, bounds_error=False)
-    
     # most recent forecast
     latest.tau225.plot(lw=1, label=station['name'] + ' ' + str(date0), color='black')
     plt.axvline(date0, color='black', ls='--')
@@ -115,59 +117,64 @@ def do_plot(station, datadir, outputdir, force=False):
     plt.close()
 
 
-def do_000_plot(outputdir, stations, force=False):
-    gfs_cycles = set()
-    for site in allest:
-        [gfs_cycles.add(k) for k in allest[site].keys()]
+def do_csv(gfs_cycle, outputdir):
+    data = pd.concat(allest.values(), ignore_index=True)
+    data['doy'] = data.date.dt.dayofyear
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
+    stats = nights.groupby(['site', 'doy']).median()
+    df = stats.pivot_table(index='site', columns='doy', values='est_mean')
+    df.to_csv('~lindy/public_html/eht2020/forecast.csv')
 
-    for gfs_cycle in sorted(gfs_cycles):
-        print('gfs_cycle', gfs_cycle)
-        outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '000', gfs_cycle)
-        os.makedirs(os.path.dirname(outname), exist_ok=True)
-        if not force and os.path.exists(outname):
+
+def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
+    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '000', gfs_cycle)
+    os.makedirs(os.path.dirname(outname), exist_ok=True)
+    if not force and os.path.exists(outname):
+        return
+
+    date0 = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
+
+    for site in sorted(allest):
+        if len(site) != 2:
             continue
+        if gfs_cycle not in allest[site]:
+            continue
+        print(' ', site)
+        est = allest[site][gfs_cycle]
+        est.set_index('date').est_mean.plot(label=stations[site]['name'], alpha=0.75, lw=1.5)
+    plt.axvline(date0, color='black', ls='--')
+    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 5))
+    days = pd.date_range(start=start, end=stop, freq='D')
+    for d in days:
+        plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)
 
-        date0 = date0s[gfs_cycle]
-
-        for site in sorted(allest):
-            if len(site) != 2:
-                continue
-            if gfs_cycle not in allest[site]:
-                continue
-            print(' ', site)
-            est = allest[site][gfs_cycle]
-            est.set_index('date').est_mean.plot(label=stations[site]['name'], alpha=0.75, lw=1.5)
-        plt.axvline(date0, color='black', ls='--')
-        (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 5))
-        days = pd.date_range(start=start, end=stop, freq='D')
-        for d in days:
-            plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)
-
-        # formatting
-        plt.ylim(0, 1.0)
-        plt.yticks(np.arange(0, 1.0, .1))
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-        plt.autoscale(enable=True, axis='x', tight=True)
-        plt.grid(alpha=0.25)
-        plt.legend(loc='upper right')
-        plt.xlabel('UT date')
-        plt.ylabel('tau225')
-        plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
-        wide(14, 5)
-        plt.savefig(outname, dpi=75)
-        plt.close()
+    # formatting
+    plt.ylim(0, 1.0)
+    plt.yticks(np.arange(0, 1.0, .1))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+    plt.autoscale(enable=True, axis='x', tight=True)
+    plt.grid(alpha=0.25)
+    plt.legend(loc='upper right')
+    plt.xlabel('UT date')
+    plt.ylabel('tau225')
+    plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
+    wide(14, 5)
+    plt.savefig(outname, dpi=75)
+    plt.close()
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')
 parser.add_argument('--vex', action='store', help='site to plot')
-parser.add_argument('--datadir', action='store', default='eht-met-data', help='data directory')
-parser.add_argument('--outputdir', action='store', default='eht-met-plots', help='output directory for plots')
+parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
+parser.add_argument('--outputdir', action='store', default='~/eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 #parser.add_argument('--am-version', action='store', default='11.0', help='am version')
 #parser.add_argument("hours",  help="hours forward (0 to 384, typically 120 or 384)", type=int)
 
 args = parser.parse_args()
+datadir = expanduser(args.datadir)
+outputdir = expanduser(args.outputdir)
 
 station_dict = read_stations(args.stations)
 
@@ -176,14 +183,17 @@ if not args.vex:
 else:
     stations = (args.vex,)
 
-#if (args.hours < 0 or args.hours > 384):
-#    parser.error("invalid number of hours")
+gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
+for gfs_cycle in gfs_cycles:
+    allest = defaultdict(dict)
 
-for vex in stations:
-    station = station_dict[vex]
-    try:
-        do_plot(station, args.datadir, args.outputdir, force=args.force)
-    except Exception as ex:
-        print('station {} saw exception {}'.format(vex, str(ex)), file=sys.stderr)
+    for vex in stations:
+        station = station_dict[vex]
 
-do_000_plot(args.outputdir, station_dict, force=args.force)
+        try:
+            do_plot(station, gfs_cycle, allest, datadir, outputdir, force=args.force)
+        except Exception as ex:
+            print('station {} gfs_cycle {} saw exception {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)
+
+    do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force)
+    #do_csv(gfs_cycle, outputdir)

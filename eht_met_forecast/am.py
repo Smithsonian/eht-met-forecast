@@ -87,7 +87,9 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
                 name="Temperature", level=lev)[0].values, u, v))
             T.append(x)
         except:
-            T.append(BADVAL)
+            #T.append(BADVAL)
+            # this badvalue causes AM to crash anyway, so let's make it a bad grib
+            raise
         try:
             x = (grid_interp(grbindx.select(
                 name="Ozone mixing ratio", level=lev)[0].values, u, v))

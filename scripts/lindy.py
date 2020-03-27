@@ -2,6 +2,7 @@
 import argparse
 import os
 import sys
+from collections import defaultdict
 
 import pandas as pd
 import matplotlib
@@ -9,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 import numpy as np
+#from scipy.interpolate import interp1d
 
 import eht_met_forecast.data
 from eht_met_forecast import read_stations
@@ -48,6 +50,11 @@ tfloor = 6. # hours from start for which to assume fixed model error
 tpow = 2. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 
+allest = defaultdict(dict)
+#allint = defaultdict(dict)
+date0s = {}
+
+
 def do_plot(station, datadir, outputdir, force=False):
     site = station.get('vex') or station['name']
     gfs_cycle, data = eht_met_forecast.data.read(site, datadir)
@@ -56,17 +63,22 @@ def do_plot(station, datadir, outputdir, force=False):
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
-    
+
     alldata = pd.concat(data, ignore_index=True).sort_values(['date', 'age'])
     alldata['sigma'] = (tfloor + alldata['age'].dt.total_seconds()/3600.)**2.
     latest = alldata.groupby('date').first() # most recent prediction
     date0 = np.max(latest['date0'])
+    date0s[gfs_cycle] = date0
 
     # ensemble estimator with errors
     est = alldata.groupby('date').apply(wavg).reset_index()
+    allest[site][gfs_cycle] = est
 
+    #allint[site][gfs_cycle] = interp1d(est.date.values.astype(int),
+    #                                   est.est_mean.values, bounds_error=False)
+    
     # most recent forecast
-    latest.tau225.plot(lw=1, label=site + ' ' + str(date0), color='black')
+    latest.tau225.plot(lw=1, label=station['name'] + ' ' + str(date0), color='black')
     plt.axvline(date0, color='black', ls='--')
 
     # old forecasts
@@ -84,7 +96,7 @@ def do_plot(station, datadir, outputdir, force=False):
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
     # do this to get pandas date fmt on xlabel
-    est.set_index('date').est_mean.plot(label=site + ' ensemble') # do this to get pandas date fmt on xlabel
+    est.set_index('date').est_mean.plot(label=station['name'] + ' ensemble') # do this to get pandas date fmt on xlabel
 
     # formatting
     plt.ylim(0, 1.0)
@@ -101,6 +113,49 @@ def do_plot(station, datadir, outputdir, force=False):
     wide(14, 5)
     plt.savefig(outname, dpi=75)
     plt.close()
+
+
+def do_000_plot(outputdir, stations, force=False):
+    gfs_cycles = set()
+    for site in allest:
+        [gfs_cycles.add(k) for k in allest[site].keys()]
+
+    for gfs_cycle in sorted(gfs_cycles):
+        print('gfs_cycle', gfs_cycle)
+        outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '000', gfs_cycle)
+        os.makedirs(os.path.dirname(outname), exist_ok=True)
+        if not force and os.path.exists(outname):
+            continue
+
+        date0 = date0s[gfs_cycle]
+
+        for site in sorted(allest):
+            if len(site) != 2:
+                continue
+            if gfs_cycle not in allest[site]:
+                continue
+            print(' ', site)
+            est = allest[site][gfs_cycle]
+            est.set_index('date').est_mean.plot(label=stations[site]['name'], alpha=0.75, lw=1.5)
+        plt.axvline(date0, color='black', ls='--')
+        (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 5))
+        days = pd.date_range(start=start, end=stop, freq='D')
+        for d in days:
+            plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)
+
+        # formatting
+        plt.ylim(0, 1.0)
+        plt.yticks(np.arange(0, 1.0, .1))
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+        plt.autoscale(enable=True, axis='x', tight=True)
+        plt.grid(alpha=0.25)
+        plt.legend(loc='upper right')
+        plt.xlabel('UT date')
+        plt.ylabel('tau225')
+        plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
+        wide(14, 5)
+        plt.savefig(outname, dpi=75)
+        plt.close()
 
 
 parser = argparse.ArgumentParser()
@@ -130,3 +185,5 @@ for vex in stations:
         do_plot(station, args.datadir, args.outputdir, force=args.force)
     except Exception as ex:
         print('station {} saw exception {}'.format(vex, str(ex)), file=sys.stderr)
+
+do_000_plot(args.outputdir, station_dict, force=args.force)

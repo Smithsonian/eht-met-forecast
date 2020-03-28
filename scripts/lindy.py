@@ -4,23 +4,15 @@ import os
 from os.path import expanduser
 import sys
 from collections import defaultdict
-import datetime
 
 import pandas as pd
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 import numpy as np
-#from scipy.interpolate import interp1d
 
 import eht_met_forecast.data
 from eht_met_forecast import read_stations
-
-
-# magic for a notebook
-#%matplotlib inline
-#%config InlineBackend.figure_format = 'retina'
 
 
 # weighted geometric average and fractional error estimator
@@ -49,18 +41,13 @@ def wide(w=8, h=3):
 
 # configuration parameters
 tfloor = 6. # hours from start for which to assume fixed model error
-tpow = 2. # model error goes as time to this power: sigma = (floor + age)**tpow
+tpow = 4. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 
 def do_plot(station, gfs_cycle, allest, datadir, outputdir, force=False):
     site = station.get('vex') or station['name']
-    data = eht_met_forecast.data.read(site, gfs_cycle, basedir=datadir)
-    if data is None:
-        return
-
-    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
-    os.makedirs(os.path.dirname(outname), exist_ok=True)
-    if not force and os.path.exists(outname):
+    data = eht_met_forecast.data.read_accumulated(site, gfs_cycle, basedir=datadir)
+    if not data:
         return
 
     alldata = pd.concat(data, ignore_index=True).sort_values(['date', 'age'])
@@ -77,7 +64,13 @@ def do_plot(station, gfs_cycle, allest, datadir, outputdir, force=False):
 
     # ensemble estimator with errors
     est = alldata.groupby('date').apply(wavg).reset_index()
+    est['site'] = site
     allest[site][gfs_cycle] = est
+
+    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
+    os.makedirs(os.path.dirname(outname), exist_ok=True)
+    if not force and os.path.exists(outname):
+        return
 
     # most recent forecast
     latest.tau225.plot(lw=1, label=station['name'] + ' ' + str(date0), color='black')
@@ -117,17 +110,33 @@ def do_plot(station, gfs_cycle, allest, datadir, outputdir, force=False):
     plt.close()
 
 
-def do_csv(gfs_cycle, outputdir):
-    data = pd.concat(allest.values(), ignore_index=True)
+def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
+    outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
+    os.makedirs(os.path.dirname(outname), exist_ok=True)
+    if not force and os.path.exists(outname):
+        return
+
+    print(gfs_cycle)
+    print(list(allest.keys()))
+    for site in allest:
+        print(site, list(allest[site]))
+
+    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site]]
+    if not the_data:
+        return
+    print(outname)
+    data = pd.concat(the_data, ignore_index=True)
     data['doy'] = data.date.dt.dayofyear
+
     nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
     stats = nights.groupby(['site', 'doy']).median()
+
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
-    df.to_csv('~lindy/public_html/eht2020/forecast.csv')
+    df.to_csv(outname)
 
 
 def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
-    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '000', gfs_cycle)
+    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '00', gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -139,7 +148,6 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
             continue
         if gfs_cycle not in allest[site]:
             continue
-        print(' ', site)
         est = allest[site][gfs_cycle]
         est.set_index('date').est_mean.plot(label=stations[site]['name'], alpha=0.75, lw=1.5)
     plt.axvline(date0, color='black', ls='--')
@@ -184,6 +192,7 @@ else:
     stations = (args.vex,)
 
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
+
 for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)
 
@@ -196,4 +205,4 @@ for gfs_cycle in gfs_cycles:
             print('station {} gfs_cycle {} saw exception {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)
 
     do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force)
-    #do_csv(gfs_cycle, outputdir)
+    do_forecast_csv(gfs_cycle, allest, outputdir, force=args.force)

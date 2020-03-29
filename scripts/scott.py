@@ -158,7 +158,7 @@ def do_plot(station, datadir, outputdir,
             tsun, rise = almanac.find_discrete(tmin, tmax,
                     almanac.sunrise_sunset(e, site))
             if tsun:
-                # if tsun is empty, does that mean the sun does not rise this day?
+                # tsun can be empty, e.g. South Pole in the summer
                 tsun_datetime = tsun.utc_datetime()
                 tsun_plottime = mdates.date2num(tsun_datetime)
                 #

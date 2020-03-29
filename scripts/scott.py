@@ -166,7 +166,7 @@ def do_plot(station, datadir, outputdir,
                 # limits.
                 #
                 for axes in axes_arr:
-                    if rise[0] is True:
+                    if rise[0]:
                         axes.axvspan(xmin, tsun_plottime[0],
                                 facecolor=nightcolor, alpha=nightalpha)
                         i = 1

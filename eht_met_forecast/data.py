@@ -1,7 +1,9 @@
 import glob
 import datetime
-import pandas as pd
 from os.path import expanduser, exists
+from collections import defaultdict
+
+import pandas as pd
 
 
 def gfs_cycle_to_dt(gfs_cycle):
@@ -25,7 +27,10 @@ def get_gfs_cycles(basedir='.'):
     return sorted(list(gfs_cycles))
 
 
-def read(vex, gfs_cycle, basedir='.'):
+partial_sums = defaultdict(list)
+
+
+def read_one(vex, gfs_cycle, basedir='.'):
     utc = datetime.timezone.utc
     kwargs = {
         'delim_whitespace': True,
@@ -46,4 +51,13 @@ def read(vex, gfs_cycle, basedir='.'):
             return
         data['date0'] = data.iloc[0]['date']
         data['age'] = data['date'] - data['date0']
-        return [data]
+        return data
+
+
+def read_accumulated(vex, gfs_cycle, basedir='.'):
+    data = read_one(vex, gfs_cycle, basedir=basedir)
+
+    if data is not None:
+        partial_sums[vex].append(data)
+
+    return partial_sums[vex]

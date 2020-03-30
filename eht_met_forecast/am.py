@@ -2,6 +2,7 @@ import subprocess
 import pygrib
 import math
 import os
+import sys
 
 from .constants import LEVELS, GFS_DAY, LATLON_DELTA
 from .latlon import box
@@ -81,21 +82,24 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
                 name="Geopotential Height", level=lev)[0].values, u, v))
             z.append(x)
         except:
+            print('point 1', file=sys.stderr)
+            raise  # XXX debug these bad gribs
             z.append(BADVAL)
         try:
             x = (grid_interp(grbindx.select(
                 name="Temperature", level=lev)[0].values, u, v))
             T.append(x)
         except:
-            #T.append(BADVAL)
-            # this badvalue causes AM to crash anyway, so let's make it a bad grib
-            raise
+            print('point 2', file=sys.stderr)
+            raise  # XXX debug these bad gribs
+            T.append(BADVAL)
         try:
             x = (grid_interp(grbindx.select(
                 name="Ozone mixing ratio", level=lev)[0].values, u, v))
             x *= M_AIR / M_O3  # convert mass mixing ratio to volume mixing ratio
             o3_vmr.append(x)
         except:
+            # this is not unusual
             o3_vmr.append(0.0)
         try:
             x = (grid_interp(grbindx.select(
@@ -105,18 +109,22 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
             else:
                 RH.append(0.0)
         except:
+            print('point 4', file=sys.stderr)
+            raise  # XXX debug these bad gribs
             RH.append(0.0)
         try:
             x = (grid_interp(grbindx.select(
                 name="Cloud mixing ratio", level=lev)[0].values, u, v))
             cloud_lmr.append(x)
         except:
+            # this is not unusual
             cloud_lmr.append(0.0)
         try:
             x = (grid_interp(grbindx.select(
                 name="Ice water mixing ratio", level=lev)[0].values, u, v))
             cloud_imr.append(x)
         except:
+            # this is not unusual
             cloud_imr.append(0.0)
 
     return Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr

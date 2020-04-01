@@ -4,15 +4,21 @@ import os
 from os.path import expanduser
 import sys
 from collections import defaultdict
+import datetime
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 import numpy as np
+from scipy.interpolate import interp1d
+
+from astropy import units as u
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 
 import eht_met_forecast.data
 from eht_met_forecast import read_stations
+import vex as vvex
 
 
 # weighted geometric average and fractional error estimator
@@ -44,14 +50,14 @@ tfloor = 6. # hours from start for which to assume fixed model error
 tpow = 4. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 
-def do_plot(station, gfs_cycle, allest, datadir, outputdir, force=False):
+def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False):
     site = station.get('vex') or station['name']
     data = eht_met_forecast.data.read_accumulated(site, gfs_cycle, basedir=datadir)
     if not data:
         return
 
     alldata = pd.concat(data, ignore_index=True).sort_values(['date', 'age'])
-    alldata['sigma'] = (tfloor + alldata['age'].dt.total_seconds()/3600.)**2.
+    alldata['sigma'] = (tfloor + alldata['age'].dt.total_seconds()/3600.)**tpow
     latest = alldata.groupby('date').first() # most recent prediction
     date0 = np.max(latest['date0'])
 
@@ -66,6 +72,8 @@ def do_plot(station, gfs_cycle, allest, datadir, outputdir, force=False):
     est = alldata.groupby('date').apply(wavg).reset_index()
     est['site'] = site
     allest[site][gfs_cycle] = est
+    allint[site][gfs_cycle] = interp1d(est.date.values.astype(int),
+                                       est.est_mean.values, bounds_error=False)
 
     outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
@@ -116,11 +124,6 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     if not force and os.path.exists(outname):
         return
 
-    print(gfs_cycle)
-    print(list(allest.keys()))
-    for site in allest:
-        print(site, list(allest[site]))
-
     the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site]]
     if not the_data:
         return
@@ -132,6 +135,53 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
+    df.to_csv(outname)
+
+
+def do_tracks_csv(gfs_cycle, allint, outputdir, force=False):
+    outname = '{}/{}/tracks.csv'.format(outputdir, gfs_cycle)
+    os.makedirs(os.path.dirname(outname), exist_ok=True)
+    if not force and os.path.exists(outname):
+        return
+
+    fmt_in = '%Yy%jd%Hh%Mm%Ss'
+    # ['4524000.43000 m', '468042.14000 m', '4460309.76000 m']
+
+    def xyz2loc(xyz):
+        xyz = [float(b[0])*u.Unit(b[1]) for b in (c.split() for c in xyz)]
+        return EarthLocation.from_geocentric(*xyz)
+
+    trackrank = dict()
+    Dns = 86400000000000  # 1 day in ns
+    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
+    daysut = pd.date_range(start=start, end=stop, freq='D')
+    daysdoy = [d.dayofyear for d in daysut]
+    days = np.array([d.value for d in daysut])
+
+    for t in 'abcdef':
+        a = vvex.parse(open('track{}.vex'.format(t)).read())
+        is345 = '345 GHz' in list(a['EXPER'].values())[0]['exper_description']
+        station_loc = dict((b['site_ID'], xyz2loc(b['site_position']))
+                           for b in a['SITE'].values())
+        source_loc = dict((b, SkyCoord(c['ra'], c['dec'], equinox=c['ref_coord_frame']))
+                          for (b, c) in a['SOURCE'].items())
+        score = np.zeros(len(days))
+        total = np.zeros(len(days))
+        for b in a['SCHED'].values(): # does not necessarily loop in order!
+            time = pd.Timestamp(datetime.datetime.strptime(b['start'], fmt_in))
+            dtimes = days + np.mod(time.value + Dns//4, Dns) - Dns//4
+            stations = set(c[0].replace('Ax', 'Aa').replace('Mm', 'Sw') for c in b['station'])
+            taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
+            if is345:
+                taus = 0.05 + 2.5*taus # scale up tau225 to 345 GHz
+            alts = np.array([source_loc[b['source']].transform_to(
+                AltAz(obstime=time, location=station_loc[s])).alt.value for s in stations])
+            n = len(taus)
+            am = 1./np.sin(alts*np.pi/180.)
+            score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0)
+            total += (n-1)*n
+        trackrank[t.upper()] = score/total
+    df = pd.DataFrame.from_dict(trackrank, orient='index', columns=daysdoy).sort_index()
     df.to_csv(outname)
 
 
@@ -195,14 +245,16 @@ gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
 
 for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)
+    allint = defaultdict(dict)
 
     for vex in stations:
         station = station_dict[vex]
 
         try:
-            do_plot(station, gfs_cycle, allest, datadir, outputdir, force=args.force)
+            do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=args.force)
         except Exception as ex:
             print('station {} gfs_cycle {} saw exception {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)
 
     do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force)
     do_forecast_csv(gfs_cycle, allest, outputdir, force=args.force)
+    do_tracks_csv(gfs_cycle, allint, outputdir, force=args.force)

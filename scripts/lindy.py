@@ -12,13 +12,49 @@ import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 import numpy as np
 from scipy.interpolate import interp1d
-
 from astropy import units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 
 import eht_met_forecast.data
 from eht_met_forecast import read_stations
 import vex as vvex
+
+
+def get_all_work(datadir, outputdir, gfs_cycles, stations, force=False):
+    ret = {}
+    for gfs_cycle in gfs_cycles:
+        me = defaultdict(list)
+        for vex in stations:
+            inname = '{}/{}/{}'.format(datadir, vex, gfs_cycle)
+            if not os.path.exists(inname):
+                continue
+            outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, vex, gfs_cycle)
+            me['lindy'].append(outname)
+        outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '00', gfs_cycle)
+        me['00'].append(outname)
+        outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
+        me['forecast'].append(outname)
+        outname = '{}/{}/tracks.csv'.format(outputdir, gfs_cycle)
+        me['tracks'].append(outname)
+        ret[gfs_cycle] = me
+
+    if force:
+        return
+        
+    for gfs_cycle in list(ret.keys()):
+        for key in list(ret[gfs_cycle].keys()):
+            for f in ret[gfs_cycle][key]:
+                needed = []
+                if not os.path.exists(f):
+                    needed.append(f)
+            if needed:
+                ret[gfs_cycle][key] = needed
+            else:
+                del ret[gfs_cycle][key]
+        if len(ret[gfs_cycle]) == 0:
+            del ret[gfs_cycle]
+
+    return ret
 
 
 # weighted geometric average and fractional error estimator
@@ -242,6 +278,15 @@ else:
     stations = (args.vex,)
 
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
+work = get_all_work(datadir, outputdir, gfs_cycles, stations, force=args.force)
+
+# we need to fetch 384/6=64 gfs_cycles before the first gfs_cycle, in
+# order to have complete data for the needed work
+
+earliest = sorted(work.keys())[0]
+earliest_loc = gfs_cycles.index(earliest)
+earliest = max(0, earliest_loc - 64)
+gfs_cycles = gfs_cycles[earliest:]
 
 for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)

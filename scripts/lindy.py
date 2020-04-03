@@ -130,7 +130,7 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
     plt.fill_between(est.date.values, est.est_mean.values/est.est_err,
                      est.est_mean.values*est.est_err, alpha=0.25)
 
-    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 5))
+    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
     days = pd.date_range(start=start, end=stop, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
@@ -237,7 +237,7 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
         est = allest[site][gfs_cycle]
         est.set_index('date').est_mean.plot(label=stations[site]['name'], alpha=0.75, lw=1.5)
     plt.axvline(date0, color='black', ls='--')
-    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 5))
+    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
     days = pd.date_range(start=start, end=stop, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)

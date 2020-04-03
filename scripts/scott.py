@@ -14,6 +14,7 @@ import argparse
 import datetime
 import glob
 import os
+from os.path import expanduser
 import sys
 
 import matplotlib
@@ -302,13 +303,15 @@ Atmospheric state data are from the NOAA/NCEP Global Forecast System (GFS), with
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='site to plot')
 parser.add_argument('--vex', action='store', help='site to plot')
-parser.add_argument('--datadir', action='store', default='eht-met-data', help='data directory')
-parser.add_argument('--outputdir', action='store', default='eht-met-plots', help='output directory for plots')
+parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
+parser.add_argument('--outputdir', action='store', default='~/eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 parser.add_argument('--am-version', action='store', default='11.0', help='am version')
 parser.add_argument("hours",  help="hours forward (0 to 384, typically 120 or 384)", type=int)
 
 args = parser.parse_args()
+datadir = expanduser(args.datadir)
+outputdir = expanduser(args.outputdir)
 
 station_dict = read_stations(args.stations)
 
@@ -323,7 +326,7 @@ if (args.hours < 0 or args.hours > 384):
 for vex in stations:
     station = station_dict[vex]
     try:
-        do_plot(station, args.datadir, args.outputdir,
+        do_plot(station, datadir, outputdir,
                 hours=args.hours, am_version=args.am_version, force=args.force)
     except Exception as ex:
         print('station {} saw {}'.format(vex, str(ex)), file=sys.stderr)

@@ -49,6 +49,9 @@ def read_one(vex, gfs_cycle, basedir='.'):
         data = pd.read_csv(f, **kwargs)
         if data.empty:
             return
+
+        data.set_index('date').resample('1H').interpolate('linear').reset_index()
+
         data['date0'] = data.iloc[0]['date']
         data['age'] = data['date'] - data['date0']
         return data

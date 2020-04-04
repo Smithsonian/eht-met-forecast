@@ -160,7 +160,21 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     if not force and os.path.exists(outname):
         return
 
-    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site]]
+    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and len(site) == 2]
+    if not the_data:
+        return
+    print(outname)
+    data = pd.concat(the_data, ignore_index=True)
+    data['doy'] = data.date.dt.dayofyear
+
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
+    stats = nights.groupby(['site', 'doy']).median()
+
+    df = stats.pivot_table(index='site', columns='doy', values='est_mean')
+    df.to_csv(outname)
+
+    outname = outname.replace('forecast.csv', 'forecast_future.csv')
+    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and len(site) != 2]
     if not the_data:
         return
     print(outname)

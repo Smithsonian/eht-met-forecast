@@ -34,8 +34,8 @@ def get_all_work(datadir, outputdir, gfs_cycles, stations, force=False):
         me['00'].append(outname)
         outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
         me['forecast'].append(outname)
-        outname = '{}/{}/tracks.csv'.format(outputdir, gfs_cycle)
-        me['tracks'].append(outname)
+        outname = '{}/{}/trackrank.csv'.format(outputdir, gfs_cycle)
+        me['trackrank'].append(outname)
         ret[gfs_cycle] = me
 
     if force:
@@ -174,8 +174,8 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     df.to_csv(outname)
 
 
-def do_tracks_csv(gfs_cycle, allint, outputdir, force=False):
-    outname = '{}/{}/tracks.csv'.format(outputdir, gfs_cycle)
+def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
+    outname = '{}/{}/trackrank.csv'.format(outputdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -302,4 +302,4 @@ for gfs_cycle in gfs_cycles:
 
     do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force)
     do_forecast_csv(gfs_cycle, allest, outputdir, force=args.force)
-    do_tracks_csv(gfs_cycle, allint, outputdir, force=args.force)
+    do_trackrank_csv(gfs_cycle, allint, outputdir, force=args.force)

@@ -94,7 +94,7 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
 
     alldata = pd.concat(data, ignore_index=True).sort_values(['date', 'age'])
     alldata['sigma'] = (tfloor + alldata['age'].dt.total_seconds()/3600.)**tpow
-    latest = alldata.groupby('date').first() # most recent prediction
+    latest = alldata.groupby('date').first().reset_index()  # most recent prediction
     date0 = np.max(latest['date0'])
 
     gfs_cycle_dt = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
@@ -117,7 +117,8 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
         return
 
     # most recent forecast
-    latest.tau225.plot(lw=1, label=station['name'] + ' ' + str(date0), color='black')
+    label = station['name'] + ' ' + str(date0)
+    plt.plot(latest.date.values, latest.tau225, lw=1, label=label, color='black')
     plt.axvline(date0, color='black', ls='--')
 
     # old forecasts
@@ -130,17 +131,19 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
     plt.fill_between(est.date.values, est.est_mean.values/est.est_err,
                      est.est_mean.values*est.est_err, alpha=0.25)
 
-    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    days = pd.date_range(start=start, end=stop, freq='D')
+    (first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
+    days = pd.date_range(start=first, end=last, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
     # do this to get pandas date fmt on xlabel
-    est.set_index('date').est_mean.plot(label=station['name'] + ' ensemble') # do this to get pandas date fmt on xlabel
+    plt.plot(est.date.values, est.est_mean, label=station['name'] + ' ensemble')
 
     # formatting
     plt.ylim(0, 1.0)
     plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+    plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+    plt.gcf().autofmt_xdate()
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')
@@ -249,10 +252,10 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
         if gfs_cycle not in allest[site]:
             continue
         est = allest[site][gfs_cycle]
-        est.set_index('date').est_mean.plot(label=stations[site]['name'], alpha=0.75, lw=1.5)
+        plt.plot(est.date.values, est.est_mean, label=stations[site]['name'], alpha=0.75, lw=1.5)
     plt.axvline(date0, color='black', ls='--')
-    (start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    days = pd.date_range(start=start, end=stop, freq='D')
+    (first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
+    days = pd.date_range(start=first, end=last, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)
 
@@ -260,6 +263,8 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
     plt.ylim(0, 1.0)
     plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+    plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+    plt.gcf().autofmt_xdate()
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')

@@ -32,6 +32,8 @@ def get_all_work(datadir, outputdir, gfs_cycles, stations, force=False):
             me['lindy'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '00', gfs_cycle)
         me['00'].append(outname)
+        outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '01', gfs_cycle)
+        me['00'].append(outname)
         outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
         me['forecast'].append(outname)
         outname = '{}/{}/trackrank.csv'.format(outputdir, gfs_cycle)
@@ -88,8 +90,13 @@ tpow = 4. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False):
     site = station.get('vex') or station['name']
+    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
+
     data = eht_met_forecast.data.read_accumulated(site, gfs_cycle, basedir=datadir)
     if not data:
+        with open(outname, 'w'):
+            # touch the output file so we skip it next time
+            pass
         return
 
     alldata = pd.concat(data, ignore_index=True).sort_values(['date', 'age'])
@@ -111,7 +118,6 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
     allint[site][gfs_cycle] = interp1d(est.date.values.astype(int),
                                        est.est_mean.values, bounds_error=False)
 
-    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -238,21 +244,36 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
     df.to_csv(outname)
 
 
-def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False):
-    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '00', gfs_cycle)
+def select_2020(site):
+    if len(site) == 2:
+        return True
+
+
+def select_future(site):
+    if len(site) != 2:
+        return True
+
+
+def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None, name='00'):
+    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, name, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
 
     date0 = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
 
+    some = False
     for site in sorted(allest):
-        if len(site) != 2:
+        if not select(site):
             continue
         if gfs_cycle not in allest[site]:
             continue
         est = allest[site][gfs_cycle]
         plt.plot(est.date.values, est.est_mean, label=stations[site]['name'], alpha=0.75, lw=1.5)
+        some = True
+    if not some:
+        plt.close()
+        return
     plt.axvline(date0, color='black', ls='--')
     (first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
     days = pd.date_range(start=first, end=last, freq='D')
@@ -298,6 +319,9 @@ else:
 
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
 work = get_all_work(datadir, outputdir, gfs_cycles, stations, force=args.force)
+if not work:
+    print('no work to do', file=sys.stderr)
+    exit(0)
 
 # we need to fetch 384/6=64 gfs_cycles before the first gfs_cycle, in
 # order to have complete data for the needed work
@@ -319,6 +343,7 @@ for gfs_cycle in gfs_cycles:
         except Exception as ex:
             print('station {} gfs_cycle {} saw exception {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)
 
-    do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force)
+    do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force, select=select_2020, name='00')
+    do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force, select=select_future, name='01')
     do_forecast_csv(gfs_cycle, allest, outputdir, force=args.force)
     do_trackrank_csv(gfs_cycle, allint, outputdir, force=args.force)

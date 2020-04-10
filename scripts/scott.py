@@ -69,6 +69,8 @@ def make_filenames(datadir, vex, gfs_cycle):
         delta = datetime.timedelta(hours=-hours)
         filename = (base + delta).strftime(GFS_TIMESTAMP)
         filenames.append('{}/{}/{}'.format(datadir, vex, filename))
+        if not os.path.exists(filename):
+            return
     return reversed(filenames)
 
 
@@ -89,6 +91,8 @@ def do_plot(station, datadir, outputdir, gfs_cycle,
                                  figsize=(6, 8))
 
     filenames = make_filenames(datadir, name, gfs_cycle)
+    if not filenames:
+        return
 
     outname = '{}/{}/forecast_{}_{}_{}.png'.format(outputdir, gfs_cycle, name, gfs_cycle, hours)
     os.makedirs(os.path.dirname(outname), exist_ok=True)

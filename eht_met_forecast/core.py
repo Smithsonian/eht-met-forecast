@@ -79,15 +79,17 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
     return my_stdout.getvalue()
 
 
-def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f):
+def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f, verbose=False):
     out = table_line_floats.format(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3)
     print(out, file=f)
-    f.flush()
-    print(out, file=sys.stderr)
+    if verbose:
+        print(out, file=sys.stderr)
+        sys.stderr.flush()
 
 
 def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=False):
-    print('fetching for hour', forecast_hour, file=sys.stderr)
+    if verbose:
+        print(site['name'], 'fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
         layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose)
     if layers_amc is None:
@@ -121,7 +123,7 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=Fals
             tfile.write(am_output)
             return  # no line emitted
 
-    print_final_output(dt_forecast_hour.strftime(GFS_TIMESTAMP), tau, Tb, pwv, lwp, iwp, o3, f)
+    print_final_output(dt_forecast_hour.strftime(GFS_TIMESTAMP), tau, Tb, pwv, lwp, iwp, o3, f, verbose=verbose)
     time.sleep(1)
 
 

@@ -14,6 +14,7 @@ import argparse
 import datetime
 import glob
 import os
+from os.path import expanduser
 import sys
 
 import matplotlib
@@ -26,7 +27,9 @@ ts = sf.load.timescale()
 e  = sf.load('de421.bsp')
 from skyfield import almanac
 
-from eht_met_forecast import read_stations
+import eht_met_forecast
+import eht_met_forecast.data
+
 
 widths = (
         0.3,
@@ -55,25 +58,23 @@ nightalpha = 0.2
 tz_UTC = datetime.timezone(datetime.timedelta(hours=0))
 
 
-def make_filenames(datadir, vex):
-    files = glob.glob('{}/{}/*'.format(datadir, vex))
-    recent = max(files)
+def make_filenames(datadir, vex, gfs_cycle):
     GFS_TIMESTAMP = '%Y%m%d_%H:00:00'
-    if '/' in recent:
-        recent = recent.split('/')[-1]
-    base = datetime.datetime.strptime(recent, GFS_TIMESTAMP)
+    base = datetime.datetime.strptime(gfs_cycle, GFS_TIMESTAMP)
     if not base:
-        raise ValueError('error parsing filename {} as a time'.format(recent))
+        raise ValueError('error parsing gfs_cycle {} as a time'.format(gfs_cycle))
 
     filenames = []
     for hours in range(0, 49, 6):
         delta = datetime.timedelta(hours=-hours)
         filename = (base + delta).strftime(GFS_TIMESTAMP)
         filenames.append('{}/{}/{}'.format(datadir, vex, filename))
-    return recent, reversed(filenames)
+        if not os.path.exists(filename):
+            return
+    return reversed(filenames)
 
 
-def do_plot(station, datadir, outputdir,
+def do_plot(station, datadir, outputdir, gfs_cycle,
             hours=None, am_version=None, force=False):
     lat = station['lat']
     lon = station['lon']
@@ -89,7 +90,9 @@ def do_plot(station, datadir, outputdir,
                                  sharex=True,
                                  figsize=(6, 8))
 
-    gfs_cycle, filenames = make_filenames(datadir, name)
+    filenames = make_filenames(datadir, name, gfs_cycle)
+    if not filenames:
+        return
 
     outname = '{}/{}/forecast_{}_{}_{}.png'.format(outputdir, gfs_cycle, name, gfs_cycle, hours)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
@@ -158,7 +161,7 @@ def do_plot(station, datadir, outputdir,
             tsun, rise = almanac.find_discrete(tmin, tmax,
                     almanac.sunrise_sunset(e, site))
             if tsun:
-                # if tsun is empty, does that mean the sun does not rise this day?
+                # tsun can be empty, e.g. South Pole in the summer
                 tsun_datetime = tsun.utc_datetime()
                 tsun_plottime = mdates.date2num(tsun_datetime)
                 #
@@ -166,7 +169,7 @@ def do_plot(station, datadir, outputdir,
                 # limits.
                 #
                 for axes in axes_arr:
-                    if rise[0] is True:
+                    if rise[0]:
                         axes.axvspan(xmin, tsun_plottime[0],
                                 facecolor=nightcolor, alpha=nightalpha)
                         i = 1
@@ -296,21 +299,23 @@ Atmospheric state data are from the NOAA/NCEP Global Forecast System (GFS), with
     plt.figtext(0.07, 0.0, annotation_str, fontsize=5.5, wrap=True)
 
     fig.savefig(outname, dpi=75)
-    plt.close(fig)
+    plt.close('all')
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='site to plot')
 parser.add_argument('--vex', action='store', help='site to plot')
-parser.add_argument('--datadir', action='store', default='eht-met-data', help='data directory')
-parser.add_argument('--outputdir', action='store', default='eht-met-plots', help='output directory for plots')
+parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
+parser.add_argument('--outputdir', action='store', default='~/eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 parser.add_argument('--am-version', action='store', default='11.0', help='am version')
 parser.add_argument("hours",  help="hours forward (0 to 384, typically 120 or 384)", type=int)
 
 args = parser.parse_args()
+datadir = expanduser(args.datadir)
+outputdir = expanduser(args.outputdir)
 
-station_dict = read_stations(args.stations)
+station_dict = eht_met_forecast.read_stations(args.stations)
 
 if not args.vex:
     stations = station_dict.keys()
@@ -320,10 +325,13 @@ else:
 if (args.hours < 0 or args.hours > 384):
     parser.error("invalid number of hours")
 
+gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
+
 for vex in stations:
     station = station_dict[vex]
-    try:
-        do_plot(station, args.datadir, args.outputdir,
-                hours=args.hours, am_version=args.am_version, force=args.force)
-    except Exception as ex:
-        print('station {} saw {}'.format(vex, str(ex)), file=sys.stderr)
+    for gfs_cycle in gfs_cycles:
+        try:
+            do_plot(station, datadir, outputdir, gfs_cycle,
+                    hours=args.hours, am_version=args.am_version, force=args.force)
+        except Exception as ex:
+            print('station {} gfs_cycle {} saw {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)

@@ -1,5 +1,6 @@
 import os.path
 import re
+import sys
 
 import pytest
 import requests_mock
@@ -81,6 +82,8 @@ def test_cli(capsys):
         out, err = capsys.readouterr()
         if 'stderr' in t_out:
             assert err == t_out['stderr']
+        else:
+            print(err, file=sys.stderr)
         if 'stdout' in t_out:
             if 'exeption' in t_in:
                 print(out)

@@ -5,7 +5,7 @@ data for the
 [Event Horizon Telescope](https://eventhorizontelescope.org/),
 downloading data from the
 GFS weather model and running it through the
-[AM radiative transfer program](10.5281/zenodo.640645).
+[AM radiative transfer program](https://doi.org/10.5281/zenodo.640645).
 
 This code has a lot of code from
 [sma-met-forecast](https://github.com/Smithsonian/sma-met-forecast),
@@ -14,7 +14,6 @@ with a lot of refactoring.
 ## Running
 
 % eht-met-forecast -h
-
 
 ## Installation
 

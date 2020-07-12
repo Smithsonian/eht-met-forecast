@@ -7,9 +7,9 @@ downloading data from the
 GFS weather model and running it through the
 [AM radiative transfer program](10.5281/zenodo.640645).
 
-The code is mostly a refactor of the code from the
-[sma-met-forecast](https://github.com/Smithsonian/sma-met-forecast)
-repo.
+This code has a lot of code from
+[sma-met-forecast](https://github.com/Smithsonian/sma-met-forecast),
+with a lot of refactoring.
 
 ## Running
 

@@ -5,6 +5,8 @@ from astropy.coordinates import EarthLocation
 
 stations = [
     # Nq:NOEMA Pv:PV Gl:GLT Sz:SPT Ax:APEX Aa:ALMA Lm:LMT Kp:KP Mg:SMT Sw:SMA Mm:JCMT
+    # SMA=SMAP (phased)
+    # SMAR=SMA reference antenna
     # PICO=PICOVEL=IRAM30M
     # NOEMA=PDBURE
     # THULE=GLT

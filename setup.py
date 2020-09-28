@@ -8,7 +8,7 @@ packages = [
 
 requires = ['hdrhistogram', 'requests']
 
-test_requires = ['pytest', 'request_mock']
+test_requires = ['pytest', 'requests_mock']
 
 setup_requires = ['setuptools_scm']
 

@@ -1,0 +1,57 @@
+language: python
+sudo: true
+dist: xenial
+
+python:
+  #- 3.2  # py.test fails at runtime
+  #- 3.3  # pkg_resources on travisci no longer supports 3.3
+  #- 3.4  # requests 2.22 dropped 3.4 support
+  - 3.5
+  - 3.6
+  - 3.7
+  - 3.8
+  - 3.9-dev
+  - nightly
+
+matrix:
+  fast_finish: true
+  allow_failures:
+  - python: 3.9-dev
+  - python: nightly
+  - python: 3.8
+    arch: arm64
+  - python: 3.8
+    arch: s390x
+#  include:
+#  - python: 3.8
+#    arch: arm64
+#  - python: 3.8
+#    arch: s390x
+
+git:
+  depth: 99999
+
+install:
+  # am
+  - curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
+  - tar xf am-11.0.tgz
+  - cd am-11.0/src
+  - make serial
+  - cd ../..
+  - export AM=./am-11.0/src/am
+  - $AM -v
+
+  # pygrib
+  - apt-get install libeccodes-dev  # 'eccodes-devel' in RH
+  - pip install pyproj numpy
+  - pip install cython  # must be installed early
+  - pip install pygrib
+
+  - pip install .
+  - pip install .[test]
+
+script:
+  - pytest
+
+after_success:
+  coveralls

@@ -252,7 +252,7 @@ def run_am(layers_amc):
 
     args = (os.environ['AM'], '-')
 
-    completed = subprocess.run(args, input=stdin, capture_output=True)
+    completed = subprocess.run(args, input=stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     returncode = completed.returncode
     stdout = completed.stdout.decode()  # one line with the integrated opacity
     stderr = completed.stderr.decode()  # verbose stuff

@@ -11,7 +11,7 @@ def latest_gfs_cycle_time(now=None, lag=None):
     if now is None:
         dt_gfs = datetime.datetime.utcnow()
     else:
-        dt_gfs = datetime.datetime.fromtimestamp(now)
+        dt_gfs = datetime.datetime.fromtimestamp(now, tz=datetime.timezone.utc)
 
     if lag:
         dt_gfs_lag = datetime.timedelta(hours=lag)

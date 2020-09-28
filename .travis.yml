@@ -8,32 +8,44 @@ addons:
     - libeccodes-dev  # for pygrib... in ubuntu starting wtih 18.04; eccodes-devel in RH
     - proj-bin  # for pygrib without wheel; proj and proj-devel in RH
     - libproj-dev
+  homebrew:
+    packages:
+    - eccodes
+    - proj
 
 python:
   #- 3.2  # py.test fails at runtime
   #- 3.3  # pkg_resources on travisci no longer supports 3.3
   #- 3.4  # requests 2.22 dropped 3.4 support
-  - 3.5
-  - 3.6
-  - 3.7
-  - 3.8
-  - 3.9-dev
-  - nightly
+#  - 3.5
+#  - 3.6
+#  - 3.7
+#  - 3.8
+#  - 3.9-dev
+#  - nightly
 
 matrix:
   fast_finish: true
   allow_failures:
-  - python: 3.9-dev
-  - python: nightly
+  - python: 3.9-dev  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython
+  - python: nightly  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython
   - python: 3.8
     arch: arm64
   - python: 3.8
     arch: s390x
   include:
   - python: 3.8
-    arch: arm64
+    arch: arm64  # works, takes 7m11s in travis
   - python: 3.8
-    arch: s390x
+    arch: s390x  # works, takes 3m19s in travis
+  - name: "OSX"
+    os: osx
+    osx_image: xcode12  # 10.15.5
+    language: shell
+    before_install:
+      - sudo mkdir -p ~/.cache/pip/wheels  # does not exist on osx
+      # for osx we can't say "python: 3.8" so we use the system python3
+      - python3 --version
 
 git:
   depth: 99999

@@ -6,12 +6,12 @@ python:
   #- 3.2  # py.test fails at runtime
   #- 3.3  # pkg_resources on travisci no longer supports 3.3
   #- 3.4  # requests 2.22 dropped 3.4 support
-  - 3.5
-  - 3.6
-  - 3.7
+#  - 3.5
+#  - 3.6
+#  - 3.7
   - 3.8
-  - 3.9-dev
-  - nightly
+#  - 3.9-dev
+#  - nightly
 
 matrix:
   fast_finish: true
@@ -42,7 +42,7 @@ install:
   - $AM -v
 
   # pygrib
-  - apt-get install libeccodes-dev  # 'eccodes-devel' in RH
+  - sudo apt-get install libeccodes-dev  # 'eccodes-devel' in RH
   - pip install pyproj numpy
   - pip install cython  # must be installed early
   - pip install pygrib

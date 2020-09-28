@@ -45,3 +45,12 @@ cd ../..
 export AM=./am-11.0/src/am
 $AM -v
 ```
+
+### this code
+
+Once `pygrib` and `am` are installed,
+
+```
+pip install .
+pip install .[test]  # if you want to run tests
+```

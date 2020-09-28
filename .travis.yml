@@ -11,12 +11,12 @@ python:
   #- 3.2  # py.test fails at runtime
   #- 3.3  # pkg_resources on travisci no longer supports 3.3
   #- 3.4  # requests 2.22 dropped 3.4 support
-#  - 3.5
-#  - 3.6
-#  - 3.7
+  - 3.5
+  - 3.6
+  - 3.7
   - 3.8
-#  - 3.9-dev
-#  - nightly
+  - 3.9-dev
+  - nightly
 
 matrix:
   fast_finish: true
@@ -27,11 +27,11 @@ matrix:
     arch: arm64
   - python: 3.8
     arch: s390x
-#  include:
-#  - python: 3.8
-#    arch: arm64
-#  - python: 3.8
-#    arch: s390x
+  include:
+  - python: 3.8
+    arch: arm64
+  - python: 3.8
+    arch: s390x
 
 git:
   depth: 99999

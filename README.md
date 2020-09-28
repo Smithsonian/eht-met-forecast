@@ -1,6 +1,6 @@
 # eht-met-forecast
 
-[![Build Status](https://travis-ci.com/wumpus/paramsurvey.svg?branch=master)](https://travis-ci.com/wumpus/paramsurvey) [![Coverage Status](https://coveralls.io/repos/github/wumpus/paramsurvey/badge.svg?branch=master)](https://coveralls.io/github/wumpus/paramsurvey?branch=master)
+[![Build Status](https://travis-ci.com/wumpus/eht-met-forecast.svg?branch=master)](https://travis-ci.com/wumpus/eht-met-forecast) [![Coverage Status](https://coveralls.io/repos/github/wumpus/eht-met-forecast/badge.svg?branch=master)](https://coveralls.io/github/wumpus/eht-met-forecast?branch=master)
 
 eht-met-forecast creates radio-astronomy-relevant weather forecast
 data for the

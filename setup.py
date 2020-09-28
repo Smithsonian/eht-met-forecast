@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+from os import path
 
 packages = [
     'eht_met_forecast',
@@ -20,17 +21,16 @@ scripts = ['scripts/stations-to-geodetic.py']
 
 package_data = {'': ['data/*.json']}
 
-try:
-    import pypandoc
-    description = pypandoc.convert_file('README.md', 'rst')
-except (IOError, ImportError):
-    description = open('README.md').read()
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    description = f.read()
 
 setup(
     name='eht-met-forecast',
     use_scm_version=True,
     description='Tools to generate EHT station forecasts',
     long_description=description,
+    long_description_content_type='text/markdown',
     author='Greg Lindahl, Scott Paine, and others',
     author_email='glindahl@cfa.harvard.edu',
     url='https://github.com/wumpus/eht-met-forecast',
@@ -49,9 +49,9 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
+        'Operating System :: POSIX :: Linux',
         'Natural Language :: English',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

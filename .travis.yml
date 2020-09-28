@@ -79,8 +79,8 @@ install:
   - $AM -v
 
   # pygrib
-  - pip install pyproj numpy
-  - pip install cython  # must be installed early
+  - pip install pyproj numpy  # not marked by pygrib as dependencies
+  - pip install cython  # must be installed early to rebuild for newer python versions
   - pip install pygrib
 
   - pip install .

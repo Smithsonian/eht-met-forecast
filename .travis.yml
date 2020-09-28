@@ -17,53 +17,53 @@ python:
   #- 3.2  # py.test fails at runtime
   #- 3.3  # pkg_resources on travisci no longer supports 3.3
   #- 3.4  # requests 2.22 dropped 3.4 support
-#  - 3.5
-#  - 3.6
-#  - 3.7
-#  - 3.8
-#  - 3.9-dev
-#  - nightly
+  - 3.5
+  - 3.6
+  - 3.7
+  - 3.8
+  - 3.9-dev
+  - nightly
 
 matrix:
   fast_finish: true
   allow_failures:
-  - python: 3.9-dev  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython
-  - python: nightly  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython
+  - python: 3.9-dev  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython?
+  - python: nightly  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython?
   - python: 3.8
     arch: arm64
   - python: 3.8
     arch: s390x
   include:
-#  - python: 3.8
-#    arch: arm64  # works, takes 7m11s in travis
-#  - python: 3.8
-#    arch: s390x  # works, takes 3m19s in travis
-  - name: "OSX"
-    os: osx
-    osx_image: xcode12  # 10.15.5
-    language: shell
-    before_install:
-      - sudo mkdir -p ~/.cache/pip/wheels  # does not exist on osx
-      # for osx we can't say "python: 3.8" so we use the system python3
-      - python3 --version
-    install:
-      # am
-      - curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
-      - tar xf am-11.0.tgz
-      - cd am-11.0/src
-      - make serial
-      - cd ../..
-      - export AM=./am-11.0/src/am
-      - $AM -v
-
-      # pygrib
-      #- sudo apt-get install libeccodes-dev proj-bin # 'eccodes-devel' and 'proj' in RH
-      - pip3 install pyproj numpy
-      - pip3 install cython  # must be installed early
-      - pip3 install pygrib
-
-      - pip3 install .
-      - pip3 install .[test]
+  - python: 3.8
+    arch: arm64  # works, takes 7m11s in travis
+  - python: 3.8
+    arch: s390x  # works, takes 3m19s in travis
+#  - name: "OSX"
+#    os: osx
+#    osx_image: xcode12  # 10.15.5
+#    language: shell
+#    before_install:
+#      - sudo mkdir -p ~/.cache/pip/wheels  # does not exist on osx
+#      # for osx we can't say "python: 3.8" so we use the system python3
+#      - python3 --version
+#    install:
+#      # am
+#      - curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
+#      - tar xf am-11.0.tgz
+#      - cd am-11.0/src
+#      - make serial
+#      - cd ../..
+#      - export AM=./am-11.0/src/am
+#      - $AM -v
+#
+#      # pygrib
+#      #- sudo apt-get install libeccodes-dev proj-bin # 'eccodes-devel' and 'proj' in RH
+#      - pip3 install pyproj numpy
+#      - pip3 install cython  # must be installed early
+#      - pip3 install pygrib
+#
+#      - pip3 install .
+#      - pip3 install .[test]
 
 git:
   depth: 99999
@@ -79,7 +79,6 @@ install:
   - $AM -v
 
   # pygrib
-  #- sudo apt-get install libeccodes-dev proj-bin # 'eccodes-devel' and 'proj' in RH
   - pip install pyproj numpy
   - pip install cython  # must be installed early
   - pip install pygrib

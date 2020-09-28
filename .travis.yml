@@ -1,6 +1,11 @@
 language: python
 sudo: true
-dist: xenial
+dist: focal
+
+addons:
+  apt:
+    packages:
+    - libeccodes-dev  # for pygrib
 
 python:
   #- 3.2  # py.test fails at runtime
@@ -42,7 +47,7 @@ install:
   - $AM -v
 
   # pygrib
-  - sudo apt-get install libeccodes-dev  # 'eccodes-devel' in RH
+  #- sudo apt-get install libeccodes-dev  # 'eccodes-devel' in RH
   - pip install pyproj numpy
   - pip install cython  # must be installed early
   - pip install pygrib

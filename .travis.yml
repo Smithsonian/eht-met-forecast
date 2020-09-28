@@ -1,11 +1,11 @@
 language: python
 sudo: true
-dist: focal
+dist: focal  # cannot use xenial because of libeccodes-dev
 
 addons:
   apt:
     packages:
-    - libeccodes-dev  # for pygrib
+    - libeccodes-dev  # for pygrib... in ubuntu starting wtih 18.04
 
 python:
   #- 3.2  # py.test fails at runtime

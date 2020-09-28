@@ -6,9 +6,15 @@ packages = [
     'eht_met_forecast',
 ]
 
-requires = []
+requires = ['hdrhistogram', 'requests']
 
-test_requirements = []
+test_requires = ['pytest', 'request_mock']
+
+setup_requires = ['setuptools_scm']
+
+extras_require = {
+    'test': test_requires,  # setup no longer tests, so make them an extra that .travis.yml uses
+}
 
 scripts = ['scripts/stations-to-geodetic.py']
 
@@ -25,14 +31,14 @@ setup(
     use_scm_version=True,
     description='Tools to generate EHT station forecasts',
     long_description=description,
-    author='Greg Lindahl and others',
+    author='Greg Lindahl, Scott Paine, and others',
     author_email='glindahl@cfa.harvard.edu',
     url='https://github.com/wumpus/eht-met-forecast',
     packages=packages,
     python_requires=">=3.4.*",
     include_package_data=True,
     package_data=package_data,
-    setup_requires=['setuptools_scm'],
+    setup_requires=setup_requires,
     install_requires=requires,
     entry_points='''
         [console_scripts]

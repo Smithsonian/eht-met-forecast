@@ -5,7 +5,8 @@ dist: focal  # cannot use xenial because of libeccodes-dev
 addons:
   apt:
     packages:
-    - libeccodes-dev  # for pygrib... in ubuntu starting wtih 18.04
+    - libeccodes-dev  # for pygrib... in ubuntu starting wtih 18.04; eccodes-devel in RH
+    - proj-bin  # for pygrib without wheel; proj in RH
 
 python:
   #- 3.2  # py.test fails at runtime
@@ -47,7 +48,7 @@ install:
   - $AM -v
 
   # pygrib
-  #- sudo apt-get install libeccodes-dev  # 'eccodes-devel' in RH
+  #- sudo apt-get install libeccodes-dev proj-bin # 'eccodes-devel' and 'proj' in RH
   - pip install pyproj numpy
   - pip install cython  # must be installed early
   - pip install pygrib

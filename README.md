@@ -8,6 +8,7 @@ GFS weather model and running it through the
 [AM radiative transfer program](https://doi.org/10.5281/zenodo.640645).
 
 This code has a lot of code from
+Scott Paine's
 [sma-met-forecast](https://github.com/Smithsonian/sma-met-forecast),
 with a lot of refactoring.
 

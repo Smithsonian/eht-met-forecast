@@ -6,7 +6,8 @@ addons:
   apt:
     packages:
     - libeccodes-dev  # for pygrib... in ubuntu starting wtih 18.04; eccodes-devel in RH
-    - proj-bin  # for pygrib without wheel; proj in RH
+    - proj-bin  # for pygrib without wheel; proj and proj-devel in RH
+    - libproj-dev
 
 python:
   #- 3.2  # py.test fails at runtime

@@ -8,7 +8,7 @@ packages = [
 
 requires = ['hdrhistogram', 'requests']
 
-test_requires = ['pytest', 'request_mock']
+test_requires = ['pytest', 'requests_mock']
 
 setup_requires = ['setuptools_scm']
 
@@ -36,6 +36,7 @@ setup(
     url='https://github.com/wumpus/eht-met-forecast',
     packages=packages,
     python_requires=">=3.4.*",
+    extras_require=extras_require,
     include_package_data=True,
     package_data=package_data,
     setup_requires=setup_requires,

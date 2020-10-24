@@ -5,7 +5,7 @@ dist: focal  # cannot use xenial because of libeccodes-dev
 addons:
   apt:
     packages:
-    - libeccodes-dev  # for pygrib... in ubuntu starting wtih 18.04; eccodes-devel in RH
+    - libeccodes-dev  # for pygrib... in ubuntu starting with 18.04; eccodes-devel in RH
     - proj-bin  # for pygrib without wheel; proj and proj-devel in RH
     - libproj-dev
   homebrew:
@@ -27,8 +27,8 @@ python:
 matrix:
   fast_finish: true
   allow_failures:
-  - python: 3.9-dev  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython?
-  - python: nightly  # fails on -Wall -Werror in both numpy and pyproj, thanks to cython?
+  - python: 3.9-dev  # 3.9.0+ failing in pygrib wheel, it is failing to run cython despite having cython installed first
+  - python: nightly  # same
   - python: 3.8
     arch: arm64
   - python: 3.8

@@ -106,7 +106,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
             else:
                 print("  Giving up.", file=sys.stderr)
                 print("Failed URL was: ", url, file=sys.stderr)
-                exit(1)
+                raise TimeoutError('gave up')  # caught in cli.py
         else:
             break
 

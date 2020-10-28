@@ -71,6 +71,8 @@ def main(args=None):
     parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
     args = parser.parse_args(args=args)
 
+    exit_value = None
+
     verbose = args.verbose
     if args.dry_run:
         verbose = True
@@ -102,7 +104,15 @@ def main(args=None):
                 f = sys.stdout
             else:
                 f = open(outfile, 'w')
-            make_forecast_table(station, gfs_cycle, f, wait=args.wait, verbose=args.verbose, one=args.one)
+            try:
+                make_forecast_table(station, gfs_cycle, f, wait=args.wait, verbose=args.verbose, one=args.one)
+            except TimeoutError:
+                # raised by gfs.py
+                print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)
+                exit_value = 1
             if not args.stdout:
                 f.close()
     dump_latency_histograms()
+
+    if exit_value:
+        exit(exit_value)

@@ -21,24 +21,26 @@ python:
   - 3.6
   - 3.7
   - 3.8
-  - 3.9-dev
+  - 3.9
   - nightly
 
 matrix:
   fast_finish: true
   allow_failures:
-  - python: 3.9-dev  # 3.9.0+ failing in pygrib wheel, it is failing to run cython despite having cython installed first
+  - python: 3.9  # 3.9 was failing in pygrib wheel, it is failing to run cython despite having cython installed first
   - python: nightly  # same
   - python: 3.8
     arch: arm64
   - python: 3.8
     arch: s390x
   include:
+#  - python: 3.8
+#    arch: arm64  # works, takes 2.5X normal in travis
   - python: 3.8
-    arch: arm64  # works, takes 7m11s in travis
-  - python: 3.8
-    arch: s390x  # works, takes 3m19s in travis
-#  - name: "OSX"
+    arch: s390x  # works, takes a normal amount of time
+#  - name: "OSX"  # getting a pygrib compile failure with clang
+#                 # 6 errors on implicit declarations, with the clang error mentioning '-Wimplicit-function-declaration'
+#		  # but -Werror is not set, so that's confusing
 #    os: osx
 #    osx_image: xcode12  # 10.15.5
 #    language: shell

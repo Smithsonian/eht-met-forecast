@@ -41,7 +41,7 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
+        #pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
         pip install cython  # must be installed early to rebuild for newer python versions
         # work around setup.cfg in the pygrib 2.0.5 tarball
         export PYGRIBSETUPCFG=None
@@ -54,7 +54,7 @@ jobs:
 
     - script: |
         pip install pytest pytest-azurepipelines
-        AM=./am-11.0/src/am
+        export AM=./am-11.0/src/am
         pytest
       displayName: 'pytest'
 
@@ -87,7 +87,7 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
+        #pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
         pip install cython  # must be installed early to rebuild for newer python versions
         # work around setup.cfg in the pygrib 2.0.5 tarball
         export PYGRIBSETUPCFG=None
@@ -102,6 +102,6 @@ jobs:
 
     - script: |
         pip install pytest pytest-azurepipelines
-        AM=./am-11.0/src/am
+        export AM=./am-11.0/src/am
         pytest
       displayName: 'pytest'

@@ -55,14 +55,8 @@ jobs:
         pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
         pytest --cov-report=xml --cov eht_met_forecast -v -v
+        coverage report -m
       displayName: 'pytest'
-
-    - task: PublishCodeCoverageResults@1
-      inputs:
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-      displayName: 'coverage'
 
   - job: macos
     pool:
@@ -111,11 +105,5 @@ jobs:
         pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
         pytest --cov-report=xml --cov eht_met_forecast -v -v
+        coverage report -m
       displayName: 'pytest'
-
-    - task: PublishCodeCoverageResults@1
-      inputs:
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-      displayName: 'coverage'

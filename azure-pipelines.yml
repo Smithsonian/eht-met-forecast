@@ -4,7 +4,7 @@ trigger:
 jobs:
   - job: linux
     pool:
-      vmImage: 'ubuntu-16.04'  # needed for libopenjpeg ?
+      vmImage: 'ubuntu-18.04'
     strategy:
       matrix:
         Python35:
@@ -25,8 +25,9 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
+        # ubuntu 18.04 minimum for libeccodes
         sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
-        # CentOS: eccodes-devel proj proj-devel ?openjpeg-devel?
+        # CentOS: eccodes-devel proj proj-devel
       displayName: 'install OS packages'
 
     - script: |
@@ -40,8 +41,9 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pyproj numpy  # not marked by pygrib as dependencies
+        pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
         pip install cython  # must be installed early to rebuild for newer python versions
+        printenv
         pip install pygrib
       displayName: 'install pygrib'
 

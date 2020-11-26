@@ -54,8 +54,7 @@ jobs:
     - script: |
         pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
-        touch tests/__init.py__
-        pytest --cov-report=xml --cov=eht_met_forecast -v -v
+        PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
         coverage report -m
       displayName: 'pytest'
 
@@ -106,6 +105,6 @@ jobs:
         pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
         touch tests/__init.py__
-        pytest --cov-report=xml --cov=eht_met_forecast -v -v
+        PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
         coverage report -m
       displayName: 'pytest'

@@ -1,6 +1,6 @@
 # eht-met-forecast
 
-[![Build Status](https://travis-ci.com/wumpus/eht-met-forecast.svg?branch=master)](https://travis-ci.com/wumpus/eht-met-forecast) [![Coverage Status](https://coveralls.io/repos/github/wumpus/eht-met-forecast/badge.svg?branch=master)](https://coveralls.io/github/wumpus/eht-met-forecast?branch=master)
+[![Build Status](https://dev.azure.com/lindahl0577/eht-met-forecast/_apis/build/status/lindahl0577.eht-met-forecast?branchName=master)](https://dev.azure.com/lindahl0577/eht-met-forecast/_build/latest?definitionId=3&branchName=master) [![Coverage](https://img.shields.io/azure-devops/coverage/lindahl0577/eht-met-forecast/3)](https://dev.azure.com/lindahl0577/eht-met-forecast/_build/latest?definitionId=3&branchName=master) [![Apache License 2.0](https://img.shields.io/github/license/wumpus/eht-met-forecast.svg)](LICENSE)
 
 eht-met-forecast creates radio-astronomy-relevant weather forecast
 data for the
@@ -20,8 +20,8 @@ Scott Paine's
 ## Installation
 
 This code depends on two relatively hard-to-install dependencies,
-pygrib and am. The [travis-ci configuration file for this repo](.travis.yml)
-shows a working solution for both in the Travis Ubuntu-based environment. Here
+pygrib and am. The [azure pipelines configuration file for this repo](azure-pipelines.yml)
+shows a working solution for both in the azure pipelines Ubuntu and MacOS-based environment. Here
 are some rough notes:
 
 ### pygrib
@@ -29,8 +29,14 @@ are some rough notes:
 ```
 apt-get install libeccodes-dev proj-bin libproj-dev  # ubuntu 18.04 or later
 # yum install eccodes-devel proj proj-devel  # RH flavored distros
-pip install pyproj numpy  # not marked by pygrib as dependencies
+# brew install eccodes proj
 pip install cython  # must be installed early to rebuild for newer python versions
+
+# temporary: work around setup.cfg in the pygrib 2.0.5 tarball
+export PYGRIBSETUPCFG=None
+# MacOS only: XCode 12 makes this warning an error? the function is in cython-generated code
+export CFLAGS="-Wno-implicit-function-declaration"
+
 pip install pygrib
 ```
 
@@ -53,4 +59,5 @@ Once `pygrib` and `am` are installed,
 ```
 pip install .
 pip install .[test]  # if you want to run tests
+pytest
 ```

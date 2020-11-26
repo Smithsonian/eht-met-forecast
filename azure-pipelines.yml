@@ -26,7 +26,7 @@ jobs:
 
     - script: |
         sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
-	# CentOS: eccodes-devel proj proj-devel
+      # CentOS: eccodes-devel proj proj-devel
       displayName: 'install OS packages'
 
     - script: |
@@ -51,8 +51,8 @@ jobs:
 
     - script: |
         pip install pytest pytest-azurepipelines
-	AM=./am-11.0/src/am
-	pytest
+        AM=./am-11.0/src/am
+        pytest
       displayName: 'pytest'
 
   - job: macos
@@ -91,12 +91,12 @@ jobs:
 
     - script: |
         sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
-	# CentOS: eccodes-devel proj proj-devel
+        # CentOS: eccodes-devel proj proj-devel
         pip install . .[test]
       displayName: 'Install dependencies'
 
     - script: |
         pip install pytest pytest-azurepipelines
-	AM=./am-11.0/src/am
-	pytest
+        AM=./am-11.0/src/am
+        pytest
       displayName: 'pytest'

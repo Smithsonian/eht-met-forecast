@@ -89,8 +89,8 @@ jobs:
         pip install cython  # must be installed early to rebuild for newer python versions
         # work around setup.cfg in the pygrib 2.0.5 tarball
         export PYGRIBSETUPCFG=None
-	# XCode 12 makes this warning an error? the function is in cython-generated code
-	export CFLAGS='-Wno-implicit-function-declaration'
+        # XCode 12 makes this warning an error? the function is in cython-generated code
+        export CFLAGS="-Wno-implicit-function-declaration"
         pip install pygrib
       displayName: 'install pygrib'
 

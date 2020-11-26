@@ -52,10 +52,17 @@ jobs:
       displayName: 'Install dependencies'
 
     - script: |
-        pip install pytest pytest-azurepipelines
+        pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
-        pytest
+        pytest --cov-report=xml --cov eht_met_forecast -v -v
       displayName: 'pytest'
+
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+      displayName: 'coverage'
 
   - job: macos
     pool:
@@ -101,7 +108,14 @@ jobs:
       displayName: 'Install dependencies'
 
     - script: |
-        pip install pytest pytest-azurepipelines
+        pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
-        pytest
+        pytest --cov-report=xml --cov eht_met_forecast -v -v
       displayName: 'pytest'
+
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+      displayName: 'coverage'

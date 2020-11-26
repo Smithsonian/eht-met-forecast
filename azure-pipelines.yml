@@ -1,0 +1,102 @@
+trigger:
+- main
+
+jobs:
+  - job: linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        Python35:
+          python.version: '3.5'
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+        Python38:
+          python.version: '3.8'
+        Python39:
+          python.version: '3.9'
+
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+
+    - script: |
+        sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
+	# CentOS: eccodes-devel proj proj-devel
+      displayName: 'install OS packages'
+
+    - script: |
+        curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
+        tar xf am-11.0.tgz
+        cd am-11.0/src
+        make serial
+        cd ../..
+        ./am-11.0/src/am -v
+      displayName: 'install am-11.0'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pyproj numpy  # not marked by pygrib as dependencies
+        pip install cython  # must be installed early to rebuild for newer python versions
+        pip install pygrib
+      displayName: 'install pygrib'
+
+    - script: |
+        pip install . .[test]
+      displayName: 'Install dependencies'
+
+    - script: |
+        pip install pytest pytest-azurepipelines
+	AM=./am-11.0/src/am
+	pytest
+      displayName: 'pytest'
+
+  - job: macos
+    pool:
+      vmImage: 'macOS-latest'
+    strategy:
+      matrix:
+        Python38:
+          python.version: '3.8'
+
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+
+    - script: |
+        brew install -y eccodes proj
+      displayName: 'install OS packages'
+
+    - script: |
+        curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
+        tar xf am-11.0.tgz
+        cd am-11.0/src
+        make serial
+        cd ../..
+        ./am-11.0/src/am -v
+      displayName: 'install am-11.0'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pyproj numpy  # not marked by pygrib as dependencies
+        pip install cython  # must be installed early to rebuild for newer python versions
+        pip install pygrib
+      displayName: 'install pygrib'
+
+    - script: |
+        sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
+	# CentOS: eccodes-devel proj proj-devel
+        pip install . .[test]
+      displayName: 'Install dependencies'
+
+    - script: |
+        pip install pytest pytest-azurepipelines
+	AM=./am-11.0/src/am
+	pytest
+      displayName: 'pytest'

@@ -43,7 +43,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
         pip install cython  # must be installed early to rebuild for newer python versions
-        printenv
+        # work around setup.cfg in the pygrib 2.0.5 tarball
+        PYGRIBSETUPCFG=None
         pip install pygrib
       displayName: 'install pygrib'
 
@@ -85,10 +86,11 @@ jobs:
       displayName: 'install am-11.0'
 
     - script: |
-        python -m pip install --upgrade pip
-        pip install pyproj numpy  # not marked by pygrib as dependencies
-        pip install cython  # must be installed early to rebuild for newer python versions
-        pip install pygrib
+        #python -m pip install --upgrade pip
+        #pip install pyproj numpy  # not marked by pygrib as dependencies
+        #pip install cython  # must be installed early to rebuild for newer python versions
+        #pip install pygrib
+        brew install pygrib
       displayName: 'install pygrib'
 
     - script: |

@@ -25,7 +25,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
-        # ubuntu 18.04 minimum for libeccodes
+        # ubuntu 18.04 minimum for libeccodes-dev
         sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
         # CentOS: eccodes-devel proj proj-devel
       displayName: 'install OS packages'
@@ -41,7 +41,6 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        #pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
         pip install cython  # must be installed early to rebuild for newer python versions
         # work around setup.cfg in the pygrib 2.0.5 tarball
         export PYGRIBSETUPCFG=None
@@ -87,10 +86,11 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        #pip install pyproj numpy  # not marked by pygrib as dependencies ?? yes they are
         pip install cython  # must be installed early to rebuild for newer python versions
         # work around setup.cfg in the pygrib 2.0.5 tarball
         export PYGRIBSETUPCFG=None
+	# XCode 12 makes this warning an error? the function is in cython-generated code
+	export CFLAGS='-Wno-implicit-function-declaration'
         pip install pygrib
       displayName: 'install pygrib'
 

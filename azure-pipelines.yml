@@ -25,8 +25,8 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
-        sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
-      # CentOS: eccodes-devel proj proj-devel
+        sudo apt-get install -y libeccodes-dev proj-bin libproj-dev libopenjpeg-dev
+        # CentOS: eccodes-devel proj proj-devel ?openjpeg-devel?
       displayName: 'install OS packages'
 
     - script: |
@@ -70,7 +70,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
-        brew install -y eccodes proj
+        brew install eccodes proj
       displayName: 'install OS packages'
 
     - script: |

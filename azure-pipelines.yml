@@ -1,5 +1,5 @@
 trigger:
-- main
+- master
 
 jobs:
   - job: linux
@@ -58,6 +58,16 @@ jobs:
         coverage report -m
       displayName: 'pytest'
 
+    - script: |
+        pip install coveralls
+        export CIRCLE_BRANCH=$BUILD_SOURCEBRANCH
+        coveralls
+      displayName: 'coveralls'
+      env:
+        CIRCLECI: 1
+        CIRCLE_BUILD_NUM: $(Build.BuildNumber)
+        COVERALLS_REPO_TOKEN: $(coveralls_repo_token)
+
   - job: macos
     pool:
       vmImage: 'macOS-latest'
@@ -108,3 +118,13 @@ jobs:
         PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
         coverage report -m
       displayName: 'pytest'
+
+    - script: |
+        pip install coveralls
+        export CIRCLE_BRANCH=$BUILD_SOURCEBRANCH
+        coveralls
+      displayName: 'coveralls'
+      env:
+        CIRCLECI: 1
+        CIRCLE_BUILD_NUM: $(Build.BuildNumber)
+        COVERALLS_REPO_TOKEN: $(coveralls_repo_token)

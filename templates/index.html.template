@@ -1,0 +1,124 @@
+<html>
+  <head>
+    <title>
+      {{ stuff.title }}
+    </title>
+  </head>
+  <body>
+    <h1>{{ stuff.title }}</h1>
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script>
+    function IsNumeric(input)
+      {
+	  return (input - 0) == input && (''+input).trim().length > 0;
+      }
+    </script>
+
+    <h2>Forecast Table -- {{ stuff.year }} <a href="forecast.csv">csv</a></h2>
+    <div id="forecast{{ stuff.year }}"></div>
+    <script type="text/javascript"charset="utf-8">
+      d3.text("forecast.csv", function(data) {
+          var parsedCSV = d3.csv.parseRows(data);
+
+          var container = d3.select("#forecast{{ stuff.year }}")
+              .append("table")
+
+              .selectAll("tr")
+              .data(parsedCSV).enter()
+              .append("tr")
+
+              .selectAll("td")
+              .data(function(d) { return d; }).enter()
+              .append("td")
+              .text(function(d) {
+		  if (IsNumeric(d)) {
+		      if (Number.isInteger(d - 0)) {
+			  return d;
+		      } else {
+			  return (d - 0).toFixed(2);
+		      }
+		  } else {
+		      return d;
+		  }});
+      });
+    </script>
+
+    <h2>Tracks Table <a href="trackrank.csv">csv</a></h2>
+    <div id="trackrank"></div>
+    <script type="text/javascript"charset="utf-8">
+      d3.text("trackrank.csv", function(data) {
+          var parsedCSV = d3.csv.parseRows(data);
+
+          var container = d3.select("#trackrank")
+              .append("table")
+
+              .selectAll("tr")
+              .data(parsedCSV).enter()
+              .append("tr")
+
+              .selectAll("td")
+              .data(function(d) { return d; }).enter()
+              .append("td")
+              .text(function(d) {
+		  if (IsNumeric(d)) {
+		      if (Number.isInteger(d - 0)) {
+			  return d;
+		      } else {
+			  return (d - 0).toFixed(2);
+		      }
+		  } else {
+		      return d;
+		  }});
+      });
+    </script>
+
+    <h2>Forecast Table -- Future <a href="forecast_future.csv">csv</a></h2>
+    <div id="forecast_future"></div>
+    <script type="text/javascript"charset="utf-8">
+      d3.text("forecast_future.csv", function(data) {
+          var parsedCSV = d3.csv.parseRows(data);
+
+          var container = d3.select("#forecast_future")
+              .append("table")
+
+              .selectAll("tr")
+              .data(parsedCSV).enter()
+              .append("tr")
+
+              .selectAll("td")
+              .data(function(d) { return d; }).enter()
+              .append("td")
+              .text(function(d) {
+		  if (IsNumeric(d)) {
+		      if (Number.isInteger(d - 0)) {
+			  return d;
+		      } else {
+			  return (d - 0).toFixed(2);
+		      }
+		  } else {
+		      return d;
+		  }});
+      });
+    </script>
+
+    <h2>{{ stuff.year }} Stations</h2>
+
+    {% for s, files in now.items() %}
+      <h3>{{ s }} {{ stuff.stations[s].name }}</h3>
+      {%- for f in files -%}
+        <img src="{{ f }}">
+      {%- endfor -%}
+    {% endfor %}
+
+    <h2>Future Stations</h2>
+
+    {% for s, files in future.items() %}
+      <h3>{{ s }} {{ stuff.stations[s].name }}</h3>
+      {%- for f in files -%}
+        <img src="{{ f }}">
+      {%- endfor -%}
+    {% endfor %}
+
+  </body>
+</html>

@@ -7,7 +7,12 @@ packages = [
     'eht_met_forecast',
 ]
 
-requires = ['hdrhistogram', 'requests']
+requires = ['hdrhistogram', 'requests']  # download
+requires += ['matplotlib', 'pycairo', 'skyfield', 'pandas', 'scipy', 'astropy', 'ply']  # plots
+requires += ['jinja2']  # webpages
+# pycairo needs os packages installed:
+#  redhat: cairo cairo-dev (tested)
+#  debian: libcairo2-dev ?
 
 test_requires = ['pytest', 'pytest-cov', 'requests_mock']
 

@@ -58,7 +58,7 @@ nightalpha = 0.2
 tz_UTC = datetime.timezone(datetime.timedelta(hours=0))
 
 
-def make_filenames(datadir, vex, gfs_cycle):
+def make_recent_filenames(datadir, vex, gfs_cycle):
     GFS_TIMESTAMP = '%Y%m%d_%H:00:00'
     base = datetime.datetime.strptime(gfs_cycle, GFS_TIMESTAMP)
     if not base:
@@ -68,14 +68,15 @@ def make_filenames(datadir, vex, gfs_cycle):
     for hours in range(0, 49, 6):
         delta = datetime.timedelta(hours=-hours)
         filename = (base + delta).strftime(GFS_TIMESTAMP)
-        filenames.append('{}/{}/{}'.format(datadir, vex, filename))
+        filename = '{}/{}/{}'.format(datadir, vex, filename)
         if not os.path.exists(filename):
-            return
-    return reversed(filenames)
+            continue
+        filenames.append(filename)
+    return list(reversed(filenames))
 
 
 def do_plot(station, datadir, outputdir, gfs_cycle,
-            hours=None, am_version=None, force=False):
+            hours=None, am_version=None, force=False, verbose=False):
     lat = station['lat']
     lon = station['lon']
     alt = station['alt']
@@ -90,7 +91,7 @@ def do_plot(station, datadir, outputdir, gfs_cycle,
                                  sharex=True,
                                  figsize=(6, 8))
 
-    filenames = make_filenames(datadir, name, gfs_cycle)
+    filenames = make_recent_filenames(datadir, name, gfs_cycle)
     if not filenames:
         return
 
@@ -99,7 +100,14 @@ def do_plot(station, datadir, outputdir, gfs_cycle,
     if not force and os.path.exists(outname):
         return
 
+    if verbose:
+        print('plotting {}, loading {} files'.format(gfs_cycle, len(filenames)), file=sys.stderr)
+
+    first = True
+
     for fnum, fname in enumerate(filenames):
+        if os.stat(fname).st_size < 20160:
+            continue
 
         time_str = np.loadtxt(
             fname,
@@ -124,9 +132,11 @@ def do_plot(station, datadir, outputdir, gfs_cycle,
             time_plottime.append(mdates.date2num(dtime))
         time_plottime = np.asarray(time_plottime)
 
-        if (fnum == 0):
+        if first:
+            first = False
             #
-            # x plot range is computed from the "latest-48" data set.
+            # x plot range is computed from the "latest-48" data set,
+            # or the oldest if there is missing data.
             #
             for axes in axes_arr:
                 axes.grid(
@@ -309,6 +319,7 @@ parser.add_argument('--datadir', action='store', default='~/github/eht-met-data'
 parser.add_argument('--outputdir', action='store', default='~/eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 parser.add_argument('--am-version', action='store', default='11.0', help='am version')
+parser.add_argument('--verbose', '-v', action='store_true', help='print more information')
 parser.add_argument("hours",  help="hours forward (0 to 384, typically 120 or 384)", type=int)
 
 args = parser.parse_args()
@@ -326,12 +337,15 @@ if (args.hours < 0 or args.hours > 384):
     parser.error("invalid number of hours")
 
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
+gfs_cycles = gfs_cycles[-(args.hours//6):]
 
+if args.verbose:
+    print('processing {} stations and {} gfs cycles'.format(len(stations), len(gfs_cycles)), file=sys.stderr)
 for vex in stations:
     station = station_dict[vex]
     for gfs_cycle in gfs_cycles:
         try:
             do_plot(station, datadir, outputdir, gfs_cycle,
-                    hours=args.hours, am_version=args.am_version, force=args.force)
+                    hours=args.hours, am_version=args.am_version, force=args.force, verbose=args.verbose)
         except Exception as ex:
             print('station {} gfs_cycle {} saw {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)

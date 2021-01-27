@@ -3,6 +3,7 @@
 import glob
 import os.path
 from collections import defaultdict
+import sys
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -10,6 +11,8 @@ from eht_met_forecast import read_stations
 
 
 stations = read_stations(None)
+stations['00'] = {'name': 'Current stations'}
+stations['01'] = {'name': 'Future stations'}
 
 env = Environment(
     loader=FileSystemLoader('./templates'),
@@ -31,6 +34,8 @@ for d in dirs:
     groups = defaultdict(list)
 
     for f in sorted(files):
+        if f.endswith('.csv'):
+            continue
         f = f.split('/')[-1]
         parts = f.split('_')
         if parts[0] in prefixes:
@@ -51,4 +56,7 @@ for d in dirs:
 
     template = env.get_template('index.html.template')
     with open(d + '/index.html', 'w') as f:
-        f.write(template.render(stuff=stuff, now=now, future=future))
+        try:
+            f.write(template.render(stuff=stuff, now=now, future=future))
+        except Exception as e:
+            print('got exception {} processing {}, skipping'.format(str(e), d), file=sys.stderr)

@@ -8,6 +8,9 @@
     <h1>{{ stuff.title }}</h1>
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3-color.v2.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v2.min.js"></script>
     <script>
     function IsNumeric(input)
       {
@@ -16,7 +19,16 @@
     var colorScale = d3.scale.threshold()
       .domain([0.05, 0.50])
       .range(["lightgreen", "lightyellow", "lightcoral"]);
-
+    function cellToColor(d)
+      {
+        // header day of year is an integer, data cells are not integers
+        if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
+          var e = Math.max(.05, d);
+          e = Math.min(0.5, e);
+          e = (0.45 - (e - 0.05)) / 0.45
+          return d3.interpolateRdYlGn(e);
+        }
+      }
     </script>
 
     <h2>Forecast Table -- {{ stuff.year }} <a href="forecast.csv">csv</a></h2>
@@ -45,11 +57,7 @@
 		  } else {
 		      return d;
 		  }})
-	      .style("background-color", function(d) {
-                 if (IsNumeric(d) && d < 2) {
-		    return colorScale(d);
-		 }
-              });
+	      .style("background-color", function(d) {return cellToColor(d);});
       });
     </script>
 
@@ -79,11 +87,7 @@
 		  } else {
 		      return d;
 		  }})
-	      .style("background-color", function(d) {
-                 if (IsNumeric(d) && d < 2) {
-		    return colorScale(d);
-		 }
-              });
+	      .style("background-color", function(d) {return cellToColor(d);});
       });
     </script>
 
@@ -113,11 +117,7 @@
 		  } else {
 		      return d;
 		  }})
-	      .style("background-color", function(d) {
-                 if (IsNumeric(d) && d < 2) {
-		    return colorScale(d);
-		 }
-              });
+	      .style("background-color", function(d) {return cellToColor(d);});
       });
     </script>
 

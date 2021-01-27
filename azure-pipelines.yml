@@ -27,7 +27,7 @@ jobs:
     - script: |
         # ubuntu 18.04 minimum for libeccodes-dev
         sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
-	# TODO: add cairo for both ubuntu and centos
+        # TODO: add cairo for both ubuntu and centos
         # CentOS: eccodes-devel proj proj-devel
       displayName: 'install OS packages'
 

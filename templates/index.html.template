@@ -16,10 +16,7 @@
       {
 	  return (input - 0) == input && (''+input).trim().length > 0;
       };
-    var colorScale = d3.scale.threshold()
-      .domain([0.05, 0.50])
-      .range(["lightgreen", "lightyellow", "lightcoral"]);
-    function cellToColor(d)
+    function colorCell(d)
       {
         // header day of year is an integer, data cells are not integers
         if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
@@ -27,6 +24,18 @@
           e = Math.min(0.5, e);
           e = (0.45 - (e - 0.05)) / 0.45
           return d3.interpolateRdYlGn(e);
+        }
+      }
+    function formatCell(d)
+      {
+        if (IsNumeric(d)) {
+          if (Number.isInteger(d - 0)) {
+            return d;
+          } else {
+	    return (d - 0).toFixed(2);
+          }
+        } else {
+          return d;
         }
       }
     </script>
@@ -47,17 +56,8 @@
               .selectAll("td")
               .data(function(d) { return d; }).enter()
               .append("td")
-              .text(function(d) {
-		  if (IsNumeric(d)) {
-		      if (Number.isInteger(d - 0)) {
-			  return d;
-		      } else {
-			  return (d - 0).toFixed(2);
-		      }
-		  } else {
-		      return d;
-		  }})
-	      .style("background-color", function(d) {return cellToColor(d);});
+              .text(function(d) { return formatCell(d); })
+	      .style("background-color", function(d) {return colorCell(d);});
       });
     </script>
 
@@ -77,17 +77,8 @@
               .selectAll("td")
               .data(function(d) { return d; }).enter()
               .append("td")
-              .text(function(d) {
-		  if (IsNumeric(d)) {
-		      if (Number.isInteger(d - 0)) {
-			  return d;
-		      } else {
-			  return (d - 0).toFixed(2);
-		      }
-		  } else {
-		      return d;
-		  }})
-	      .style("background-color", function(d) {return cellToColor(d);});
+              .text(function(d) { return formatCell(d); })
+	      .style("background-color", function(d) {return colorCell(d);});
       });
     </script>
 
@@ -107,17 +98,8 @@
               .selectAll("td")
               .data(function(d) { return d; }).enter()
               .append("td")
-              .text(function(d) {
-		  if (IsNumeric(d)) {
-		      if (Number.isInteger(d - 0)) {
-			  return d;
-		      } else {
-			  return (d - 0).toFixed(2);
-		      }
-		  } else {
-		      return d;
-		  }})
-	      .style("background-color", function(d) {return cellToColor(d);});
+              .text(function(d) { return formatCell(d); })
+	      .style("background-color", function(d) {return colorCell(d);});
       });
     </script>
 

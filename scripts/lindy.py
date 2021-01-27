@@ -154,10 +154,15 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')
-    plt.gca().add_artist(AnchoredText(station['name'], loc=2))
+    if site != station['name']:
+        label = site + ' ' + station['name']
+    else:
+        label = site
+    plt.gca().add_artist(AnchoredText(label, loc=2))
     plt.xlabel('UT date')
     plt.ylabel('tau225')
-    plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
+    #plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
+    plt.xlim(days[0]-pd.Timedelta('1 day'), days[-1]+pd.Timedelta('7 days'))
 
     wide(14, 5)
     plt.savefig(outname, dpi=75)
@@ -178,7 +183,7 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     data['doy'] = data.date.dt.dayofyear
 
     #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 29)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 26)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
@@ -193,7 +198,7 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     data['doy'] = data.date.dt.dayofyear
 
     #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 29)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 26)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
@@ -216,7 +221,7 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
     trackrank = dict()
     Dns = 86400000000000  # 1 day in ns
     #(start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (start, stop) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
+    (start, stop) = (pd.Timestamp(2021, 1, 26), pd.Timestamp(2021, 2, 6))
     daysut = pd.date_range(start=start, end=stop, freq='D')
     daysdoy = [d.dayofyear for d in daysut]
     days = np.array([d.value for d in daysut])
@@ -287,7 +292,12 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None,
         if gfs_cycle not in allest[site]:
             continue
         est = allest[site][gfs_cycle]
-        plt.plot(est.date.values, est.est_mean, label=stations[site]['name'], alpha=0.75, lw=1.5)
+        name = stations[site]['name']
+        if site != name:
+            label = site + ' ' + name
+        else:
+            label = site
+        plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5)
         some = True
     if not some:
         plt.close()
@@ -310,7 +320,8 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None,
     plt.legend(loc='upper right')
     plt.xlabel('UT date')
     plt.ylabel('tau225')
-    plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
+    #plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
+    plt.xlim(days[0]-pd.Timedelta('1 day'), days[-1]+pd.Timedelta('7 days'))
     wide(14, 5)
     plt.savefig(outname, dpi=75)
     plt.close()

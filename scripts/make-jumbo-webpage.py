@@ -43,11 +43,19 @@ for d in dirs:
 
     now = {}
     future = {}
+    subset = set(('Sw', 'Mm', 'Mg', 'Kp', '00'))  # or empty if none
+
     for s in sorted(groups.keys()):
-        if len(s) != 2:
-            future[s] = groups[s]
+        if subset:
+            if s in subset:
+                now[s] = groups[s]
+            else:
+                future[s] = groups[s]
         else:
-            now[s] = groups[s]
+            if len(s) != 2:
+                future[s] = groups[s]
+            else:
+                now[s] = groups[s]
 
     stuff = {}
     stuff['title'] = '{} Plots'.format(gfs_cycle)

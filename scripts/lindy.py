@@ -138,7 +138,7 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
                      est.est_mean.values*est.est_err, alpha=0.25)
 
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (first, last) = (pd.Timestamp(2021, 1, 24), pd.Timestamp(2021, 2, 1))
+    (first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     days = pd.date_range(start=first, end=last, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
@@ -170,7 +170,7 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     if not force and os.path.exists(outname):
         return
 
-    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and len(site) == 2]
+    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and select_2021(site)]
     if not the_data:
         return
     print(outname)
@@ -178,14 +178,14 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     data['doy'] = data.date.dt.dayofyear
 
     #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 24)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 29)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
     df.to_csv(outname)
 
     outname = outname.replace('forecast.csv', 'forecast_future.csv')
-    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and len(site) != 2]
+    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and select_future(site)]
     if not the_data:
         return
     print(outname)
@@ -193,7 +193,7 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     data['doy'] = data.date.dt.dayofyear
 
     #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 24)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 29)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
@@ -216,7 +216,7 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
     trackrank = dict()
     Dns = 86400000000000  # 1 day in ns
     #(start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (start, stop) = (pd.Timestamp(2021, 1, 24), pd.Timestamp(2021, 2, 1))
+    (start, stop) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     daysut = pd.date_range(start=start, end=stop, freq='D')
     daysdoy = [d.dayofyear for d in daysut]
     days = np.array([d.value for d in daysut])
@@ -255,13 +255,20 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
     df.to_csv(outname)
 
 
+subset = set(('Sw', 'Mm', 'Mg', 'Kp', '00'))  # or empty if none
+
+
 def select_2021(site):
-    if len(site) == 2:
+    if subset and site in subset:
+        return True
+    if not subset and len(site) == 2:
         return True
 
 
 def select_future(site):
-    if len(site) != 2:
+    if subset and site not in subset:
+        return True
+    if not subset and len(site) != 2:
         return True
 
 
@@ -287,7 +294,7 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None,
         return
     plt.axvline(date0, color='black', ls='--')
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (first, last) = (pd.Timestamp(2021, 1, 24), pd.Timestamp(2021, 2, 1))
+    (first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     days = pd.date_range(start=first, end=last, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)

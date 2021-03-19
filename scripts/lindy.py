@@ -241,7 +241,13 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
             time = pd.Timestamp(datetime.datetime.strptime(b['start'], fmt_in))
             dtimes = days + np.mod(time.value + Dns//4, Dns) - Dns//4
             stations = set(c[0].replace('Ax', 'Aa').replace('Mm', 'Sw') for c in b['station'])
-            taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
+            try:
+                taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
+            except KeyError:
+                print('key error')
+                print('gfs_cycle', gfs_cycle, 'missing station:', [s for s in stations if gfs_cycle not in allint[s]])
+                print('skipping')
+                return
 
             if is345:
                 taus = 0.05 + 2.5*taus # scale up tau225 to 345 GHz

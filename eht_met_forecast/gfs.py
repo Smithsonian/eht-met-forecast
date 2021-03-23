@@ -31,7 +31,7 @@ def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):
     gfs_product = 'f{:03d}'.format(forecast_hour)
 
     params = {
-        'dir': '/gfs.{}'.format(gfs_dayhour),
+        'dir': '/gfs.{}/atmos'.format(gfs_dayhour),
         'file': 'gfs.t{}z.pgrb2.{}.{}'.format(gfs_hour, LATLON_GRID_STR, gfs_product),
         'subregion': '',
         'leftlon': leftlon,

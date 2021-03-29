@@ -1,6 +1,6 @@
 python scripts/scott.py --verbose --outputdir ./eht-met-plots/ 384
 python scripts/scott.py --verbose --outputdir ./eht-met-plots/ 120
-python scripts/lindy.py
+python scripts/lindy.py --vex e21n24.vex --emphasize Nq:Pv:Gl:Kp:Mg
 
 python scripts/make-jumbo-webpage.py
 

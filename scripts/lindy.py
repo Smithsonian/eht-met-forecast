@@ -88,7 +88,7 @@ tfloor = 6. # hours from start for which to assume fixed model error
 tpow = 4. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 
-def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False):
+def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, outputdir, force=False):
     site = station.get('vex') or station['name']
     outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
 
@@ -138,8 +138,8 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
                      est.est_mean.values*est.est_err, alpha=0.25)
 
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
-    days = pd.date_range(start=first, end=last, freq='D')
+    #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
+    days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
     # do this to get pandas date fmt on xlabel
@@ -169,13 +169,14 @@ def do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=False)
     plt.close()
 
 
-def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
+def do_forecast_csv(gfs_cycle, allest, start_doy, outputdir, emphasize=None, force=False):
     outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
 
-    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and select_2021(site)]
+    the_data = [allest[site][gfs_cycle]
+                for site in allest if gfs_cycle in allest[site] and (not emphasize or site in emphasize)]
     if not the_data:
         return
     print(outname)
@@ -183,14 +184,15 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     data['doy'] = data.date.dt.dayofyear
 
     #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 26)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
     df.to_csv(outname)
 
     outname = outname.replace('forecast.csv', 'forecast_future.csv')
-    the_data = [allest[site][gfs_cycle] for site in allest if gfs_cycle in allest[site] and select_future(site)]
+    the_data = [allest[site][gfs_cycle]
+                for site in allest if gfs_cycle in allest[site] and (emphasize and site not in emphasize)]
     if not the_data:
         return
     print(outname)
@@ -198,14 +200,14 @@ def do_forecast_csv(gfs_cycle, allest, outputdir, force=False):
     data['doy'] = data.date.dt.dayofyear
 
     #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 26)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
     df.to_csv(outname)
 
 
-def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
+def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=None, force=False):
     outname = '{}/{}/trackrank.csv'.format(outputdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
@@ -220,16 +222,14 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
 
     trackrank = dict()
     Dns = 86400000000000  # 1 day in ns
-    #(start, stop) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (start, stop) = (pd.Timestamp(2021, 1, 26), pd.Timestamp(2021, 2, 6))
-    daysut = pd.date_range(start=start, end=stop, freq='D')
+    daysut = pd.date_range(start=start, end=end, freq='D')
     daysdoy = [d.dayofyear for d in daysut]
     days = np.array([d.value for d in daysut])
 
-    #for t in 'abcdef':
-        #a = vvex.parse(open('track{}.vex'.format(t)).read())
-    for t in 'j':
-        a = vvex.parse(open('e21{}28.vex'.format(t)).read())
+    print('GREG trackrank')
+
+    for vex in vexes:
+        a = vvex.parse(open(vex).read())
         is345 = '345 GHz' in list(a['EXPER'].values())[0]['exper_description']
         station_loc = dict((b['site_ID'], xyz2loc(b['site_position']))
                            for b in a['SITE'].values())
@@ -237,16 +237,24 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
                           for (b, c) in a['SOURCE'].items())
         score = np.zeros(len(days))
         total = np.zeros(len(days))
+
+        print('  vex', vex)
+
         for b in a['SCHED'].values(): # does not necessarily loop in order!
             time = pd.Timestamp(datetime.datetime.strptime(b['start'], fmt_in))
             dtimes = days + np.mod(time.value + Dns//4, Dns) - Dns//4
+            print('   dtimes', dtimes)
             stations = set(c[0].replace('Ax', 'Aa').replace('Mm', 'Sw') for c in b['station'])
             try:
                 taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
+                print('   taus', taus)
+                print('   stations', stations)
             except KeyError:
                 print('key error')
                 print('gfs_cycle', gfs_cycle, 'missing station:', [s for s in stations if gfs_cycle not in allint[s]])
-                print('skipping')
+                print('aborting the entire trackrank computation')
+                # note that we could choose to compute trackrank minus the missing station
+                # need to adjust a lot of things
                 return
 
             if is345:
@@ -255,31 +263,19 @@ def do_trackrank_csv(gfs_cycle, allint, outputdir, force=False):
                 AltAz(obstime=time, location=station_loc[s])).alt.value for s in stations])
             n = len(taus)
             am = 1./np.sin(alts*np.pi/180.)
-            score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0)
+            print('   airmass', am)
+            score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0) / len(dtimes)
+            print('   score', (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0))
             total += (n-1)*n
-        trackrank[t.upper()] = score/total
+            print('   total', (n-1)*n)
+        print('  score:', score)
+        print('  total:', total)
+        trackrank[vex] = score/total
     df = pd.DataFrame.from_dict(trackrank, orient='index', columns=daysdoy).sort_index()
     df.to_csv(outname)
 
 
-subset = set(('Sw', 'Mm', 'Mg', 'Kp', '00'))  # or empty if none
-
-
-def select_2021(site):
-    if subset and site in subset:
-        return True
-    if not subset and len(site) == 2:
-        return True
-
-
-def select_future(site):
-    if subset and site not in subset:
-        return True
-    if not subset and len(site) != 2:
-        return True
-
-
-def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None, name='00'):
+def do_00_plot(gfs_cycle, allest, start, end, outputdir, stations, force=False, include=None, exclude=None, name='00'):
     outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, name, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
@@ -289,10 +285,13 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None,
 
     some = False
     for site in sorted(allest):
-        if not select(site):
+        if exclude and site in exclude:
+            continue
+        if include and site not in include:
             continue
         if gfs_cycle not in allest[site]:
             continue
+
         est = allest[site][gfs_cycle]
         name = stations[site]['name']
         if site != name:
@@ -306,8 +305,8 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None,
         return
     plt.axvline(date0, color='black', ls='--')
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    (first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
-    days = pd.date_range(start=first, end=last, freq='D')
+    #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
+    days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
         plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)
 
@@ -331,26 +330,31 @@ def do_00_plot(gfs_cycle, allest, outputdir, stations, force=False, select=None,
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')
-parser.add_argument('--vex', action='store', help='site to plot')
+parser.add_argument('--vex', action='store', nargs='+', help='list of vex files')
+parser.add_argument('--emphasize', action='store', nargs='+', help='colon-delimited list of stations to emphasize, i.e. this year\'s array')
 parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
 parser.add_argument('--outputdir', action='store', default='./eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
-#parser.add_argument('--am-version', action='store', default='11.0', help='am version')
-#parser.add_argument("hours",  help="hours forward (0 to 384, typically 120 or 384)", type=int)
 
 args = parser.parse_args()
 datadir = expanduser(args.datadir)
 outputdir = expanduser(args.outputdir)
 
+emphasize = set(station for station in args.emphasize if ':' not in station)
+[emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
+if '00' not in emphasize:
+    emphasize.add('00')
+
 station_dict = read_stations(args.stations)
 
-if not args.vex:
-    stations = station_dict.keys()
-else:
-    stations = (args.vex,)
+stations = station_dict.keys()
+
+for e in emphasize:
+    if e not in stations and e != '00':
+        raise ValueError('emphasized station {} is not known'.format(e))
 
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
-gfs_cycles = gfs_cycles[-(384//6):]
+gfs_cycles = gfs_cycles[-(384//6):]  # never work on anything but the most recent 384 hours
 
 work = get_all_work(datadir, outputdir, gfs_cycles, stations, force=args.force)
 if not work:
@@ -365,19 +369,23 @@ earliest_loc = gfs_cycles.index(earliest)
 earliest = max(0, earliest_loc - 64)
 gfs_cycles = gfs_cycles[earliest:]
 
+start = pd.Timestamp(2021, 4, 6)
+start_doy = start.dayofyear
+end = pd.Timestamp(2021, 4, 8)
+
 for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)
     allint = defaultdict(dict)
 
-    for vex in stations:
-        station = station_dict[vex]
+    for s, station in station_dict.items():
 
         try:
-            do_plot(station, gfs_cycle, allest, allint, datadir, outputdir, force=args.force)
+            do_plot(station, gfs_cycle, allest, allint, start, end, datadir, outputdir, force=args.force)
         except Exception as ex:
-            print('station {} gfs_cycle {} saw exception {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)
+            print('station {} gfs_cycle {} saw exception {}'.format(s, gfs_cycle, str(ex)), file=sys.stderr)
 
-    do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force, select=select_2021, name='00')
-    do_00_plot(gfs_cycle, allest, outputdir, station_dict, force=args.force, select=select_future, name='01')
-    do_forecast_csv(gfs_cycle, allest, outputdir, force=args.force)
-    do_trackrank_csv(gfs_cycle, allint, outputdir, force=args.force)
+    do_00_plot(gfs_cycle, allest, start, end, outputdir, station_dict, force=args.force, include=emphasize, name='00')
+    do_00_plot(gfs_cycle, allest, start, end, outputdir, station_dict, force=args.force, exclude=emphasize, name='01')
+
+    do_forecast_csv(gfs_cycle, allest, start_doy, outputdir, emphasize=emphasize, force=args.force)
+    do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, outputdir, include=emphasize, force=args.force)

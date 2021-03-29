@@ -61,7 +61,7 @@
       });
     </script>
 
-    <h2>Tracks Table <a href="trackrank.csv">csv</a></h2>
+    <h2>TrackRank Table <a href="trackrank.csv">csv</a></h2>
     <div id="trackrank"></div>
     <script type="text/javascript"charset="utf-8">
       d3.text("trackrank.csv", function(data) {

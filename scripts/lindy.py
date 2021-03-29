@@ -226,8 +226,6 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=No
     daysdoy = [d.dayofyear for d in daysut]
     days = np.array([d.value for d in daysut])
 
-    print('GREG trackrank')
-
     for vex in vexes:
         a = vvex.parse(open(vex).read())
         is345 = '345 GHz' in list(a['EXPER'].values())[0]['exper_description']
@@ -238,17 +236,12 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=No
         score = np.zeros(len(days))
         total = np.zeros(len(days))
 
-        print('  vex', vex)
-
         for b in a['SCHED'].values(): # does not necessarily loop in order!
             time = pd.Timestamp(datetime.datetime.strptime(b['start'], fmt_in))
             dtimes = days + np.mod(time.value + Dns//4, Dns) - Dns//4
-            print('   dtimes', dtimes)
             stations = set(c[0].replace('Ax', 'Aa').replace('Mm', 'Sw') for c in b['station'])
             try:
                 taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
-                print('   taus', taus)
-                print('   stations', stations)
             except KeyError:
                 print('key error')
                 print('gfs_cycle', gfs_cycle, 'missing station:', [s for s in stations if gfs_cycle not in allint[s]])
@@ -263,13 +256,8 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=No
                 AltAz(obstime=time, location=station_loc[s])).alt.value for s in stations])
             n = len(taus)
             am = 1./np.sin(alts*np.pi/180.)
-            print('   airmass', am)
             score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0) / len(dtimes)
-            print('   score', (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0))
             total += (n-1)*n
-            print('   total', (n-1)*n)
-        print('  score:', score)
-        print('  total:', total)
         trackrank[vex] = score/total
     df = pd.DataFrame.from_dict(trackrank, orient='index', columns=daysdoy).sort_index()
     df.to_csv(outname)

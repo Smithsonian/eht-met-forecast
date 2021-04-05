@@ -4,28 +4,49 @@ import glob
 import os.path
 from collections import defaultdict
 import sys
+import argparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from eht_met_forecast import read_stations
 
+# argparse
+# --force,-f
+# --emphasize
 
-stations = read_stations(None)
+parser = argparse.ArgumentParser()
+parser.add_argument('--stations', action='store', help='location of stations.json file')
+parser.add_argument('--emphasize', action='store', nargs='+', help='colon-delimited list of stations to emphasize, i.e. this year\'s array')
+parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help='output directory for plots')
+parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
+
+args = parser.parse_args()
+plotdir = os.path.expanduser(args.plotdir)
+
+emphasize = set(station for station in args.emphasize if ':' not in station)
+[emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
+if '00' not in emphasize:
+    emphasize.add('00')
+
+stations = read_stations(args.stations)
 stations['00'] = {'name': 'Current stations'}
 stations['01'] = {'name': 'Future stations'}
 
+for e in emphasize:
+    if e not in stations and e != '00':
+        raise ValueError('emphasized station {} is not known'.format(e))
+
 env = Environment(
+    # XXX make templates be relative to __file__?
     loader=FileSystemLoader('./templates'),
-    # loader = PackageLoader('olymap', 'templates')
     autoescape=select_autoescape(['html'])
 )
 
-dirs = glob.glob('eht-met-plots/2*')
-
-force = True
+# XXX
+dirs = glob.glob(args.plotdir + '/2*')
 
 for d in dirs:
-    if os.path.exists(d+'/index.html') and not force:
+    if os.path.exists(d+'/index.html') and not args.force:
         continue
 
     gfs_cycle = d.split('/')[-1]
@@ -43,11 +64,10 @@ for d in dirs:
 
     now = {}
     future = {}
-    subset = set(('Sw', 'Mm', 'Mg', 'Kp', '00'))  # or empty if none
 
     for s in sorted(groups.keys()):
-        if subset:
-            if s in subset:
+        if emphasize:
+            if s in emphasize:
                 now[s] = groups[s]
             else:
                 future[s] = groups[s]

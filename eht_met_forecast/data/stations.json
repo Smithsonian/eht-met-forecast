@@ -1,131 +1,131 @@
 [
     {
-        "alt": 2618.0,
+        "alt": 2618,
         "lat": 44.634,
         "lon": 5.907,
-        "name": "PDBURE",
-        "vex": "Nq"
+        "name": "NOEMA/PDBURE",
+        "vex": "Nn"
     },
     {
-        "alt": 2919.0,
+        "alt": 2919,
         "lat": 37.066,
         "lon": -3.393,
-        "name": "PICOVEL",
+        "name": "PICOVEL/IRAM30M",
         "vex": "Pv"
     },
     {
-        "alt": 89.0,
+        "alt": 89,
         "lat": 76.535,
         "lon": -68.686,
-        "name": "THULE",
+        "name": "THULE/GLT",
         "vex": "Gl"
     },
     {
-        "alt": 2857.0,
+        "alt": 2857,
         "lat": -90.0,
         "lon": 45.0,
         "name": "SPT",
         "vex": "Sz"
     },
     {
-        "alt": 5104.0,
+        "alt": 5104,
         "lat": -23.006,
         "lon": -67.759,
         "name": "APEX",
         "vex": "Ax"
     },
     {
-        "alt": 5070.0,
+        "alt": 5070,
         "lat": -23.029,
         "lon": -67.755,
         "name": "ALMA",
         "vex": "Aa"
     },
     {
-        "alt": 4593.0,
+        "alt": 4593,
         "lat": 18.986,
         "lon": -97.315,
         "name": "LMT",
         "vex": "Lm"
     },
     {
-        "alt": 1891.0,
+        "alt": 1891,
         "lat": 31.953,
         "lon": -111.615,
         "name": "KITTPEAK",
-        "vex": "Kp"
+        "vex": "Kt"
     },
     {
-        "alt": 3159.0,
+        "alt": 3159,
         "lat": 32.702,
         "lon": -109.891,
         "name": "SMTO",
         "vex": "Mg"
     },
     {
-        "alt": 4115.0,
+        "alt": 4115,
         "lat": 19.824,
         "lon": -155.478,
         "name": "SMAP",
         "vex": "Sw"
     },
     {
-        "alt": 4120.0,
+        "alt": 4120,
         "lat": 19.823,
         "lon": -155.477,
         "name": "JCMT",
         "vex": "Mm"
     },
     {
-        "alt": 1201.0,
+        "alt": 1201,
         "lat": 37.231,
         "lon": -118.283,
         "name": "OVRO"
     },
     {
-        "alt": 131.0,
+        "alt": 131,
         "lat": 42.623,
         "lon": -71.488,
         "name": "HAY"
     },
     {
-        "alt": 5270.0,
+        "alt": 5270,
         "lat": -16.353,
         "lon": -68.131,
         "name": "BOL"
     },
     {
-        "alt": 2300.0,
+        "alt": 2300,
         "lat": -23.391,
         "lon": 16.175,
         "name": "GAM"
     },
     {
-        "alt": 2800.0,
+        "alt": 2800,
         "lat": 31.044,
         "lon": -115.464,
         "name": "BAJA"
     },
     {
-        "alt": 2635.0,
+        "alt": 2635,
         "lat": -24.627,
         "lon": -70.404,
         "name": "VLT"
     },
     {
-        "alt": -2012.0,
+        "alt": -2012,
         "lat": -29.414,
         "lon": -70.733,
         "name": "LAS"
     },
     {
-        "alt": 4302.0,
+        "alt": 4302,
         "lat": 38.841,
         "lon": -105.044,
         "name": "PIKES"
     },
     {
-        "alt": 2124.0,
+        "alt": 2124,
         "lat": 34.078,
         "lon": -107.618,
         "name": "VLA"

@@ -150,6 +150,7 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Lindy said this was needed on cloud machines?!
     plt.gcf().autofmt_xdate()
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
@@ -169,11 +170,13 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.close()
 
 
-def do_forecast_csv(gfs_cycle, allest, start_doy, plotdir, emphasize=None, force=False):
+def do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=None, force=False):
     outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
+
+    start_doy = start.dayofyear
 
     the_data = [allest[site][gfs_cycle]
                 for site in allest if gfs_cycle in allest[site] and (not emphasize or site in emphasize)]
@@ -303,6 +306,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Lindy said this was needed on cloud machines?!
     plt.gcf().autofmt_xdate()
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
@@ -316,6 +320,15 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.close()
 
 
+def get_dates(args):
+    def get_one(s):
+        return [int(part) for part in s.split(':')]
+
+    start = pd.Timestamp(*get_one(args.start))
+    end = pd.Timestamp(*get_one(args.end))
+    return start, end
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')
 parser.add_argument('--vex', action='store', nargs='+', help='list of vex files')
@@ -323,6 +336,8 @@ parser.add_argument('--emphasize', action='store', nargs='+', help='colon-delimi
 parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
 parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
+parser.add_argument('--start', action='store', help='start date of nightly labels, YYYY:MM:DD')
+parser.add_argument('--end', action='store', help='end date of nightly labels, YYYY:MM:DD')
 
 args = parser.parse_args()
 datadir = expanduser(args.datadir)
@@ -355,9 +370,7 @@ earliest_loc = gfs_cycles.index(earliest)
 earliest = max(0, earliest_loc - 64)
 gfs_cycles = gfs_cycles[earliest:]
 
-start = pd.Timestamp(2021, 4, 9)
-start_doy = start.dayofyear
-end = pd.Timestamp(2021, 4, 20)
+start, end = get_dates(args)
 
 for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)
@@ -373,5 +386,5 @@ for gfs_cycle in gfs_cycles:
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
-    do_forecast_csv(gfs_cycle, allest, start_doy, plotdir, emphasize=emphasize, force=args.force)
+    do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)
     do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, plotdir, include=emphasize, force=args.force)

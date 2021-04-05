@@ -6,7 +6,7 @@ $AM -v || exit 1
 
 TIME=192
 
-STATIONS="Aa Ax BAJA BOL GAM Gl HAY Kp LAS Lm Mg Mm Nq OVRO PIKES Pv Sw Sz VLA VLT"
+STATIONS="Aa Ax BAJA BOL GAM Gl HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
 
 for vex in $STATIONS; do
    eht-met-forecast --backfill $TIME --dir $DEST --stations stations.jsonl --vex $vex &

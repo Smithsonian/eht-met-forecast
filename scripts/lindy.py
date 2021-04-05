@@ -256,7 +256,7 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=No
                 AltAz(obstime=time, location=station_loc[s])).alt.value for s in stations])
             n = len(taus)
             am = 1./np.sin(alts*np.pi/180.)
-            score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0) / len(dtimes)
+            score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0)  # talking with Lindy about: / len(dtimes)
             total += (n-1)*n
         trackrank[vex] = score/total
     df = pd.DataFrame.from_dict(trackrank, orient='index', columns=daysdoy).sort_index()

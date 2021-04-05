@@ -19,6 +19,10 @@ import eht_met_forecast.data
 from eht_met_forecast import read_stations
 import vex as vvex
 
+night_length = '15 hours'
+before_start = '1 day'
+after_end = '1 day'
+
 
 def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
     ret = {}
@@ -137,11 +141,9 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.fill_between(est.date.values, est.est_mean.values/est.est_err,
                      est.est_mean.values*est.est_err, alpha=0.25)
 
-    #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
-        plt.axvspan(d, d+pd.Timedelta('15 hours'), color='C0', alpha=0.15, zorder=-10)
+        plt.axvspan(d, d+pd.Timedelta(night_length), color='C0', alpha=0.15, zorder=-10)
     # do this to get pandas date fmt on xlabel
     plt.plot(est.date.values, est.est_mean, label=station['name'] + ' ensemble')
 
@@ -162,8 +164,7 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.gca().add_artist(AnchoredText(label, loc=2))
     plt.xlabel('UT date')
     plt.ylabel('tau225')
-    #plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
-    plt.xlim(days[0]-pd.Timedelta('1 day'), days[-1]+pd.Timedelta('7 days'))
+    plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end)
 
     wide(14, 5)
     plt.savefig(outname, dpi=75)
@@ -299,7 +300,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
-        plt.axvspan(d, d+pd.Timedelta('15 hours'), color='black', alpha=0.05, zorder=-10)
+        plt.axvspan(d, d+pd.Timedelta(night_length), color='black', alpha=0.05, zorder=-10)
 
     # formatting
     plt.ylim(0, 1.0)
@@ -313,8 +314,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.legend(loc='upper right')
     plt.xlabel('UT date')
     plt.ylabel('tau225')
-    #plt.xlim(days[0]-pd.Timedelta('5 days'), days[-1]+pd.Timedelta('3 days'))
-    plt.xlim(days[0]-pd.Timedelta('1 day'), days[-1]+pd.Timedelta('7 days'))
+             plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
     wide(14, 5)
     plt.savefig(outname, dpi=75)
     plt.close()
@@ -338,6 +338,7 @@ parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 parser.add_argument('--start', action='store', help='start date of nightly labels, YYYY:MM:DD')
 parser.add_argument('--end', action='store', help='end date of nightly labels, YYYY:MM:DD')
+parser.add_argument('--verbose', action='store', help='more talking')
 
 args = parser.parse_args()
 datadir = expanduser(args.datadir)

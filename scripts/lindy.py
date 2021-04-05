@@ -20,7 +20,7 @@ from eht_met_forecast import read_stations
 import vex as vvex
 
 
-def get_all_work(datadir, outputdir, gfs_cycles, stations, force=False):
+def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
     ret = {}
     for gfs_cycle in gfs_cycles:
         me = defaultdict(list)
@@ -28,15 +28,15 @@ def get_all_work(datadir, outputdir, gfs_cycles, stations, force=False):
             inname = '{}/{}/{}'.format(datadir, vex, gfs_cycle)
             if not os.path.exists(inname):
                 continue
-            outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, vex, gfs_cycle)
+            outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, vex, gfs_cycle)
             me['lindy'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '00', gfs_cycle)
+        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00', gfs_cycle)
         me['00'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, '01', gfs_cycle)
+        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '01', gfs_cycle)
         me['00'].append(outname)
-        outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
+        outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
         me['forecast'].append(outname)
-        outname = '{}/{}/trackrank.csv'.format(outputdir, gfs_cycle)
+        outname = '{}/{}/trackrank.csv'.format(plotdir, gfs_cycle)
         me['trackrank'].append(outname)
         ret[gfs_cycle] = me
 
@@ -88,9 +88,9 @@ tfloor = 6. # hours from start for which to assume fixed model error
 tpow = 4. # model error goes as time to this power: sigma = (floor + age)**tpow
 
 
-def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, outputdir, force=False):
+def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, force=False):
     site = station.get('vex') or station['name']
-    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, site, gfs_cycle)
+    outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, site, gfs_cycle)
 
     data = eht_met_forecast.data.read_accumulated(site, gfs_cycle, basedir=datadir)
     if not data:
@@ -169,8 +169,8 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, outputdir, 
     plt.close()
 
 
-def do_forecast_csv(gfs_cycle, allest, start_doy, outputdir, emphasize=None, force=False):
-    outname = '{}/{}/forecast.csv'.format(outputdir, gfs_cycle)
+def do_forecast_csv(gfs_cycle, allest, start_doy, plotdir, emphasize=None, force=False):
+    outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -207,8 +207,8 @@ def do_forecast_csv(gfs_cycle, allest, start_doy, outputdir, emphasize=None, for
     df.to_csv(outname)
 
 
-def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=None, force=False):
-    outname = '{}/{}/trackrank.csv'.format(outputdir, gfs_cycle)
+def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None, force=False):
+    outname = '{}/{}/trackrank.csv'.format(plotdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -263,8 +263,8 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, outputdir, include=No
     df.to_csv(outname)
 
 
-def do_00_plot(gfs_cycle, allest, start, end, outputdir, stations, force=False, include=None, exclude=None, name='00'):
-    outname = '{}/{}/lindy_{}_{}.png'.format(outputdir, gfs_cycle, name, gfs_cycle)
+def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, include=None, exclude=None, name='00'):
+    outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, name, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -321,12 +321,12 @@ parser.add_argument('--stations', action='store', help='location of stations.jso
 parser.add_argument('--vex', action='store', nargs='+', help='list of vex files')
 parser.add_argument('--emphasize', action='store', nargs='+', help='colon-delimited list of stations to emphasize, i.e. this year\'s array')
 parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
-parser.add_argument('--outputdir', action='store', default='./eht-met-plots', help='output directory for plots')
+parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 
 args = parser.parse_args()
 datadir = expanduser(args.datadir)
-outputdir = expanduser(args.outputdir)
+plotdir = expanduser(args.plotdir)
 
 emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
@@ -344,7 +344,7 @@ for e in emphasize:
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
 gfs_cycles = gfs_cycles[-(384//6):]  # never work on anything but the most recent 384 hours
 
-work = get_all_work(datadir, outputdir, gfs_cycles, stations, force=args.force)
+work = get_all_work(datadir, plotdir, gfs_cycles, stations, force=args.force)
 if not work:
     print('no work to do', file=sys.stderr)
     exit(0)
@@ -368,12 +368,12 @@ for gfs_cycle in gfs_cycles:
     for s, station in station_dict.items():
 
         try:
-            do_plot(station, gfs_cycle, allest, allint, start, end, datadir, outputdir, force=args.force)
+            do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, force=args.force)
         except Exception as ex:
             print('station {} gfs_cycle {} saw exception {}'.format(s, gfs_cycle, str(ex)), file=sys.stderr)
 
-    do_00_plot(gfs_cycle, allest, start, end, outputdir, station_dict, force=args.force, include=emphasize, name='00')
-    do_00_plot(gfs_cycle, allest, start, end, outputdir, station_dict, force=args.force, exclude=emphasize, name='01')
+    do_00_plot(gfs_cycle, allest, start, end, plotdir, station_dict, force=args.force, include=emphasize, name='00')
+    do_00_plot(gfs_cycle, allest, start, end, plotdir, station_dict, force=args.force, exclude=emphasize, name='01')
 
-    do_forecast_csv(gfs_cycle, allest, start_doy, outputdir, emphasize=emphasize, force=args.force)
-    do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, outputdir, include=emphasize, force=args.force)
+    do_forecast_csv(gfs_cycle, allest, start_doy, plotdir, emphasize=emphasize, force=args.force)
+    do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, plotdir, include=emphasize, force=args.force)

@@ -333,9 +333,7 @@ emphasize = set(station for station in args.emphasize if ':' not in station)
 if '00' not in emphasize:
     emphasize.add('00')
 
-station_dict = read_stations(args.stations)
-
-stations = station_dict.keys()
+stations = read_stations(args.stations)
 
 for e in emphasize:
     if e not in stations and e != '00':
@@ -365,15 +363,15 @@ for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)
     allint = defaultdict(dict)
 
-    for s, station in station_dict.items():
+    for s, station in stations.items():
 
         try:
             do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, force=args.force)
         except Exception as ex:
             print('station {} gfs_cycle {} saw exception {}'.format(s, gfs_cycle, str(ex)), file=sys.stderr)
 
-    do_00_plot(gfs_cycle, allest, start, end, plotdir, station_dict, force=args.force, include=emphasize, name='00')
-    do_00_plot(gfs_cycle, allest, start, end, plotdir, station_dict, force=args.force, exclude=emphasize, name='01')
+    do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
+    do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
     do_forecast_csv(gfs_cycle, allest, start_doy, plotdir, emphasize=emphasize, force=args.force)
     do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, plotdir, include=emphasize, force=args.force)

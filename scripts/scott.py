@@ -75,7 +75,7 @@ def make_recent_filenames(datadir, vex, gfs_cycle):
     return list(reversed(filenames))
 
 
-def do_plot(station, datadir, outputdir, gfs_cycle,
+def do_plot(station, datadir, plotdir, gfs_cycle,
             hours=None, am_version=None, force=False, verbose=False):
     lat = station['lat']
     lon = station['lon']
@@ -95,7 +95,7 @@ def do_plot(station, datadir, outputdir, gfs_cycle,
     if not filenames:
         return
 
-    outname = '{}/{}/forecast_{}_{}_{}.png'.format(outputdir, gfs_cycle, name, gfs_cycle, hours)
+    outname = '{}/{}/forecast_{}_{}_{}.png'.format(plotdir, gfs_cycle, name, gfs_cycle, hours)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
@@ -316,7 +316,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='site to plot')
 parser.add_argument('--vex', action='store', help='site to plot')
 parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
-parser.add_argument('--outputdir', action='store', default='~/eht-met-plots', help='output directory for plots')
+parser.add_argument('--plotdir', action='store', default='~/eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 parser.add_argument('--am-version', action='store', default='11.0', help='am version')
 parser.add_argument('--verbose', '-v', action='store_true', help='print more information')
@@ -324,7 +324,7 @@ parser.add_argument("hours",  help="hours forward (0 to 384, typically 120 or 38
 
 args = parser.parse_args()
 datadir = expanduser(args.datadir)
-outputdir = expanduser(args.outputdir)
+plotdir = expanduser(args.plotdir)
 
 station_dict = eht_met_forecast.read_stations(args.stations)
 
@@ -345,7 +345,7 @@ for vex in stations:
     station = station_dict[vex]
     for gfs_cycle in gfs_cycles:
         try:
-            do_plot(station, datadir, outputdir, gfs_cycle,
+            do_plot(station, datadir, plotdir, gfs_cycle,
                     hours=args.hours, am_version=args.am_version, force=args.force, verbose=args.verbose)
         except Exception as ex:
             print('station {} gfs_cycle {} saw {}'.format(vex, gfs_cycle, str(ex)), file=sys.stderr)

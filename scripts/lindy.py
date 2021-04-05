@@ -357,9 +357,9 @@ earliest_loc = gfs_cycles.index(earliest)
 earliest = max(0, earliest_loc - 64)
 gfs_cycles = gfs_cycles[earliest:]
 
-start = pd.Timestamp(2021, 4, 6)
+start = pd.Timestamp(2021, 4, 9)
 start_doy = start.dayofyear
-end = pd.Timestamp(2021, 4, 8)
+end = pd.Timestamp(2021, 4, 20)
 
 for gfs_cycle in gfs_cycles:
     allest = defaultdict(dict)

@@ -8,7 +8,9 @@ python scripts/lindy.py --vex e21[abcd]*.vex --emphasize $EHT2021 --start 2021:0
 python scripts/make-jumbo-webpage.py --emphasize $EHT2021
 
 rm -f eht-met-plots/latest
-(cd eht-met-plots/ && ln -s `ls | tail -n 1` latest)
+LATEST_TIME=`cd eht-met-plots/ && ls | tail -n 1`
+(cd eht-met-plots/ && ln -s $LATEST_TIME latest)
+(cd eht-met-plots/latest/ && ln -s lindy_00_$LATEST_TIME.png lindy_00.png)
 
 rsync -av eht-met-plots/ glindahl@35.199.60.65:public_html/eht-met-plots/
 

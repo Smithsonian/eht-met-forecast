@@ -51,7 +51,7 @@
 
     <h2>Forecast Table -- {{ stuff.year }} <a href="forecast.csv">csv</a></h2>
     <div id="forecast{{ stuff.year }}"></div>
-    <script type="text/javascript"charset="utf-8">
+    <script type="text/javascript" charset="utf-8">
       d3.text("forecast.csv", function(data) {
           var parsedCSV = d3.csv.parseRows(data);
 
@@ -72,7 +72,7 @@
 
     <h2>TrackRank Table <a href="trackrank.csv">csv</a></h2>
     <div id="trackrank"></div>
-    <script type="text/javascript"charset="utf-8">
+    <script type="text/javascript" charset="utf-8">
       d3.text("trackrank.csv", function(data) {
           var parsedCSV = d3.csv.parseRows(data);
 
@@ -108,7 +108,7 @@
 
     <h2>Forecast Table -- Future <a href="forecast_future.csv">csv</a></h2>
     <div id="forecast_future"></div>
-    <script type="text/javascript"charset="utf-8">
+    <script type="text/javascript" charset="utf-8">
       d3.text("forecast_future.csv", function(data) {
           var parsedCSV = d3.csv.parseRows(data);
 

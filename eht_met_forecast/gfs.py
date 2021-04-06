@@ -59,8 +59,10 @@ MAX_DOWNLOAD_TRIES  = 4
 def fetch_gfs_download(url, params, wait=False, verbose=False):
 
     retry = MAX_DOWNLOAD_TRIES
+    actual_tries = 0
     while retry > 0:
         try:
+            actual_tries += 1
             r = requests.get(url, params=params, timeout=(CONN_TIMEOUT, READ_TIMEOUT))
             if r.status_code == requests.codes.ok:
                 errflag = 0
@@ -99,6 +101,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
             errflag = 1
 
         if errflag:
+            if actual_tries > 1:
+                print(' tries={}'.format(actual_tries), file=sys.stderr, end='')
             retry = retry - 1
             if retry > 0:
                 print("  Retrying...", file=sys.stderr)

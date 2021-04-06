@@ -22,7 +22,7 @@
         if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
           var e = Math.max(.05, d);
           e = Math.min(0.5, e);
-          e = (0.45 - (e - 0.05)) / 0.45
+          e = (0.45 - (e - 0.05)) / 0.45;
           return d3.interpolateRdYlGn(e);
         }
       }
@@ -30,8 +30,9 @@
       {
         // header day of year is an integer, data cells are not integers
         if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
-          var e = Math.max(.0, d);
-          e = Math.min(1.0, e);
+          var e = Math.max({{stuff.trackmin}}, d);
+          e = Math.min({{stuff.trackmax}}, e);
+          e = ({{stuff.trackmax}} - (e - {{stuff.trackmin}})) / {{stuff.trackmax}};
           return d3.interpolateRdYlGn(e);
         }
       }

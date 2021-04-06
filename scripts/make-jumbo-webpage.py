@@ -82,6 +82,10 @@ for d in dirs:
     stuff['year'] = gfs_cycle[:4]
     stuff['stations'] = stations
 
+    # XXX need to read trackrank.csv to compute these
+    stuff['trackmin'] = 0.
+    stuff['trackmax'] = 1.
+
     template = env.get_template('index.html.template')
     with open(d + '/index.html', 'w') as f:
         try:

@@ -1,9 +1,11 @@
-python scripts/scott.py --verbose --plotdir ./eht-met-plots/ 384
-python scripts/scott.py --verbose --plotdir ./eht-met-plots/ 120
+python scripts/scott.py --verbose --plotdir ./eht-met-plots/ 384 &
+python scripts/scott.py --verbose --plotdir ./eht-met-plots/ 120 &
 
 EHT2021="Nn:Pv:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz"
 
-python scripts/lindy.py --vex e21[abcd]*.vex --emphasize $EHT2021 --start 2021:04:09 --end 2021:04:20
+python scripts/lindy.py --vex e21[abcd]*.vex e2_[ef].vex --emphasize $EHT2021 --start 2021:04:09 --end 2021:04:20 &
+
+wait
 
 python scripts/make-jumbo-webpage.py --emphasize $EHT2021
 

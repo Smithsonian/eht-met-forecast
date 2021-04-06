@@ -33,7 +33,7 @@
           var e = Math.max({{stuff.trackmin}}, d);
           e = Math.min({{stuff.trackmax}}, e);
           e = ({{stuff.trackmax}} - (e - {{stuff.trackmin}})) / {{stuff.trackmax}};
-          return d3.interpolateRdYlGn(e);
+          return d3.interpolateRdYlGn(1.0 - e);
         }
       }
     function formatCell(d)

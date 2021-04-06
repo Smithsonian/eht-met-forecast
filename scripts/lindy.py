@@ -164,10 +164,10 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.gca().add_artist(AnchoredText(label, loc=2))
     plt.xlabel('UT date')
     plt.ylabel('tau225')
-    plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end)
+    plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
 
     wide(14, 5)
-    plt.savefig(outname, dpi=75)
+    plt.savefig(outname, dpi=150)
     plt.close()
 
 
@@ -314,9 +314,9 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.legend(loc='upper right')
     plt.xlabel('UT date')
     plt.ylabel('tau225')
-             plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
+    plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
     wide(14, 5)
-    plt.savefig(outname, dpi=75)
+    plt.savefig(outname, dpi=150)
     plt.close()
 
 

@@ -308,7 +308,7 @@ Atmospheric state data are from the NOAA/NCEP Global Forecast System (GFS), with
 
     plt.figtext(0.07, 0.0, annotation_str, fontsize=5.5, wrap=True)
 
-    fig.savefig(outname, dpi=75)
+    fig.savefig(outname, dpi=150)
     plt.close('all')
 
 

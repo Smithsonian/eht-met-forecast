@@ -32,7 +32,7 @@
         if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
           var e = Math.max({{stuff.trackmin}}, d);
           e = Math.min({{stuff.trackmax}}, e);
-          e = ({{stuff.trackmax}} - (e - {{stuff.trackmin}})) / {{stuff.trackmax}};
+          e = ({{stuff.trackmax}} - {{stuff.trackmin}} - (e - {{stuff.trackmin}})) / ({{stuff.trackmax}} - {{stuff.trackmin}});
           return d3.interpolateRdYlGn(1.0 - e);
         }
       }

@@ -83,8 +83,8 @@ for d in dirs:
     stuff['stations'] = stations
 
     # XXX need to read trackrank.csv to compute these
-    stuff['trackmin'] = 0.4
-    stuff['trackmax'] = 0.8
+    stuff['trackmin'] = 0.55
+    stuff['trackmax'] = 0.75
 
     template = env.get_template('index.html.template')
     with open(d + '/index.html', 'w') as f:

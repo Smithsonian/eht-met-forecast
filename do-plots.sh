@@ -9,8 +9,8 @@ wait
 
 python scripts/make-jumbo-webpage.py --emphasize $EHT2021
 
-LATEST_TIME=`cd eht-met-plots/ && ls | tail -n 1`
 rm -f eht-met-plots/latest
+LATEST_TIME=`cd eht-met-plots/ && ls | tail -n 1`
 (cd eht-met-plots/ && ln -s $LATEST_TIME latest)
 rm -f eht-met-plots/latest/lindy_00.png
 (cd eht-met-plots/latest/ && ln -s lindy_00_$LATEST_TIME.png lindy_00.png)

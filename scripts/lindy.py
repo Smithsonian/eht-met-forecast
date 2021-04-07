@@ -5,6 +5,7 @@ from os.path import expanduser
 import sys
 from collections import defaultdict
 import datetime
+import hashlib
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -275,22 +276,47 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     date0 = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
 
+    close_sites = {'Ax': 'Aa', 'Mm': 'Sw'}
+    inverted_close_sites = {v: k for k, v in close_sites.items()}
+
     some = False
+    actual_sites = set()
     for site in sorted(allest):
         if exclude and site in exclude:
             continue
         if include and site not in include:
+            continue
+        actual_sites.add(site)
+
+    for site in sorted(allest):
+        if site not in actual_sites:
+            continue
+        if site in close_sites and close_sites[site] in allest:
             continue
         if gfs_cycle not in allest[site]:
             continue
 
         est = allest[site][gfs_cycle]
         name = stations[site]['name']
+        label = site
         if site != name:
-            label = site + ' ' + name
-        else:
-            label = site
-        plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5)
+            label += ' ' + name
+        if site in inverted_close_sites:
+            other_site = inverted_close_sites[site]
+            if other_site in actual_sites:
+                label += ' ' + other_site
+                other_name = stations[other_site]['name']
+                if other_site != other_name:
+                    label += ' ' + other_name
+
+        ls_list = ['solid', 'dashed', 'dashdot']  # , 'dotted']
+        i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
+        ls = ls_list[i]
+
+        if site == 'Sw':  # Remo likes this :-D
+            ls = 'solid'
+
+        plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5, ls=ls)
         some = True
     if not some:
         plt.close()

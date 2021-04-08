@@ -286,14 +286,12 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             continue
         if include and site not in include:
             continue
+        if gfs_cycle not in allest[site]:
+            continue
         actual_sites.add(site)
 
-    for site in sorted(allest):
-        if site not in actual_sites:
-            continue
-        if site in close_sites and close_sites[site] in allest:
-            continue
-        if gfs_cycle not in allest[site]:
+    for site in sorted(actual_sites):
+        if site in close_sites and close_sites[site] in actual_sites:
             continue
 
         est = allest[site][gfs_cycle]

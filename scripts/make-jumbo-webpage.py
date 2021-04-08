@@ -5,6 +5,7 @@ import os.path
 from collections import defaultdict
 import sys
 import argparse
+import traceback
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -57,6 +58,9 @@ for d in dirs:
     for f in sorted(files):
         if f.endswith('.csv'):
             continue
+        if f == 'lindy_00.png':
+            # a symlink
+            continue
         f = f.split('/')[-1]
         parts = f.split('_')
         if parts[0] in prefixes:
@@ -92,3 +96,4 @@ for d in dirs:
             f.write(template.render(stuff=stuff, now=now, future=future))
         except Exception as e:
             print('got exception {} processing {}, skipping'.format(str(e), d), file=sys.stderr)
+            print(traceback.format_exc())

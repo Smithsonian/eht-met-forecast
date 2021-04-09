@@ -64,3 +64,44 @@ def read_accumulated(vex, gfs_cycle, basedir='.'):
         partial_sums[vex].append(data)
 
     return partial_sums[vex]
+
+
+def read_eu(basedir='.'):
+    kwargs = {
+        'delim_whitespace': True,
+        'header': 0,
+        'parse_dates': {'date': [0]},
+        'date_parser': lambda x: datetime.datetime.utcfromtimestamp(int(x.replace('.', ''))),
+    }
+    fname = expanduser(basedir) + '/tau225.txt'
+
+    if not exists(fname):
+        return
+
+    with open(fname) as f:
+        data = pd.read_csv(f, **kwargs)
+    if data.empty:
+        return
+
+    deletes = {
+        'DeBilt': '',
+        'Thule': '',
+        'AMT': '',
+    }
+
+    data.drop(columns=deletes.keys())
+    renames = {
+        'ALMA': 'Aa',
+        'APEX': 'Ax',
+        'SMTO': 'Mg',
+        'LMT': 'Lm',
+        'SPT': 'Sz',
+        'PICO': 'Pv',
+        'JCMT': 'Mm',
+        'KP': 'Kt',
+        'GLT': 'Gl',
+        'NOEMA': 'Nn',
+        'SMA': 'Sw',
+    }
+
+    return data.rename(columns=renames)

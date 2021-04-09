@@ -6,6 +6,7 @@ import sys
 from collections import defaultdict
 import datetime
 import hashlib
+import traceback
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -106,7 +107,7 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
 
     alldata = pd.concat(data, ignore_index=True).sort_values(['date', 'age'])
     alldata['sigma'] = (tfloor + alldata['age'].dt.total_seconds()/3600.)**tpow
-    latest = alldata.groupby('date').first().reset_index()  # most recent prediction
+    latest = alldata.groupby('date').first().reset_index()  # most recent forecast
     date0 = np.max(latest['date0'])
 
     gfs_cycle_dt = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
@@ -127,26 +128,36 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     if not force and os.path.exists(outname):
         return
 
-    # most recent forecast
+    # solid black line for the latest forecast
     label = station['name'] + ' ' + str(date0)
     plt.plot(latest.date.values, latest.tau225, lw=1, label=label, color='black')
+    # vertial line at the most recent forecast run time
     plt.axvline(date0, color='black', ls='--')
 
-    # old forecasts
+    # faint black lines for all old forecasts
     for df in data:
         if df.iloc[0].date0 == date0:
             continue
         plt.plot(df.date.values, df.tau225.values, color='black', alpha=1./len(data))
 
-    # ensemble estimator
+    # ensemble estimator, medium ?blue? band
+    # JAGGED 1 hour/3 hour
     plt.fill_between(est.date.values, est.est_mean.values/est.est_err,
                      est.est_mean.values*est.est_err, alpha=0.25)
 
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
+        # night markings, light blue fill
         plt.axvspan(d, d+pd.Timedelta(night_length), color='C0', alpha=0.15, zorder=-10)
-    # do this to get pandas date fmt on xlabel
+    # ensemble mean dark ?blue? line
+    # JAGGED 1 hour/3 hour
     plt.plot(est.date.values, est.est_mean, label=station['name'] + ' ensemble')
+
+    # EU forecast
+    eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
+    if site in eu_data:
+        # coming through orange?
+        plt.plot(eu_data.date.values, eu_data[site], ls='--', label=station['name'] + ' EU')
 
     # formatting
     plt.ylim(0, 1.0)
@@ -407,6 +418,7 @@ for gfs_cycle in gfs_cycles:
             do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, force=args.force)
         except Exception as ex:
             print('station {} gfs_cycle {} saw exception {}'.format(s, gfs_cycle, str(ex)), file=sys.stderr)
+            print(traceback.format_exc())
 
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')

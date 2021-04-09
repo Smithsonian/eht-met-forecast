@@ -28,13 +28,16 @@ emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
 if '00' not in emphasize:
     emphasize.add('00')
+if '00e' not in emphasize:
+    emphasize.add('00e')
 
 stations = read_stations(args.stations)
-stations['00'] = {'name': 'Current stations'}
+stations['00'] = {'name': 'Current stations GFS weather'}
+stations['00e'] = {'name': 'Current stations EU weather'}
 stations['01'] = {'name': 'Future stations'}
 
 for e in emphasize:
-    if e not in stations and e != '00':
+    if e not in stations and e != '00' and e != '00e':
         raise ValueError('emphasized station {} is not known'.format(e))
 
 env = Environment(
@@ -58,10 +61,13 @@ for d in dirs:
     for f in sorted(files):
         if f.endswith('.csv'):
             continue
+        f = f.split('/')[-1]
         if f == 'lindy_00.png':
             # a symlink
             continue
-        f = f.split('/')[-1]
+        if f == 'lindy_00e.png':
+            # a symlink
+            continue
         parts = f.split('_')
         if parts[0] in prefixes:
             groups[parts[1]].append(f)

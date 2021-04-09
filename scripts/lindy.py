@@ -24,6 +24,7 @@ import vex as vvex
 night_length = '15 hours'
 before_start = '1 day'
 after_end = '1 day'
+close_sites = {'Ax': 'Aa', 'Mm': 'Sw'}
 
 
 def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
@@ -155,7 +156,7 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
 
     # EU forecast
     eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
-    if site in eu_data:
+    if eu_data is not None and site in eu_data:
         # coming through orange?
         plt.plot(eu_data.date.values, eu_data[site], ls='--', label=station['name'] + ' EU')
 
@@ -287,17 +288,20 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     date0 = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
 
-    close_sites = {'Ax': 'Aa', 'Mm': 'Sw'}
     inverted_close_sites = {v: k for k, v in close_sites.items()}
+
+    if allest is None:
+        # a hacky way to signal using EU data
+        eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
 
     some = False
     actual_sites = set()
-    for site in sorted(allest):
+    for site in sorted(stations.keys()):
         if exclude and site in exclude:
             continue
         if include and site not in include:
             continue
-        if gfs_cycle not in allest[site]:
+        if allest and gfs_cycle not in allest[site]:
             continue
         actual_sites.add(site)
 
@@ -305,7 +309,6 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         if site in close_sites and close_sites[site] in actual_sites:
             continue
 
-        est = allest[site][gfs_cycle]
         name = stations[site]['name']
         label = site
         if site != name:
@@ -325,12 +328,21 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         if site == 'Sw':  # Remo likes this :-D
             ls = 'solid'
 
-        plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5, ls=ls)
-        some = True
+        if allest:
+            est = allest[site][gfs_cycle]
+            plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5, ls=ls)
+            some = True
+        else:
+            if eu_data is not None and site in eu_data:
+                plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
+                some = True
+
     if not some:
         plt.close()
         return
-    plt.axvline(date0, color='black', ls='--')
+    if allest:
+        # vertical line at the forcast time, but only for GFS
+        plt.axvline(date0, color='black', ls='--')
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
     #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     days = pd.date_range(start=start, end=end, freq='D')
@@ -347,6 +359,13 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')
+
+    if allest:
+        label = 'GFS'
+    else:
+        label = 'EU'
+    plt.gca().add_artist(AnchoredText(label, loc=2))
+
     plt.xlabel('UT date')
     plt.ylabel('tau225')
     plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
@@ -421,6 +440,7 @@ for gfs_cycle in gfs_cycles:
             print(traceback.format_exc())
 
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00e')
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
     do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)

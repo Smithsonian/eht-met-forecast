@@ -89,7 +89,8 @@ def read_eu(basedir='.'):
         'AMT': '',
     }
 
-    data.drop(columns=deletes.keys())
+    data.drop(columns=deletes.keys(), errors='ignore', inplace=True)
+
     renames = {
         'ALMA': 'Aa',
         'APEX': 'Ax',
@@ -102,6 +103,10 @@ def read_eu(basedir='.'):
         'GLT': 'Gl',
         'NOEMA': 'Nn',
         'SMA': 'Sw',
+        # added April 10
+        'IRAM_PV': 'Pv',
+        'SPTDUMMY': 'Sz',
+        'IRAM_PdB': 'Nn',
     }
 
     return data.rename(columns=renames)

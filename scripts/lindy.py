@@ -290,6 +290,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     inverted_close_sites = {v: k for k, v in close_sites.items()}
 
+    eu_data = None
     if allest is None:
         # a hacky way to signal using EU data
         eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
@@ -361,7 +362,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.legend(loc='upper right')
 
     if allest:
-        label = 'GFS'
+        label = 'GFS ' + gfs_cycle
     else:
         label = 'EU'
     plt.gca().add_artist(AnchoredText(label, loc=2))

@@ -39,6 +39,8 @@ def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
             me['lindy'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00', gfs_cycle)
         me['00'].append(outname)
+        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00e', gfs_cycle)
+        me['00'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '01', gfs_cycle)
         me['00'].append(outname)
         outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
@@ -50,8 +52,8 @@ def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
     if force:
         return ret
 
-    for gfs_cycle in list(ret.keys()):
-        for key in list(ret[gfs_cycle].keys()):
+    for gfs_cycle in list(ret.keys()):  # list() because I'm deleting
+        for key in list(ret[gfs_cycle].keys()):  # list() because I'm deleting
             for f in ret[gfs_cycle][key]:
                 needed = []
                 if not os.path.exists(f):
@@ -384,6 +386,9 @@ def get_dates(args):
     return start, end
 
 
+# if columns are renamed this can crash, so let's call it first thing to see if it crashes
+eht_met_forecast.data.read_eu()  # ./tau255.txt
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')
 parser.add_argument('--vex', action='store', nargs='+', help='list of vex files')
@@ -401,13 +406,11 @@ plotdir = expanduser(args.plotdir)
 
 emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
-if '00' not in emphasize:
-    emphasize.add('00')
 
 stations = read_stations(args.stations)
 
 for e in emphasize:
-    if e not in stations and e != '00':
+    if e not in stations:
         raise ValueError('emphasized station {} is not known'.format(e))
 
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)

@@ -54,7 +54,7 @@ CONN_TIMEOUT        = 60       # Initial server response timeout in seconds
 READ_TIMEOUT        = 60       # Stalled download timeout in seconds
 RETRY_DELAY         = 60       # Delay before retry (NOAA requests 60 s)
 FOUROHFOUR_DELAY    = 300      # Delay after a 404 (data not ready, wait=True)
-MAX_DOWNLOAD_TRIES  = 4
+MAX_DOWNLOAD_TRIES  = 8
 
 
 def fetch_gfs_download(url, params, wait=False, verbose=False):

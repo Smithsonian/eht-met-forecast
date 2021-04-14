@@ -109,6 +109,7 @@ def main(args=None):
             except TimeoutError:
                 # raised by gfs.py
                 print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)
+                sys.stderr.flush()
                 exit_value = 1
             if not args.stdout:
                 f.close()

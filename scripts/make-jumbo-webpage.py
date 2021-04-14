@@ -76,6 +76,10 @@ for d in dirs:
     future = {}
 
     for s in sorted(groups.keys()):
+        if s not in stations:
+            # renamed things
+            print('I had files for station {} but it is not in stations'.format(s))
+            continue
         if emphasize:
             if s in emphasize:
                 now[s] = groups[s]
@@ -88,6 +92,7 @@ for d in dirs:
                 now[s] = groups[s]
 
     stuff = {}
+    stuff['gfs_cycle'] = gfs_cycle
     stuff['title'] = '{} Plots'.format(gfs_cycle)
     stuff['year'] = gfs_cycle[:4]
     stuff['stations'] = stations

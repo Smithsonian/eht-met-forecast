@@ -92,7 +92,7 @@
       });
     </script>
 
-    <h2>{{ stuff.year }} Stations</h2>
+    <h2>{{ stuff.year }} Stations {{ stuff.gfs_cycle}}</h2>
 
     {% for s, files in now.items() %}
       <h3>{{ s }} {{ stuff.stations[s].name }}</h3>

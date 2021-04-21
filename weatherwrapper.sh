@@ -10,6 +10,7 @@ cd ~/github/eht-met-forecast
 bash do-all.sh
 
 # now wait for the next one
-WAIT=--wait bash do-all.sh
+# turn this one when we're running
+#WAIT=--wait bash do-all.sh
 
 

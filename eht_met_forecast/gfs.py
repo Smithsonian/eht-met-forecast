@@ -54,6 +54,7 @@ CONN_TIMEOUT        = 60       # Initial server response timeout in seconds
 READ_TIMEOUT        = 60       # Stalled download timeout in seconds
 RETRY_DELAY         = 60       # Delay before retry (NOAA requests 60 s)
 FOUROHFOUR_DELAY    = 300      # Delay after a 404 (data not ready, wait=True)
+RATELIMIT_DELAY     = 60
 MAX_DOWNLOAD_TRIES  = 8
 
 
@@ -74,12 +75,14 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
                     retry += 1  # free retry
                     retry_duration = FOUROHFOUR_DELAY
                 print('Data not yet available (404)', file=sys.stderr, end='')
-            elif r.status_code in {403, 429, 503}:
-                # I've never seen NOMADS send these but they are typical "slow down" status codes
-                # they might start sending these on 2021-4-20 when they implement rate limits
+            elif r.status_code in {403, 429, 503, 302}:
+                # 403, 429, 503: I've never seen NOMADS send these but they are typical "slow down" status codes
+                # here's what they started sending after 4/20/2021:
+                # HTTP/1.1 302 Your allowed limit has been reached. Please go to https://www.weather.gov/abusive-user-block for more info\
                 errflag = 1
                 print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
-                retry += 0.8  # this counts as 1/5 of a retry
+                retry += 1  # free retry
+                retry_duration = RATELIMIT_DELAY
             elif r.status_code in {500, 502, 504}:
                 # I've seen 502 from NOMADS when the website is broken
                 errflag = 1

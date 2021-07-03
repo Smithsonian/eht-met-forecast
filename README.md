@@ -1,6 +1,6 @@
 # eht-met-forecast
 
-[![Build Status](https://dev.azure.com/lindahl0577/eht-met-forecast/_apis/build/status/lindahl0577.eht-met-forecast?branchName=master)](https://dev.azure.com/lindahl0577/eht-met-forecast/_build/latest?definitionId=3&branchName=master) [![Coverage](https://coveralls.io/repos/github/wumpus/eht-met-forecast/badge.svg?branch=master)](https://coveralls.io/github/wumpus/eht-met-forecast?branch=master) [![Apache License 2.0](https://img.shields.io/github/license/wumpus/eht-met-forecast.svg)](LICENSE)
+[![Build Status](https://dev.azure.com/lindahl0577/eht-met-forecast/_apis/build/status/lindahl0577.eht-met-forecast?branchName=main)](https://dev.azure.com/lindahl0577/eht-met-forecast/_build/latest?definitionId=3&branchName=main) [![Coverage](https://coveralls.io/repos/github/wumpus/eht-met-forecast/badge.svg?branch=main)](https://coveralls.io/github/wumpus/eht-met-forecast?branch=main) [![Apache License 2.0](https://img.shields.io/github/license/wumpus/eht-met-forecast.svg)](LICENSE)
 
 eht-met-forecast creates radio-astronomy-relevant weather forecast
 data for the

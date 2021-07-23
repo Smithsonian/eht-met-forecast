@@ -47,7 +47,7 @@ jobs:
       displayName: 'install pygrib'
 
     - script: |
-        pip install . .[test]
+        pip --use-feature=in-tree-build install . .[test]
       displayName: 'Install dependencies'
 
     - script: |
@@ -108,7 +108,7 @@ jobs:
         # see brew above for where these OS packages are installed
         # sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
         # CentOS: eccodes-devel proj proj-devel
-        pip install . .[test]
+        pip --use-feature=in-tree-build install . .[test]
       displayName: 'Install dependencies'
 
     - script: |

@@ -31,6 +31,10 @@ stations = [
     {'name': 'LAS', 'x': 1834168.6478, 'y': -5247347.9448, 'z': -3113005.9296},  # broken? -2km alt
     {'name': 'PIKES', 'x': -1292058.67099, 'y': -4807190.10901, 'z': 3981241.60693},
     {'name': 'VLA', 'x': -1601201.2, 'y': -5042007.4, 'z': 3554843.0},
+    # needs to be converted the other direction:
+    #{'name': 'GLT-SUMMIT', "alt": 3204,  "lat": 72.579, "lon": -38.454,
+    },
+
 ]
 
 geodetic_stations = []

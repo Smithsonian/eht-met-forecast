@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import os
-from os.path import expanduser
+import os.path
 import sys
 from collections import defaultdict
 import datetime
@@ -246,6 +246,7 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
     days = np.array([d.value for d in daysut])
 
     for vex in vexes:
+        track = os.path.splitext(os.path.basename(vex))[0]
         a = vvex.parse(open(vex).read())
         is345 = '345 GHz' in list(a['EXPER'].values())[0]['exper_description']
         station_loc = dict((b['site_ID'], xyz2loc(b['site_position']))
@@ -277,7 +278,7 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
             am = 1./np.sin(alts*np.pi/180.)
             score += (n-1)*np.sum(np.exp(-am[:,None] * taus), axis=0)  # talking with Lindy about: / len(dtimes)
             total += (n-1)*n
-        trackrank[vex] = score/total
+        trackrank[track] = score/total
     df = pd.DataFrame.from_dict(trackrank, orient='index', columns=daysdoy).sort_index()
     df.to_csv(outname)
 
@@ -401,8 +402,8 @@ parser.add_argument('--end', action='store', help='end date of nightly labels, Y
 parser.add_argument('--verbose', action='store', help='more talking')
 
 args = parser.parse_args()
-datadir = expanduser(args.datadir)
-plotdir = expanduser(args.plotdir)
+datadir = os.path.expanduser(args.datadir)
+plotdir = os.path.expanduser(args.plotdir)
 
 emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]

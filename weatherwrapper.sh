@@ -7,15 +7,24 @@ export AM=./am-11.0/src/am
 cd ~/github/eht-met-forecast
 
 date
+date -u
 
-# first download anything in the past
+echo downloading in the past
+
 bash do-all.sh
 
 date
+date -u
 
-# now wait for the next one
 # turn this one when we're running
-#WAIT=--wait bash do-all.sh
+echo downloading latest with wait
+WAIT=--wait bash do-all.sh
+
+echo doing plots
+bash do-plots.sh
+
+# now we'd like to notify Greg and/or slack, BUT, only for the run starting at 01 UT
 
 date
+date -u
 

@@ -1,3 +1,5 @@
+date -u
+
 # this data directory should be the checked in data, with no partial files
 DATA=~/github/eht-met-data-prod
 
@@ -20,4 +22,5 @@ wget https://vlbimon1.science.ru.nl/img/plots/tau225.txt
 python scripts/lindy.py --vex $VEX --emphasize $EHT2022DR --start $START --end $END --datadir $DATA &
 
 wait
+date -u
 

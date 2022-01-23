@@ -75,11 +75,16 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
                     retry += 1  # free retry
                     retry_duration = FOUROHFOUR_DELAY
                 print('Data not yet available (404)', file=sys.stderr, end='')
-            elif r.status_code in {403, 429, 503, 302}:
+            elif r.status_code in {403, 429, 503}:
                 # 403, 429, 503: I've never seen NOMADS send these but they are typical "slow down" status codes
+                errflag = 1
+                print('Received surprising retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
+                retry += 1  # free retry
+                retry_duration = RATELIMIT_DELAY
+            elif r.status_code in {302} and 'Location' not in r.headers:
                 # here's what they started sending after 4/20/2021:
                 # HTTP/1.1 302 Your allowed limit has been reached. Please go to https://www.weather.gov/abusive-user-block for more info
-                # XXX this 302 does not have a Location: header, test for it so we won't infinitely retry if it is a real 302 with Location:
+                # This 302 does not have a Location: header, so we test for it to make it less likely we'll end up in an infinite loop
                 errflag = 1
                 print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 1  # free retry

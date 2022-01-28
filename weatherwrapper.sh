@@ -16,12 +16,12 @@ bash do-all.sh
 date
 date -u
 
-# turn this one when we're running
-echo downloading latest with wait
-WAIT=--wait bash do-all.sh
+# turn this on when we're running
+#echo downloading latest with wait
+#WAIT=--wait bash do-all.sh
 
-echo doing plots
-bash do-plots.sh
+#echo doing plots
+#bash do-plots.sh
 
 # now we'd like to notify Greg and/or slack, BUT, only for the run starting at 01 UT
 

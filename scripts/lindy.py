@@ -21,7 +21,13 @@ import eht_met_forecast.data
 from eht_met_forecast import read_stations
 import vex as vvex
 
-night_length = '15 hours'
+schedule_start = '0 hours'  # midnight
+schedule_end = '15 hours'
+
+# dress rehearsal
+#schedule_start = '4.5 hours'
+#schedule_end = '6.5 hours'
+
 before_start = '1 day'
 after_end = '1 day'
 close_sites = {'Ax': 'Aa', 'Mm': 'Sw'}
@@ -151,7 +157,7 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
         # night markings, light blue fill
-        plt.axvspan(d, d+pd.Timedelta(night_length), color='C0', alpha=0.15, zorder=-10)
+        plt.axvspan(d+pd.Timedelta(schedule_start), d+pd.Timedelta(schedule_end), color='C0', alpha=0.15, zorder=-10)
     # ensemble mean dark ?blue? line
     # JAGGED 1 hour/3 hour
     plt.plot(est.date.values, est.est_mean, label=station['name'] + ' ensemble')
@@ -351,7 +357,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
-        plt.axvspan(d, d+pd.Timedelta(night_length), color='black', alpha=0.05, zorder=-10)
+        plt.axvspan(d+pd.Timedelta(schedule_start), d+pd.Timedelta(schedule_end), color='black', alpha=0.05, zorder=-10)
 
     # formatting
     plt.ylim(0, 1.0)

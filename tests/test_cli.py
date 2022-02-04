@@ -39,6 +39,10 @@ def test_cli(capsys):
             {'stdout': '20200316_18:00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'}
         ],
         [
+            {'contentf': 'test.grb', 'args': ['--vex', 'Mm', '--one', '--stdout', '--log', 'LOG.pytest']},
+            {'stdout': '20200316_18:00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n', 'ofile': 'LOG.pytest'}
+        ],
+        [
             {'status_code': 500, 'whack_timeouts': True, 'exception': SystemExit,
              'args': ['--vex', 'Mm', '--one', '--stdout']},
             {'stdout': ''},
@@ -68,6 +72,12 @@ def test_cli(capsys):
         if 'status_code' in t_in:
             kwargs['status_code'] = t_in['status_code']
 
+        if 'ofile' in t_out:
+            try:
+                os.unlink(t_out['ofile'])
+            except FileNotFoundError:
+                pass
+
         if t_in.get('whack_timeouts'):
             whack_timeouts()
 
@@ -80,6 +90,7 @@ def test_cli(capsys):
                 main(args=t_in['args'])
 
         out, err = capsys.readouterr()
+
         if 'stderr' in t_out:
             assert err == t_out['stderr']
         else:
@@ -91,3 +102,5 @@ def test_cli(capsys):
             out = re.sub(r'#.*\n', '', out)
             out = out[12:]  # drop date at the start of the line
             assert out == t_out['stdout'][12:]
+        if 'ofile' in t_out:
+            assert os.path.isfile(t_out['ofile'])

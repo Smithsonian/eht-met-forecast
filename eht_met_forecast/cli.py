@@ -2,11 +2,12 @@ import sys
 import datetime
 import os
 from argparse import ArgumentParser
+from collections import defaultdict
 
 from .constants import GFS_TIMESTAMP
 from .timer_utils import dump_latency_histograms
 from .gfs import latest_gfs_cycle_time
-from .core import read_stations, ok, make_forecast_table
+from .core import read_stations, ok, make_forecast_table, dump_stats
 
 
 def interpret_args(args, station_dict):
@@ -68,6 +69,7 @@ def main(args=None):
     parser.add_argument('--dry-run', '-n', action='store_true', help='Show what would be done. Implies -v')
     parser.add_argument('--one', action='store_true', help='Just do one hour. Used for testing')
     parser.add_argument('--stdout', action='store_true', help='Print output to stdout instead of a file')
+    parser.add_argument('--log', action='store', help='File to write logging information to')
     parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
     args = parser.parse_args(args=args)
 
@@ -85,16 +87,25 @@ def main(args=None):
         print('no valid stations to fetch', file=sys.stderr)
         exit(1)
 
+    stats = defaultdict(int)
+    stats['stations'] = []
+    stats['gfs_time'] = cycles[0].strftime(GFS_TIMESTAMP)
+
     for vex in stations:
         station = station_dict[vex]
+        stats['stations'].append(vex)
+
         for gfs_cycle in cycles:
-            print('checking station', vex, 'cycle', gfs_cycle.strftime(GFS_TIMESTAMP), file=sys.stderr)
+            gcf = gfs_cycle.strftime(GFS_TIMESTAMP)
+            if verbose:
+                print('checking station', vex, 'cycle', gcf, file=sys.stderr)
             outdir = '{}/{}'.format(args.dir, vex)
-            outfile = '{}/{}'.format(outdir, gfs_cycle.strftime(GFS_TIMESTAMP))
+            outfile = '{}/{}'.format(outdir, gcf)
             if ok(outfile, verbose=verbose):
                 if verbose:
                     print('  outfile {} seems ok, not re-fetching'.format(outfile), file=sys.stderr)
                 continue
+            print('downloading station', vex, 'cycle', gcf, file=sys.stderr)
             if verbose or args.dry_run:
                 print('  processing', vex, outfile, file=sys.stderr)
                 if args.dry_run:
@@ -104,8 +115,9 @@ def main(args=None):
                 f = sys.stdout
             else:
                 f = open(outfile, 'w')
+
             try:
-                make_forecast_table(station, gfs_cycle, f, wait=args.wait, verbose=args.verbose, one=args.one)
+                make_forecast_table(station, gfs_cycle, f, wait=args.wait, verbose=args.verbose, one=args.one, stats=stats)
             except TimeoutError:
                 # raised by gfs.py
                 print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)
@@ -113,7 +125,10 @@ def main(args=None):
                 exit_value = 1
             if not args.stdout:
                 f.close()
-    dump_latency_histograms()
+
+    stats['stations'] = ':'.join(sorted(stats['stations']))
+    dump_stats(stats, log=args.log)
+    dump_latency_histograms(log=args.log)
 
     if exit_value:
         exit(exit_value)

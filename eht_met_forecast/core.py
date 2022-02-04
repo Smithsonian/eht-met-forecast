@@ -10,7 +10,7 @@ import json
 from .constants import GFS_TIMESTAMP
 from .timer_utils import record_latency
 from .am import grib2_to_am_layers, print_am_header, print_am_layers, run_am, summarize_am, header_amc
-from .gfs import latest_gfs_cycle_time, download_gfs
+from .gfs import download_gfs
 
 expected_lines = 210
 table_header = ('#', 'date', 'tau255', 'Tb[K]', 'pwv[mm]', 'lwp[kg*m^-2]', 'iwp[kg*m^-2]', 'o3[DU]')
@@ -40,8 +40,8 @@ def print_table_line(fields, f):
     print(table_line_string.format(*fields), file=f)
 
 
-def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False):
-    grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=wait, verbose=verbose)
+def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False, stats=None):
+    grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=stats)
 
     grib_problem = False
     with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb') as f:
@@ -87,11 +87,11 @@ def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f, verbose=Fal
         sys.stderr.flush()
 
 
-def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=False):
+def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=False, stats=None):
     if verbose:
         print(site['name'], 'fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
-        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose)
+        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=None)
     if layers_amc is None:
         return  # no line emitted
 
@@ -127,14 +127,14 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=Fals
     time.sleep(1)
 
 
-def make_forecast_table(site, gfs_cycle, f, wait=False, verbose=False, one=False):
+def make_forecast_table(site, gfs_cycle, f, wait=False, verbose=False, one=False, stats=None):
     print_table_line(table_header, f)
     for forecast_hour in range(0, 121):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose, stats=stats)
         if one:
             return
     for forecast_hour in range(123, 385, 3):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose, stats=stats)
 
 
 def read_stations(filename):
@@ -153,3 +153,19 @@ def read_stations(filename):
             raise ValueError('need vex or name')
 
     return stations_dict
+
+
+def dump_stats(stats, log=None):
+    headers = ('gfs_time', 'stations')
+    out = ''
+    for key in headers:
+        out += '{}: {}\n'.format(key, stats[key])
+    for key in sorted(stats.keys()):
+        if key in headers:
+            continue
+        out += '  {}: {}\n'.format(key, stats[key])
+
+    print(out, file=sys.stderr)
+    if log:
+        with open(log, 'a') as fd:
+            print(out, file=fd)

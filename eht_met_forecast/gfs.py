@@ -58,7 +58,7 @@ RATELIMIT_DELAY     = 60
 MAX_DOWNLOAD_TRIES  = 8
 
 
-def fetch_gfs_download(url, params, wait=False, verbose=False):
+def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
 
     retry = MAX_DOWNLOAD_TRIES
     actual_tries = 0
@@ -67,6 +67,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
             actual_tries += 1
             retry_duration = RETRY_DELAY
             r = requests.get(url, params=params, timeout=(CONN_TIMEOUT, READ_TIMEOUT))
+            if stats:
+                stats[int(r.status_code)] += 1
             if r.status_code == requests.codes.ok:
                 errflag = 0
             elif r.status_code == 404:
@@ -81,6 +83,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
                 print('Received surprising retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 1  # free retry
                 retry_duration = RATELIMIT_DELAY
+                if stats:
+                    stats['ratelimit_surprising'] += 1
             elif r.status_code in {302} and 'Location' not in r.headers:
                 # here's what they started sending after 4/20/2021:
                 # HTTP/1.1 302 Your allowed limit has been reached. Please go to https://www.weather.gov/abusive-user-block for more info
@@ -89,11 +93,20 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
                 print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 1  # free retry
                 retry_duration = RATELIMIT_DELAY
+                if stats:
+                    stats['ratelimit_302_no_location'] += 1
+            elif r.status_code in {302}:
+                # ? this can happen if you ask for a date too far in the past
+                # allow_redirects=True is the default for .get() so this should never happen
+                if stats:
+                    stats['302_with_location'] += 1
             elif r.status_code in {500, 502, 504}:
                 # I've seen 502 from NOMADS when the website is broken
                 errflag = 1
                 print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 0.8  # this counts as 1/5 of a retry
+                if stats:
+                    stats['website_broken'] += 1
             else:
                 errflag = 1
                 print("Download failed with status code {0}".format(r.status_code),
@@ -106,12 +119,21 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
             errflag = 1
             if wait:
                 retry += 1
+                if stats:
+                    stats['timeout_with_wait'] += 1
+            else:
+                if stats:
+                    stats['timeout_without_wait'] += 1
         except requests.exceptions.ReadTimeout:
             print("Data download timed out.", file=sys.stderr, end='')
             errflag = 1
+            if stats:
+                stats['timeout_read'] += 1
         except requests.exceptions.RequestException as e:
             print("Surprising exception of", str(e)+".", file=sys.stderr, end='')
             errflag = 1
+            if stats:
+                stats['exception_'+str(e)] += 1
 
         if errflag:
             if actual_tries > 1:
@@ -123,6 +145,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
             else:
                 print("  Giving up.", file=sys.stderr)
                 print("Failed URL was: ", url, file=sys.stderr)
+                if stats:
+                    stats['giving_up'] += 1
                 raise TimeoutError('gave up')  # caught in cli.py
         else:
             break
@@ -130,7 +154,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False):
     return r.content
 
 
-def download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False):
+def download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False, stats=None):
     url, params = form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour)
-    grib_buffer = fetch_gfs_download(url, params, wait=wait, verbose=verbose)
+    grib_buffer = fetch_gfs_download(url, params, wait=wait, verbose=verbose, stats=stats)
     return grib_buffer

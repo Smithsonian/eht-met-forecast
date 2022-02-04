@@ -1,6 +1,8 @@
 #!/bin/bash
 
+STATIONS="Aa Ax BAJA BOL GAM Gl HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
 DEST=~/github/eht-met-data
+UPLOAD=glindahl@35.199.60.65
 
 # die early if this isn't present
 $AM -v || exit 1
@@ -12,14 +14,12 @@ BACKFILL=168
 # use during an observation
 #WAIT="--wait"
 
-STATIONS="Aa Ax BAJA BOL GAM Gl HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
-
 for vex in $STATIONS; do
-   eht-met-forecast --backfill $BACKFILL --dir $DEST --vex $vex $WAIT &
+   eht-met-forecast --backfill $BACKFILL --dir $DEST --vex $vex $WAIT --log LOG &
 done
 
 wait
 
 (cd $DEST && bash ./commit-finished.sh)
 
-ssh glindahl@35.199.60.65 "cd eht-met-data && git pull"
+ssh $UPLOAD "cd eht-met-data && git pull"

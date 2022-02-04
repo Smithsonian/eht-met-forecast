@@ -43,8 +43,8 @@ jobs:
     - script: |
         python -m pip install --upgrade pip
         pip install cython  # must be installed early to rebuild for newer python versions
-        # work around setup.cfg in the pygrib 2.0.5 tarball
-        export PYGRIBSETUPCFG=None
+        # work around setup.cfg in the pygrib 2.0.5 tarball -- fixed after 2.0.6
+        # export PYGRIBSETUPCFG=None
         pip install pygrib
       displayName: 'install pygrib'
 

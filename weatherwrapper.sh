@@ -6,14 +6,12 @@ export AM=./am-11.0/src/am
 
 cd ~/github/eht-met-forecast
 
-date
 date -u
 
 echo downloading in the past
 
 bash do-all.sh
 
-date
 date -u
 
 # turn this on when we're running
@@ -25,6 +23,5 @@ date -u
 
 # now we'd like to notify Greg and/or slack, BUT, only for the run starting at 01 UT
 
-date
 date -u
 

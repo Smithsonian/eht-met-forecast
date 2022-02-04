@@ -18,6 +18,8 @@ VEX=dr2022-schedules/e22*.vex
 # XXX look at the first line to rename this file by date
 rm -f tau225.txt
 wget https://vlbimon1.science.ru.nl/img/plots/tau225.txt
+# wget will prevent overwrites, giving us a history
+#wget https://vlbimon1.science.ru.nl/img/plots/tau225.txt.archive
 
 python scripts/lindy.py --vex $VEX --emphasize $EHT2022DR --start $START --end $END --datadir $DATA &
 

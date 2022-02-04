@@ -7,7 +7,7 @@ graphs for the
 [Event Horizon Telescope](https://eventhorizontelescope.org/).
 
 This code downloads raw weather forecast data from the NOAA GFS weather model.
-It then runs this forecast through Scott Pain's
+It then runs this forecast through Scott Paine's
 [AM radiative transfer code](https://doi.org/10.5281/zenodo.640645)
 to compute values of interest to radio astronomy, such as the opacity
 at millimeter frequencies. These derived values are then archived.

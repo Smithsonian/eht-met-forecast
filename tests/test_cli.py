@@ -33,14 +33,23 @@ def content_403_second(request, context):
 
 
 def test_cli(capsys):
+
+    # AM 11.0 gfs15_to_am
+    #stdout = '00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'
+    # AM 11.0 gfs16_to_am and bugfixes 2/5/22
+    stdout =  '00:00   7.6247e-02   2.3999e+01   1.4794e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'
+    # AM 12.0 gfs16 is the same
+
+    stdout = '20200316+18:' + stdout
+    
     tests = [
         [
             {'contentf': 'test.grb', 'args': ['--vex', 'Mm', '--one', '--stdout']},
-            {'stdout': '20200316_18:00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'}
+            {'stdout': stdout}
         ],
         [
             {'contentf': 'test.grb', 'args': ['--vex', 'Mm', '--one', '--stdout', '--log', 'LOG.pytest']},
-            {'stdout': '20200316_18:00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n', 'ofile': 'LOG.pytest'}
+            {'stdout': stdout, 'ofile': 'LOG.pytest'}
         ],
         [
             {'status_code': 500, 'whack_timeouts': True, 'exception': SystemExit,
@@ -50,7 +59,7 @@ def test_cli(capsys):
         [
             {'contentc': content_403_second, 'status_code': 403, 'whack_timeouts': True,
              'args': ['--vex', 'Mm', '--one', '--stdout']},
-            {'stdout': '20200316_18:00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'},
+            {'stdout': stdout},
         ],
     ]
 

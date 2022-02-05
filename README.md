@@ -13,7 +13,7 @@ to compute values of interest to radio astronomy, such as the opacity
 at millimeter frequencies. These derived values are then archived.
 These values are also used to create graphs of near-future weather, which are
 embedded in a webpage. These webpages are then used by the
-EHT Array Operations Center for daily GO/NO-GO decisions.
+EHT Array Operations Center for daily GO/NO-GO decisions during our observations.
 
 ## Graphs
 
@@ -21,49 +21,64 @@ EHT Array Operations Center for daily GO/NO-GO decisions.
 
 ## Running
 
+```
 % eht-met-forecast -h
-
+% eht-met-forecast --backfill 168 --dir . --vex Sw --wait --log LOG
+```
 
 ## Installation Clues
 
-This code depends on two relatively hard-to-install dependencies,
-pygrib and am. The [azure pipelines configuration file for this repo](azure-pipelines.yml)
-shows a working solution for both in the azure pipelines Ubuntu and MacOS-based environment. Here
-are some rough notes:
+This code depends on two dependencies, `pygrib` and `am`. The [azure
+pipelines configuration file for this repo](azure-pipelines.yml) shows
+a working solution for both in the azure pipelines Ubuntu and
+MacOS-based environment. Here are some rough notes:
 
 ### pygrib
 
+The python pygrib package requires a few OS packages:
+
 ```
-apt-get install libeccodes-dev proj-bin libproj-dev  # Ubuntu 18.04 or later
-# yum install eccodes-devel proj proj-devel  # RH flavored distros
-# brew install eccodes proj  # for homebrew
-# conda?
-
-pip install cython  # must be installed early to rebuild for newer python versions
-
-# no longer needed: work around setup.cfg in the pygrib 2.0.5-2.0.6 tarballs
-#export PYGRIBSETUPCFG=None
-# MacOS only: XCode 12 makes this warning an error? the function is in cython-generated code
-export CFLAGS="-Wno-implicit-function-declaration"
-
-pip install pygrib
+# Ubuntu 18.04 or later -- libeccodes isn't available earlier -- tested in the CI
+apt-get install libeccodes-dev proj-bin libproj-dev libcairo2-dev
+# RedHat flavored distros -- not tested
+yum install eccodes-devel proj proj-devel cairo-devel
+# Homebrew -- tested in the CI on MacOS
+brew install eccodes proj cairo
+# conda-forge: guesses, not tested
+conda install -c conda-forge eccodes proj cairo
 ```
+
+Once these OS packages are installed, the following sequence is needed in order:
+
+- pip install cython
+- pip install pygrib
+
+The `setup.py` file does this for you.
+
+Finally, on MacOS XCode 12 and later, you need:
+
+`export CFLAGS="-Wno-implicit-function-declaration"`
+
+because cython generates C code that triggers this warning (which becomes a fatal error).
 
 ### am
 
+The am code is straightforward C and does not require any unusual libraries.
+
+The included `Makefile` has instructions to build it:
+
+`make am11`
+
+Before running `eht-met-forecast`, you need to set an environment variable:
+
 ```
-curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
-tar xf am-11.0.tgz
-cd am-11.0/src
-make serial
-cd ../..
 export AM=./am-11.0/src/am
 $AM -v
 ```
 
 ### this code
 
-Once `pygrib` and `am` are installed,
+Once the OS pacakges for `pygrib` and `am` are installed,
 
 ```
 pip install .

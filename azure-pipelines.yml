@@ -32,23 +32,18 @@ jobs:
       displayName: 'install OS packages'
 
     - script: |
-        curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
-        #curl 'https://zenodo.org/record/5794524/files/am-12.0.tgz?download=1' > am-12.0.tgz
-        tar xf am-11.0.tgz
-        cd am-11.0/src
-        make serial
-        cd ../..
-        ./am-11.0/src/am -v
+        make am11
       displayName: 'install am-11.0'
 
     - script: |
         python -m pip install --upgrade pip
-        pip --use-feature=in-tree-build install . .[test]
+        pip install . .[test]
       displayName: 'Install dependencies'
 
     - script: |
         pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
+        $AM -v
         PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
         coverage report -m
       displayName: 'pytest'
@@ -82,13 +77,7 @@ jobs:
       displayName: 'install OS packages'
 
     - script: |
-        curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
-        #curl 'https://zenodo.org/record/5794524/files/am-12.0.tgz?download=1' > am-12.0.tgz
-        tar xf am-11.0.tgz
-        cd am-11.0/src
-        make serial
-        cd ../..
-        ./am-11.0/src/am -v
+        make am11
       displayName: 'install am-11.0'
 
     - script: |
@@ -96,12 +85,13 @@ jobs:
         python -m pip install --upgrade pip
         # XCode 12 makes this warning an error? the function is in cython-generated code
         export CFLAGS="-Wno-implicit-function-declaration"
-        pip --use-feature=in-tree-build install . .[test]
+        pip install . .[test]
       displayName: 'Install dependencies'
 
     - script: |
         pip install pytest-azurepipelines
         export AM=./am-11.0/src/am
+        $AM -v
         touch tests/__init.py__
         PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
         coverage report -m

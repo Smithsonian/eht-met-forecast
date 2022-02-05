@@ -36,7 +36,8 @@ are some rough notes:
 ```
 apt-get install libeccodes-dev proj-bin libproj-dev  # Ubuntu 18.04 or later
 # yum install eccodes-devel proj proj-devel  # RH flavored distros
-# brew install eccodes proj
+# brew install eccodes proj  # for homebrew
+# conda?
 
 pip install cython  # must be installed early to rebuild for newer python versions
 

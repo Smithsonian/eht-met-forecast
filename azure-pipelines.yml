@@ -25,10 +25,12 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
+        # these package lists are also in README.md
         # ubuntu 18.04 minimum for libeccodes-dev
         sudo apt-get install -y libeccodes-dev proj-bin libproj-dev libcairo2-dev
-        # TODO: add cairo for both ubuntu and centos
         # CentOS: eccodes-devel proj proj-devel cairo-devel
+        # brew: tested below: eccodes proj cairo
+        # conda-forge: guesses, not tested: eccodes proj cairo
       displayName: 'install OS packages'
 
     - script: |

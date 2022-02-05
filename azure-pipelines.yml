@@ -26,9 +26,9 @@ jobs:
 
     - script: |
         # ubuntu 18.04 minimum for libeccodes-dev
-        sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
+        sudo apt-get install -y libeccodes-dev proj-bin libproj-dev libcairo2-dev
         # TODO: add cairo for both ubuntu and centos
-        # CentOS: eccodes-devel proj proj-devel
+        # CentOS: eccodes-devel proj proj-devel cairo-devel
       displayName: 'install OS packages'
 
     - script: |
@@ -43,13 +43,6 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install cython  # must be installed early to rebuild for newer python versions
-        # work around setup.cfg in the pygrib 2.0.5 tarball -- fixed after 2.0.6
-        # export PYGRIBSETUPCFG=None
-        pip install pygrib
-      displayName: 'install pygrib'
-
-    - script: |
         pip --use-feature=in-tree-build install . .[test]
       displayName: 'Install dependencies'
 
@@ -99,19 +92,10 @@ jobs:
       displayName: 'install am-11.0'
 
     - script: |
+        # see brew above for where OS packages are installed
         python -m pip install --upgrade pip
-        pip install cython  # must be installed early to rebuild for newer python versions
-        # work around setup.cfg in the pygrib 2.0.5 tarball
-        export PYGRIBSETUPCFG=None
         # XCode 12 makes this warning an error? the function is in cython-generated code
         export CFLAGS="-Wno-implicit-function-declaration"
-        pip install pygrib
-      displayName: 'install pygrib'
-
-    - script: |
-        # see brew above for where these OS packages are installed
-        # sudo apt-get install -y libeccodes-dev proj-bin libproj-dev
-        # CentOS: eccodes-devel proj proj-devel
         pip --use-feature=in-tree-build install . .[test]
       displayName: 'Install dependencies'
 

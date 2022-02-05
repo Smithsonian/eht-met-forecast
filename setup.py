@@ -7,7 +7,7 @@ packages = [
     'eht_met_forecast',
 ]
 
-requires = ['hdrhistogram', 'requests']  # download
+requires = ['hdrhistogram', 'requests', 'pygrib']  # download
 requires += ['matplotlib', 'pycairo', 'skyfield', 'pandas', 'scipy', 'astropy', 'ply']  # plots
 requires += ['jinja2']  # webpages
 # pycairo needs os packages installed:
@@ -16,7 +16,7 @@ requires += ['jinja2']  # webpages
 
 test_requires = ['pytest', 'pytest-cov', 'requests_mock']
 
-setup_requires = ['setuptools_scm']
+setup_requires = ['setuptools_scm', 'cython']
 
 extras_require = {
     'test': test_requires,  # setup no longer tests, so make them an extra that .travis.yml uses

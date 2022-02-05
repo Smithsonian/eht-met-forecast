@@ -40,8 +40,8 @@ apt-get install libeccodes-dev proj-bin libproj-dev  # Ubuntu 18.04 or later
 
 pip install cython  # must be installed early to rebuild for newer python versions
 
-# temporary: work around setup.cfg in the pygrib 2.0.5 tarball
-export PYGRIBSETUPCFG=None
+# no longer needed: work around setup.cfg in the pygrib 2.0.5-2.0.6 tarballs
+#export PYGRIBSETUPCFG=None
 # MacOS only: XCode 12 makes this warning an error? the function is in cython-generated code
 export CFLAGS="-Wno-implicit-function-declaration"
 

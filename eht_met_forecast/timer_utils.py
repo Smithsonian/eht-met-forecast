@@ -20,7 +20,7 @@ def record_latency(name):
 
 
 def dump_latency_histograms(log=None):
-    out = 'name t50 t90 t95 t99\n'
+    out = '  name t50 t90 t95 t99\n'
 
     for name in sorted(hists.keys()):
         hist = hists[name]
@@ -29,7 +29,7 @@ def dump_latency_histograms(log=None):
         t95 = hist.get_value_at_percentile(95.0) / 1000.
         t99 = hist.get_value_at_percentile(99.0) / 1000.
 
-        out += ' {} {} {} {} {}\n'.format(name, t50, t90, t95, t99)
+        out += '  {} {} {} {} {}\n'.format(name, t50, t90, t95, t99)
 
     print(out, file=sys.stderr)
     if log:

@@ -156,7 +156,7 @@ def read_stations(filename):
 
 
 def dump_stats(stats, log=None):
-    headers = ('gfs_time', 'stations')
+    headers = ('gfs_time', 'stations', 'start')
     out = ''
     for key in headers:
         out += '{}: {}\n'.format(key, stats[key])

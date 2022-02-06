@@ -9,7 +9,7 @@ from .constants import GFS_DAYHOUR, GFS_HOUR, LATLON_GRID_STR, LATLON_DELTA, LEV
 
 def latest_gfs_cycle_time(now=None, lag=None):
     if now is None:
-        dt_gfs = datetime.datetime.utcnow()
+        dt_gfs = datetime.datetime.now(datetime.timezone.utc)
     else:
         dt_gfs = datetime.datetime.fromtimestamp(now, tz=datetime.timezone.utc)
 

@@ -2,7 +2,7 @@
 # it is important for the above line to be bash and not sh
 
 . ~/venv/eht-met-forecast/bin/activate
-export AM=./am-11.0/src/am
+export AM=./am-12.0/src/am
 
 cd ~/github/eht-met-forecast
 

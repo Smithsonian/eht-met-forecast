@@ -1,4 +1,5 @@
 import sys
+import time
 import datetime
 import os
 from argparse import ArgumentParser
@@ -129,6 +130,11 @@ def main(args=None):
                 f.close()
 
     stats['stations'] = ':'.join(sorted(stats['stations']))
+    elapsed = int(time.time() - t0)
+    if args.wait:
+        stats['elapsed_wait_s'] = elapsed
+    else:
+        stats['elapsed_s'] = elapsed
     dump_stats(stats, log=args.log)
     dump_latency_histograms(log=args.log)
 

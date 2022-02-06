@@ -90,7 +90,7 @@ def main(args=None):
 
     stats = defaultdict(int)
     stats['stations'] = []
-    stats['gfs_time'] = cycles[0].strftime(GFS_TIMESTAMP) 
+    stats['gfs_time'] = cycles[0].strftime(GFS_TIMESTAMP)
     stats['start'] = datetime.datetime.now(datetime.timezone.utc).strftime(GFS_TIMESTAMP_FULL)
     t0 = time.time()
 

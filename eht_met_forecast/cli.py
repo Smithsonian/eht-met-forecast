@@ -91,6 +91,7 @@ def main(args=None):
     stats['stations'] = []
     stats['gfs_time'] = cycles[0].strftime(GFS_TIMESTAMP) 
     stats['start'] = datetime.datetime.now(datetime.timezone.utc).strftime(GFS_TIMESTAMP_FULL)
+    t0 = time.time()
 
     for vex in stations:
         station = station_dict[vex]

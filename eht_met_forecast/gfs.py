@@ -2,6 +2,7 @@ import datetime
 import requests
 import sys
 import time
+import random
 
 from .latlon import box
 from .constants import GFS_DAYHOUR, GFS_HOUR, LATLON_GRID_STR, LATLON_DELTA, LEVELS
@@ -58,6 +59,11 @@ RATELIMIT_DELAY     = 60
 MAX_DOWNLOAD_TRIES  = 8
 
 
+def jiggle(seconds):
+    jig = seconds // 3
+    return random.randint(seconds, seconds + jig)
+
+
 def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
 
     retry = MAX_DOWNLOAD_TRIES
@@ -75,14 +81,14 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 errflag = 1
                 if wait:
                     retry += 1  # free retry
-                    retry_duration = FOUROHFOUR_DELAY
+                    retry_duration = jiggle(FOUROHFOUR_DELAY)
                 print('Data not yet available (404)', file=sys.stderr, end='')
             elif r.status_code in {403, 429, 503}:
                 # 403, 429, 503: I've never seen NOMADS send these but they are typical "slow down" status codes
                 errflag = 1
                 print('Received surprising retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 1  # free retry
-                retry_duration = RATELIMIT_DELAY
+                retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:
                     stats['ratelimit_surprising'] += 1
             elif r.status_code in {302} and 'Location' not in r.headers:
@@ -92,12 +98,14 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 errflag = 1
                 print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 1  # free retry
-                retry_duration = RATELIMIT_DELAY
+                retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:
                     stats['ratelimit_302_no_location'] += 1
             elif r.status_code in {302}:
                 # ? this can happen if you ask for a date too far in the past
-                # allow_redirects=True is the default for .get() so this should never happen
+                # allow_redirects=True is the default for .get() so by default the redir will be followed
+                # so a 302 shouldn't be visible
+                errflag = 1
                 if stats:
                     stats['302_with_location'] += 1
             elif r.status_code in {500, 502, 504}:

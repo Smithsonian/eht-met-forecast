@@ -11,7 +11,7 @@ am12:
 	cd am-12.0/src && make serial && ./am -v
 
 test:
-	AM=am-11.0/src/am PYTHONPATH=. pytest -v -v
+	AM=am-12.0/src/am PYTHONPATH=. pytest -v -v
 
 test_coverage:
-	AM=am-11.0/src/am PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
+	AM=am-12.0/src/am PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v

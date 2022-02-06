@@ -5,7 +5,7 @@ import os
 from argparse import ArgumentParser
 from collections import defaultdict
 
-from .constants import GFS_TIMESTAMP
+from .constants import GFS_TIMESTAMP, GFS_TIMESTAMP_FULL
 from .timer_utils import dump_latency_histograms
 from .gfs import latest_gfs_cycle_time
 from .core import read_stations, ok, make_forecast_table, dump_stats
@@ -91,6 +91,7 @@ def main(args=None):
     stats = defaultdict(int)
     stats['stations'] = []
     stats['gfs_time'] = cycles[0].strftime(GFS_TIMESTAMP)
+    stats['start'] = datetime.datetime.now(datetime.timezone.utc).strftime(GFS_TIMESTAMP_FULL)
     t0 = time.time()
 
     for vex in stations:

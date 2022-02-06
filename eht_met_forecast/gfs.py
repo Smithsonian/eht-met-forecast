@@ -68,7 +68,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
             retry_duration = RETRY_DELAY
             r = requests.get(url, params=params, timeout=(CONN_TIMEOUT, READ_TIMEOUT))
             if stats:
-                stats[int(r.status_code)] += 1
+                stats[str(r.status_code)] += 1
             if r.status_code == requests.codes.ok:
                 errflag = 0
             elif r.status_code == 404:

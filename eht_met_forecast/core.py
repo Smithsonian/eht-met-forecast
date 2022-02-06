@@ -91,7 +91,7 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=Fals
     if verbose:
         print(site['name'], 'fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
-        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=None)
+        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=stats)
     if layers_amc is None:
         return  # no line emitted
 

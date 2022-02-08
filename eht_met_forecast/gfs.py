@@ -68,6 +68,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
 
     retry = MAX_DOWNLOAD_TRIES
     actual_tries = 0
+    r = None  # so we can use it even after an exception
     while retry > 0:
         try:
             actual_tries += 1
@@ -106,10 +107,12 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 # allow_redirects=True is the default for .get() so by default the redir will be followed
                 # so a 302 shouldn't be visible
                 errflag = 1
+                print('should not happen: 302 with Location: {} seen'.format(r.headers['Location']), file=sys.stderr, end='')
                 if stats:
                     stats['302_with_location'] += 1
             elif r.status_code in {500, 502, 504}:
                 # I've seen 502 from NOMADS when the website is broken
+                # 500s when the lev_ or var_ are incorrect, detailed message in the contents
                 errflag = 1
                 print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 0.8  # this counts as 1/5 of a retry
@@ -149,6 +152,11 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
             retry = retry - 1
             if retry > 0:
                 print("  Retrying...", file=sys.stderr)
+                if r:
+                    try:  # I don't think this can fail, but anyway
+                        print('  Content was:', r.content[:100])
+                    except Exception:
+                        pass
                 time.sleep(retry_duration)
             else:
                 print("  Giving up.", file=sys.stderr)

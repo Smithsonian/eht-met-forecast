@@ -3,6 +3,7 @@ import pygrib
 import math
 import os
 import sys
+import math
 
 from .constants import LEVELS, GFS_DAY, LATLON_DELTA
 from .latlon import box
@@ -40,6 +41,17 @@ LAYER_HEADER = """
 def grid_interp(a, u, v):
     return (a[0][0] * (1.0 - u) * (1.0 - v) + a[1][0] * u * (1.0 - v)
           + a[0][1] * (1.0 - u) * v         + a[1][1] * u * v       )
+
+
+def grid_interp_vector(a, b, u, v):
+    c = [None, None]
+    c[0] = [None, None]
+    c[1] = [None, None]
+    for i in range(0, 2):
+        for j in range(0, 2):
+            c[i][j] = math.sqrt(a[i][j]**2 + b[i][j]**2)
+
+    return grid_interp(c, u, v)
 
 
 # Numerical and physical constants

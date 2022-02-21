@@ -43,7 +43,74 @@ def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):
 
     for lev in LEVELS:
         params['lev_{:d}_mb'.format(lev)] = 'on'
-    VARIABLES = ("CLWMR", "ICMR", "HGT", "O3MR", "RH", "TMP")
+    params['lev_surface'] = 'on'  # CRAIN, etc. maps to level=0
+    params['lev_max_wind'] = 'on'  # UGRD, VGRD, maps to level=0
+
+    # lev_ that cause 500 errors: 'lev_0_mb' 'lev_0' 'lev_10_m' 'lev_20_m' 'lev_maxWind'
+
+    VARIABLES = ["CLWMR", "ICMR", "HGT", "O3MR", "RH", "TMP"]  # for AM
+    #VARIABLES += ["WIND"]  # wind -- not available at all in GFS
+    VARIABLES += ["UGRD", "VGRD"]  # wind -- meters/sec -- works in levels but really we want level 0? no joy for lev_surface either
+    VARIABLES += ["CRAIN", "CFRZR", "CICEP", "CSNOW"]  # yes/no 1/0 rain, freezing rain, ice pellets, snow -- works for lev_surface
+    #VARIABLES += ["POP", "CPOFP", "CPOZP"]  # probability of precip -- not in the GFS docs, so no joy
+    VARIABLES += ["GUST"]  # works with lev_surface and then level=0
+    '''
+    these are all of the levels -- get_gfs.pl download of all variables
+
+    95:Geopotential Height:gpm (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    96:Temperature:K (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    97:Relative humidity:% (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    98:Specific humidity:kg kg**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    99:Vertical velocity:Pa s**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    100:Geometric vertical velocity:m s**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    101:U component of wind:m s**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    102:V component of wind:m s**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    103:Absolute vorticity:s**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    104:Ozone mixing ratio:kg kg**-1 (instant):regular_ll:isobaricInhPa:level 100 Pa:fcst time 0 hrs:from 202202060000
+    642:Temperature:K (instant):regular_ll:heightAboveGround:level 100 m:fcst time 0 hrs:from 202202060000
+    643:100 metre U wind component:m s**-1 (instant):regular_ll:heightAboveGround:level 100 m:fcst time 0 hrs:from 202202060000
+    644:100 metre V wind component:m s**-1 (instant):regular_ll:heightAboveGround:level 100 m:fcst time 0 hrs:from 202202060000
+
+    level 0, yet to figure out how to fetch them. maxWind? maybe this is at any altitude?!
+    the level 100+ winds above work with the normal levels
+
+    626:U component of wind:m s**-1 (instant):regular_ll:maxWind:level 0:fcst time 0 hrs:from 202202060000
+    627:V component of wind:m s**-1 (instant):regular_ll:maxWind:level 0:fcst time 0 hrs:from 202202060000
+    https://www.weatheronline.co.uk/cgi-bin/expertcharts?LANG=en&CONT=ukuk&MODELL=gfs&MODELLTYP=1&VAR=uv10&INFO=1&
+    "surface wind" which is wind at 10 meters above the ground
+    https://www.tropicaltidbits.com/analysis/models/?model=gfs&region=us&pkg=mslp_wind&runtime=2022020618&fh=6
+    also says "10m wind"
+
+    585:10 metre U wind component:m s**-1 (instant):regular_ll:heightAboveGround:level 10 m:fcst time 0 hrs:from 202202060000
+    586:10 metre V wind component:m s**-1 (instant):regular_ll:heightAboveGround:level 10 m:fcst time 0 hrs:from 202202060000
+
+
+
+    these next ones are the lowest height
+
+    level 0, also called surface, actually works with lev_surface
+
+    590:Categorical snow:(Code table 4.222) (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+    591:Categorical ice pellets:(Code table 4.222) (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+    592:Categorical freezing rain:(Code table 4.222) (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+    593:Categorical rain:(Code table 4.222) (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+
+    these are the only 'precip' or 'percent' entries:
+    588:Percent frozen precipitation:% (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+    PRATE 589:Precipitation rate:kg m**-2 s**-1 (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+    PWAT 604:Precipitable water:kg m**-2 (instant):regular_ll:atmosphereSingleLayer:level 0 considered as a single layer:fcst time 0 hrs:from 202202060000
+    CWAT
+
+    test me: not in the inventory (!)
+    not useful, it's at any altitue https://www.weatheronline.co.uk/cgi-bin/expertcharts?MODELL=gfs&MODELLTYP=1&VAR=boen&INFO=1
+    14:Wind speed (gust):m s**-1 (instant):regular_ll:surface:level 0:fcst time 0 hrs:from 202202060000
+    would be useful to have this, because it might be related to the atmospheric coherance time
+    550 and 551? https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2.0p25.anl.shtml
+
+
+
+    '''
+
     for var in VARIABLES:
         params['var_' + var] = 'on'
 
@@ -154,7 +221,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 print("  Retrying...", file=sys.stderr)
                 if r:
                     try:  # I don't think this can fail, but anyway
-                        print('  Content was:', r.content[:100])
+                        if len(r.content):
+                            print('  Content was:', r.content[:100])
                     except Exception:
                         pass
                 time.sleep(retry_duration)

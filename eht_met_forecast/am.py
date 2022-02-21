@@ -66,10 +66,75 @@ PASCAL_ON_MBAR      = 100.     # conversion from mbar (hPa) to Pa
 RH_TOP_PLEVEL = 29.
 STRAT_H2O_VMR = 5e-6
 
+# https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2.0p25.anl.shtml
+# https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2.0p25.f000.shtml
+# https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2.0p25.f003.shtml -- layers beyond 0
+
+# https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2b.0p25.anl.shtml
+# https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2b.0p25.f000.shtml
+# https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2b.0p25.f003.shtml -- layers beyond 0
+
+scalar_gribs = [  # this table is not yet used
+    {'lev': 'surface', 'var': ['CSNOW'], 'name': 'Categorial snow', 'level': [0]},  # f000 and f003 but not anl (?) and it's "3 hour fcst" and "0-3 hour ave" in "Forecast Valid"... "analysis" in f000
+    {'lev': 'surface', 'var': ['CICEP'], 'name': 'Categorical ice pellets', 'level': [0]},
+    {'lev': 'surface', 'var': ['CFRZR'], 'name': 'Categorical freezing rain', 'level': [0]},
+    {'lev': 'surface', 'var': ['CRAIN'], 'name': 'Categorical rain', 'level': [0]},
+    {'lev': 'surface', 'var': ['GUST'], 'name': 'Wind speed (gust)', 'level': [0]},  # f000 and f003 surface and not anl? "3 hour fcst" at f003, "analysis" in f000
+]
+
+vector_gribs = [  # this table is not yet used
+    # these come in pairs and need a different interpolation function
+    {'lev': ['max_wind'], 'var': ['GUST'], 'name': 'U component of wind', 'level': [0], 'ourname': 'wind gust'},  # f0003 "3 hour fcst" vs "analysis" and "analyis" for anl and f000
+    {'lev': ['max_wind'], 'var': ['GUST'], 'name': 'V component of wind', 'level': [0], 'ourname': 'wind gust'},
+    {'lev': ['1'], 'var': ['UGRD'], 'name': 'U component of wind', 'level': [1], 'ourname': 'low wind'},  # anl: level 1 and up, also PV=blah, f000: "planwetary boundary layer", layer 1, "10 m above ground"
+    {'lev': ['1'], 'var': ['VGRD'], 'name': 'V component of wind', 'level': [1], 'ourname': 'low wind'},
+]
+
+
+def grib2_to_extra_information(grbindx, u, v):
+    '''
+pygrib clues
+grbindx.select only works on the named args named in the pygrib.index() call (name and level, here)
+didn't have much luck having more than 2 index names in the pygrib.index call -- could probably make multiple indices
+or you can use pygrib.open() instead, to not have an index, it's supposedly slower but these grib files are small (2k/station)
+    '''
+    ret = {}
+
+    try:
+        k = 'csnow'
+        ret['csnow'] = (grid_interp(grbindx.select(name='Categorical snow', level=0)[0].values, u, v))
+        k = 'cicep'
+        ret['cicep'] = (grid_interp(grbindx.select(name='Categorical ice pellets', level=0)[0].values, u, v))
+        k = 'cfrzr'
+        ret['cfrzr'] = (grid_interp(grbindx.select(name='Categorical freezing rain', level=0)[0].values, u, v))
+        k = 'crain'
+        ret['crain'] = (grid_interp(grbindx.select(name='Categorical rain', level=0)[0].values, u, v))
+
+        # appears for level_surface
+        k = 'wgust'
+        ret['wgust'] = (grid_interp(grbindx.select(name='Wind speed (gust)', level=0)[0].values, u, v))
+
+        # this one is mediated by lev_max_wind
+        k = 'max wind u'
+        a = grbindx.select(name='U component of wind', level=0)[0].values
+        k = 'max wind v'
+        b = grbindx.select(name='V component of wind', level=0)[0].values
+        ret['max_wind'] = grid_interp_vector(a, b, u, v)
+
+        # apparently level 1 is as low as you can go
+        k = 'level 1 wind u'
+        a = grbindx.select(name='U component of wind', level=1)[0].values
+        k = 'level 1 wind v'
+        b = grbindx.select(name='V component of wind', level=1)[0].values
+        ret['surface_wind'] = grid_interp_vector(a, b, u, v)
+    except Exception as e:
+        print('key:', k, 'exception:', e, file=sys.stderr)
+        raise
+    return ret
+
 
 def grib2_to_am_layers(gribname, lat, lon, alt):
-    grbindx = pygrib.index(gribname, "name", "level")
-
+    grbindx = pygrib.index(gribname, "name", "level")  # normal code
     # in memory -- not sure what syntax actually works for this?
     # need to .index() after creation
     # gribfile = pygrib.fromstring(grib_buffer)
@@ -86,6 +151,8 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
     RH        = []
     cloud_lmr = []
     cloud_imr = []
+
+    extra = grib2_to_extra_information(grbindx, u, v)
 
     for i, lev in enumerate(LEVELS):
         Pbase.append(lev)
@@ -137,7 +204,19 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
             # this is not unusual
             cloud_imr.append(0.0)
 
-    return Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr
+    return Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr, extra
+
+
+def print_extra(gfs_cycle, forecast_hour, extra):
+    # extra is a dict
+    # gfs_cycle forms the filename
+    # forecast hour
+    fname = gfs_cycle.strftime(GFS_TIMESTAMP)
+    dt_forecast_hour = gfs_cycle + datetime.timedelta(hours=forecast_hour)
+    rowname = dt_forecast_hour.strftime(GFS_TIMESTAMP)
+    # XXX write a csv line
+    # the normal output file is f, passed to print_final_output, passed into compute_one_hour, by make_forecast_table, which is called by cli.main
+    pass
 
 
 def print_am_header(gfs_cycle, forecast_hour, lat, lon, alt):

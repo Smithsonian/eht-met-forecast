@@ -37,8 +37,10 @@ def test_cli(capsys):
     # AM 11.0 gfs15_to_am
     #stdout = '00:00   7.6246e-02   2.3999e+01   1.4787e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'
     # AM 11.0 gfs16_to_am and bugfixes 2/5/22
-    stdout =  '00:00   7.6247e-02   2.3999e+01   1.4794e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'
+    #stdout =  '00:00   7.6247e-02   2.3999e+01   1.4794e+00   0.0000e+00   0.0000e+00   2.7655e+02\n'
     # AM 12.0 gfs16 is the same
+    # new test.grb with wind
+    stdout = '00:00   1.1151e-01   3.2311e+01   2.4032e+00   0.0000e+00   0.0000e+00   2.6272e+02\n'
 
     stdout = '20200316+18:' + stdout
     

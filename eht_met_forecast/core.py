@@ -139,13 +139,15 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=
     time.sleep(1)
 
 
-def make_forecast_table(site, gfs_cycle, f, f2, wait=False, verbose=False, one=False, stats=None):
+def make_forecast_table(site, gfs_cycle, f, f2, wait=False, verbose=False, hours=-1, stats=None):
     print_table_line(table_header, f)
     for forecast_hour in range(0, 121):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
-        if one:
+        if forecast_hour > hours:
             return
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
     for forecast_hour in range(123, 385, 3):
+        if forecast_hour > hours:
+            return
         compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
 
 

@@ -69,7 +69,7 @@ def main(args=None):
                         help='directory to store output (default: eht-met-data')
     parser.add_argument('--wait', action='store_true', help='Retry forever on 404, awaiting data availability')
     parser.add_argument('--dry-run', '-n', action='store_true', help='Show what would be done. Implies -v')
-    parser.add_argument('--one', action='store_true', help='Just do one hour. Used for testing')
+    parser.add_argument('--hours', action='store', default=384, type=int, help='Hours to compute. Used for testing')
     parser.add_argument('--stdout', action='store_true', help='Print output to stdout instead of a file')
     parser.add_argument('--log', action='store', help='File to write logging information to')
     parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
@@ -131,7 +131,7 @@ def main(args=None):
                 f2.writeheader()
 
             try:
-                make_forecast_table(station, gfs_cycle, f, f2, wait=args.wait, verbose=args.verbose, one=args.one, stats=stats)
+                make_forecast_table(station, gfs_cycle, f, f2, wait=args.wait, verbose=args.verbose, hours=args.hours, stats=stats)
             except TimeoutError:
                 # raised by gfs.py
                 print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)

@@ -101,6 +101,7 @@ or you can use pygrib.open() instead, to not have an index, it's supposedly slow
     ret = {}
 
     try:
+        # appears for lev_surface at level 0
         k = 'csnow'
         ret['csnow'] = (grid_interp(grbindx.select(name='Categorical snow', level=0)[0].values, u, v))
         k = 'cicep'
@@ -110,11 +111,11 @@ or you can use pygrib.open() instead, to not have an index, it's supposedly slow
         k = 'crain'
         ret['crain'] = (grid_interp(grbindx.select(name='Categorical rain', level=0)[0].values, u, v))
 
-        # appears for level_surface
+        # appears for lev_surface at level 0
         k = 'wgust'
         ret['wgust'] = (grid_interp(grbindx.select(name='Wind speed (gust)', level=0)[0].values, u, v))
 
-        # this one is mediated by lev_max_wind
+        # appears for lev_max_wind at level 0
         k = 'max wind u'
         a = grbindx.select(name='U component of wind', level=0)[0].values
         k = 'max wind v'

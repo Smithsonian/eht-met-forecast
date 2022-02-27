@@ -97,7 +97,9 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 # HTTP/1.1 302 Your allowed limit has been reached. Please go to https://www.weather.gov/abusive-user-block for more info
                 # This 302 does not have a Location: header, so we test for it to make it less likely we'll end up in an infinite loop
                 errflag = 1
-                print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
+                if actual_tries > 1:
+                    # this happens ~ 33 times per run (out of 209) so make it quieter
+                    print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 retry += 1  # free retry
                 retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:

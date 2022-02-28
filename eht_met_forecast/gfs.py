@@ -68,6 +68,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
 
     retry = MAX_DOWNLOAD_TRIES
     actual_tries = 0
+    quiet_retry = False
     r = None  # so we can use it even after an exception
     while retry > 0:
         try:
@@ -100,6 +101,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 if actual_tries > 1:
                     # this happens ~ 33 times per run (out of 209) so make it quieter
                     print('Received retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
+                else:
+                    quiet_retry = True
                 retry += 1  # free retry
                 retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:
@@ -149,16 +152,18 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 stats['exception_'+str(e)] += 1
 
         if errflag:
-            if actual_tries > 1:
-                print(' tries={}'.format(actual_tries), file=sys.stderr, end='')
             retry = retry - 1
             if retry > 0:
-                print("  Retrying...", file=sys.stderr)
-                if r:
-                    try:  # I don't think this can fail, but anyway
-                        print('  Content was:', r.content[:100])
-                    except Exception:
-                        pass
+                if not quiet_retry:
+                    print(' tries={}'.format(actual_tries), file=sys.stderr, end='')
+                    print("  Retrying...", file=sys.stderr)
+                    if r:
+                        try:  # I don't think this can fail, but anyway
+                            content = r.content[:100]
+                            if content:
+                                print('  Content was:', content, file=sys.stderr)
+                        except Exception:
+                            pass
                 time.sleep(retry_duration)
             else:
                 print("  Giving up.", file=sys.stderr)

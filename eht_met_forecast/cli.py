@@ -135,8 +135,9 @@ def main(args=None):
         stats['elapsed_wait_s'] = elapsed
     else:
         stats['elapsed_s'] = elapsed
-    dump_stats(stats, log=args.log)
-    dump_latency_histograms(log=args.log)
+    if elapsed > 0:
+        dump_stats(stats, log=args.log)
+        dump_latency_histograms(log=args.log)
 
     if exit_value:
         exit(exit_value)

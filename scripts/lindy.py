@@ -265,7 +265,11 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
         for b in a['SCHED'].values(): # does not necessarily loop in order!
             time = pd.Timestamp(datetime.datetime.strptime(b['start'], fmt_in))
             dtimes = days + np.mod(time.value + Dns//4, Dns) - Dns//4
-            stations = set(c[0].replace('Ax', 'Aa').replace('Mm', 'Sw') for c in b['station'])
+            try:
+                stations = set(c[0].replace('Ax', 'Aa').replace('Mm', 'Sw') for c in b['station'])
+            except IndexError:
+                # when there is only 1 station in a scan, the data structure is just a list instead of a list of lists
+                stations = {b['station'][0].replace('Ax', 'Aa').replace('Mm', 'Sw')}
             try:
                 taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
             except KeyError:

@@ -11,6 +11,10 @@ rm -f eht-met-plots/latest/lindy_00.png
 (cd eht-met-plots/latest/ && ln -s lindy_00_$LATEST_TIME.png lindy_00.png)
 rm -f eht-met-plots/latest/lindy_00e.png
 (cd eht-met-plots/latest/ && ln -s lindy_00e_$LATEST_TIME.png lindy_00e.png)
+rm -f eht-met-plots/latest/lindy_00w.png
+(cd eht-met-plots/latest/ && ln -s lindy_00w_$LATEST_TIME.png lindy_00w.png)
+rm -f eht-met-plots/latest/lindy_00wg.png
+(cd eht-met-plots/latest/ && ln -s lindy_00wg_$LATEST_TIME.png lindy_00wg.png)
 
 # this is eht-work ... the homedirs are mounted using NFS so this rsync can be
 # done to any eht cloud server

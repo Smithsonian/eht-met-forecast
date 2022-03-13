@@ -85,9 +85,6 @@ def read_wind(vex, gfs_cycle, basedir='.'):
         data = pd.read_csv(f, **kwargs)
         data['date'] = data['date_temp']
         del data['date_temp']
-        if 'surface_wind' in data:  # XXX remove me eventually
-            print('GREG fixup')
-            data['10m_wind'] = data['surface_wind']
         
     return data
 

@@ -4,10 +4,11 @@ import datetime
 import os
 from argparse import ArgumentParser
 from collections import defaultdict
+import csv
 
 from .constants import GFS_TIMESTAMP, GFS_TIMESTAMP_FULL
 from .timer_utils import dump_latency_histograms
-from .gfs import latest_gfs_cycle_time
+from .gfs import latest_gfs_cycle_time, jiggle
 from .core import read_stations, ok, make_forecast_table, dump_stats
 
 
@@ -68,7 +69,7 @@ def main(args=None):
                         help='directory to store output (default: eht-met-data')
     parser.add_argument('--wait', action='store_true', help='Retry forever on 404, awaiting data availability')
     parser.add_argument('--dry-run', '-n', action='store_true', help='Show what would be done. Implies -v')
-    parser.add_argument('--one', action='store_true', help='Just do one hour. Used for testing')
+    parser.add_argument('--hours', action='store', default=384, type=int, help='Hours to compute. Used for testing')
     parser.add_argument('--stdout', action='store_true', help='Print output to stdout instead of a file')
     parser.add_argument('--log', action='store', help='File to write logging information to')
     parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
@@ -92,6 +93,7 @@ def main(args=None):
     stats['stations'] = []
     stats['gfs_time'] = cycles[0].strftime(GFS_TIMESTAMP)
     stats['start'] = datetime.datetime.now(datetime.timezone.utc).strftime(GFS_TIMESTAMP_FULL)
+    time.sleep(jiggle(15) - 15)  # 0-5 seconds
     t0 = time.time()
 
     for vex in stations:
@@ -116,11 +118,20 @@ def main(args=None):
             os.makedirs(outdir, exist_ok=True)
             if args.stdout:
                 f = sys.stdout
+                f2 = None
             else:
                 f = open(outfile, 'w')
+                f2 = open(outfile+'.extra', 'w', newline='')
+
+            if f2:
+                fieldnames = [
+                    'date', 'csnow', 'cicep', 'cfrzr', 'crain', 'wgust', 'max_wind', '10m_wind',
+                ]
+                f2 = csv.DictWriter(f2, fieldnames=fieldnames, delimiter=' ')
+                f2.writeheader()
 
             try:
-                make_forecast_table(station, gfs_cycle, f, wait=args.wait, verbose=args.verbose, one=args.one, stats=stats)
+                make_forecast_table(station, gfs_cycle, f, f2, wait=args.wait, verbose=args.verbose, hours=args.hours, stats=stats)
             except TimeoutError:
                 # raised by gfs.py
                 print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)

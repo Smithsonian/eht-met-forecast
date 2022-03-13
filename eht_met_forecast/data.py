@@ -22,6 +22,8 @@ def get_gfs_cycles(basedir='.'):
 
     gfs_cycles = set()
     for f in files:
+        if '.extra' in f:
+            continue
         parts = f.split('/')
         gfs_cycles.add(parts[-1])
     return sorted(list(gfs_cycles))
@@ -64,6 +66,27 @@ def read_accumulated(vex, gfs_cycle, basedir='.'):
         partial_sums[vex].append(data)
 
     return partial_sums[vex]
+
+
+def read_wind(vex, gfs_cycle, basedir='.'):
+    utc = datetime.timezone.utc
+    kwargs = {
+        'delim_whitespace': True,
+        'header': 0,
+        'parse_dates': {'date_temp': [0]},
+        'date_parser': lambda x: datetime.datetime.strptime(x, '%Y%m%d_%H:%M:%S').replace(tzinfo=utc)
+    }
+
+    fname = expanduser('{}/{}/{}.extra'.format(basedir, vex, gfs_cycle))
+    if not exists(fname):
+        return
+
+    with open(fname) as f:
+        data = pd.read_csv(f, **kwargs)
+        data['date'] = data['date_temp']
+        del data['date_temp']
+        
+    return data
 
 
 def read_eu(basedir='.'):

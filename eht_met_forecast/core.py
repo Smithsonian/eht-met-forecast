@@ -44,18 +44,23 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
     grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=stats)
 
     grib_problem = False
-    with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb') as f:
+    # development hint: use delete=False to save all of these
+    delete = False
+    with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb', delete=delete) as f:
         f.write(grib_buffer)
         f.flush()
+
         try:
-            Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr = grib2_to_am_layers(f.name, lat, lon, alt)
+            Pbase, z, T, o3_vmr, RH, cloud_lmr, cloud_imr, extra = grib2_to_am_layers(f.name, lat, lon, alt)
         except Exception as e:
             # example: RuntimeError: b'End of resource reached when reading message'
             # example: UserWarning: file temp.grb has multi-field messages, keys inside multi-field messages will not be indexed correctly
             grib_problem = str(e)
+            print('problem reading grib:', grib_problem, file=sys.stderr)
+
+    my_stdout = io.StringIO()
 
     if not grib_problem:
-        my_stdout = io.StringIO()
         with contextlib.redirect_stdout(my_stdout):
             try:
                 print_am_header(gfs_cycle, forecast_hour, lat, lon, alt)
@@ -64,8 +69,9 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
                 # example: ZeroDivisionError after a bunch of
                 #   ECCODES INFO    :  grib_file_open: cannot open file foo.grb (No such file or directory)
                 grib_problem = str(e)
+                print('problem printing am', grib_problem, file=sys.stderr)
 
-    if grib_problem:
+    if False:
         with tempfile.NamedTemporaryFile(mode='wb', prefix='layers-err-', suffix='.grb', dir='.', delete=False) as tfile:
             print('some problem turning the grib into layers, saving ', tfile.name, file=sys.stderr)
             tfile.write(grib_buffer)
@@ -74,9 +80,9 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
             with open(fname, 'w') as f:
                 print(grib_problem, file=f)
                 print('lat', lat, 'lon', lon, 'alt', alt, 'gfs_cycle', gfs_cycle, 'forecast_hour', forecast_hour, file=f)
-        return
+        return None, None
 
-    return my_stdout.getvalue()
+    return my_stdout.getvalue(), extra
 
 
 def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f, verbose=False):
@@ -87,15 +93,24 @@ def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f, verbose=Fal
         sys.stderr.flush()
 
 
-def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=False, stats=None):
+def print_extra(fcast_pretty, extra, f2, verbose=False):
+    if f2:
+        extra['date'] = fcast_pretty
+        f2.writerow(extra)
+
+
+def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=False, stats=None):
     if verbose:
         print(site['name'], 'fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
-        layers_amc = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=stats)
+        layers_amc, extra = gfs15_to_am10(site['lat'], site['lon'], site['alt'], gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=stats)
     if layers_amc is None:
         return  # no line emitted
 
     dt_forecast_hour = gfs_cycle + datetime.timedelta(hours=forecast_hour)
+    fcast_pretty = dt_forecast_hour.strftime(GFS_TIMESTAMP)
+    print_extra(fcast_pretty, extra, f2, verbose=verbose)
+
     am_problem = False
     with record_latency('run am'):
         returncode, am_output, am_error = run_am(layers_amc)
@@ -123,18 +138,22 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=False, verbose=Fals
             tfile.write(am_output)
             return  # no line emitted
 
-    print_final_output(dt_forecast_hour.strftime(GFS_TIMESTAMP), tau, Tb, pwv, lwp, iwp, o3, f, verbose=verbose)
+    fcast_pretty = dt_forecast_hour.strftime(GFS_TIMESTAMP)
+    print_final_output(fcast_pretty, tau, Tb, pwv, lwp, iwp, o3, f, verbose=verbose)
+    print_extra(fcast_pretty, extra, f2, verbose=verbose)
     time.sleep(1)
 
 
-def make_forecast_table(site, gfs_cycle, f, wait=False, verbose=False, one=False, stats=None):
+def make_forecast_table(site, gfs_cycle, f, f2, wait=False, verbose=False, hours=-1, stats=None):
     print_table_line(table_header, f)
     for forecast_hour in range(0, 121):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose, stats=stats)
-        if one:
+        if forecast_hour >= hours:
             return
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
     for forecast_hour in range(123, 385, 3):
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, wait=wait, verbose=verbose, stats=stats)
+        if forecast_hour >= hours:
+            return
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
 
 
 def read_stations(filename):

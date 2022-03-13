@@ -96,7 +96,7 @@
     <h2>{{ stuff.year }} Stations {{ stuff.gfs_cycle}}</h2>
 
     {% for s, files in now.items() %}
-      <h3>{{ s }} {{ stuff.stations[s].name }}</h3>
+      <h3>{{ s }} {{ stuff.stations[s].name|escape }}</h3>
       {%- for f in files -%}
         {% if f.startswith('lindy') %}
           <img style="width:1050px;" src="{{ f }}">

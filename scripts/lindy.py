@@ -47,6 +47,10 @@ def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
         me['00'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00e', gfs_cycle)
         me['00'].append(outname)
+        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00w', gfs_cycle)
+        me['00'].append(outname)
+        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00wg', gfs_cycle)
+        me['00'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '01', gfs_cycle)
         me['00'].append(outname)
         outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
@@ -293,7 +297,7 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
     df.to_csv(outname)
 
 
-def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, include=None, exclude=None, name='00'):
+def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, include=None, exclude=None, name='00', datadir='.'):
     outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, name, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
@@ -305,8 +309,12 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     eu_data = None
     if allest is None:
-        # a hacky way to signal using EU data
-        eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
+        if name in {'00w', '00wg'}:
+            wind_data = {}
+            for site in stations:
+                wind_data[site] = eht_met_forecast.data.read_wind(site, gfs_cycle, basedir=datadir)
+        else:
+            eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
 
     some = False
     actual_sites = set()
@@ -323,10 +331,10 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         if site in close_sites and close_sites[site] in actual_sites:
             continue
 
-        name = stations[site]['name']
+        sname = stations[site]['name']
         label = site
-        if site != name:
-            label += ' ' + name
+        if site != sname:
+            label += ' ' + sname
         if site in inverted_close_sites:
             other_site = inverted_close_sites[site]
             if other_site in actual_sites:
@@ -346,6 +354,23 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             est = allest[site][gfs_cycle]
             plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5, ls=ls)
             some = True
+        elif name == '00w':
+            if wind_data is not None and site in wind_data:
+                wd = wind_data[site]
+                if wd is not None and '10m_wind' in wd:
+                    plt.plot(wd.date.values, wd['10m_wind'], ls=ls, label=label + ' 10m wind')
+                    some = True
+        elif name == '00wg':
+            if wind_data is not None and site in wind_data:
+                wd = wind_data[site]
+                if wd is not None and 'wgust' in wd:
+                    wd['wgust'].mask(wd['wgust'] < 10., np.NAN, inplace=True)
+                    # always do the plot so that the colors/styles are consistent with the wind speed
+                    label = label + ' wind gust'
+                    if wd['wgust'].count() == 0:
+                        label = None  # but disappear the label if empty
+                    plt.plot(wd.date.values, wd['wgust'], ls=ls, label=label)
+                    some = True
         else:
             if eu_data is not None and site in eu_data:
                 plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
@@ -364,8 +389,13 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         plt.axvspan(d+pd.Timedelta(schedule_start), d+pd.Timedelta(schedule_end), color='black', alpha=0.05, zorder=-10)
 
     # formatting
-    plt.ylim(0, 1.0)
-    plt.yticks(np.arange(0, 1.0, .1))
+    if name == '00w':
+        plt.ylim(0, 40.0)  # 40 meters/sec ~ 90 mph
+    elif name == '00wg':
+        plt.ylim(0, 40.0)  # 40 meters/sec ~ 90 mph
+    else:
+        plt.ylim(0, 1.0)
+        plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
     # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Lindy said this was needed on cloud machines?!
@@ -376,12 +406,19 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     if allest:
         label = 'GFS ' + gfs_cycle
+    elif name == '00w':
+        label = 'GFS wind ' + gfs_cycle
+    elif name == '00wg':
+        label = 'GFS wind gust ' + gfs_cycle
     else:
         label = 'EU'
     plt.gca().add_artist(AnchoredText(label, loc=2))
 
     plt.xlabel('UT date')
-    plt.ylabel('tau225')
+    if name in {'00w', '00wg'}:
+        plt.ylabel('meters/sec')
+    else:
+        plt.ylabel('tau225')
     plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
     wide(14, 5)
     plt.savefig(outname, dpi=150)
@@ -456,6 +493,8 @@ for gfs_cycle in gfs_cycles:
 
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
     do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00e')
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00w', datadir=datadir)
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00wg', datadir=datadir)
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
     do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)

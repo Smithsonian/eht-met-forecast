@@ -122,12 +122,10 @@ or you can use pygrib.open() instead, to not have an index, it's supposedly slow
         b = grbindx.select(name='V component of wind', level=0)[0].values
         ret['max_wind'] = grid_interp_vector(a, b, u, v)
 
-        # apparently level 1 is as low as you can go
-        k = 'level 1 wind u'
-        a = grbindx.select(name='U component of wind', level=1)[0].values
-        k = 'level 1 wind v'
-        b = grbindx.select(name='V component of wind', level=1)[0].values
-        ret['surface_wind'] = grid_interp_vector(a, b, u, v)
+        # appears for lev_10_m_above_ground
+        a = grbindx.select(name='10 metre U wind component', level=10)[0].values
+        b = grbindx.select(name='10 metre V wind component', level=10)[0].values
+        ret['10m_wind'] = grid_interp_vector(a, b, u, v)
     except Exception as e:
         print('key:', k, 'exception:', e, file=sys.stderr)
         raise

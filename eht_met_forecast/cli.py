@@ -125,7 +125,7 @@ def main(args=None):
 
             if f2:
                 fieldnames = [
-                    'date', 'csnow', 'cicep', 'cfrzr', 'crain', 'wgust', 'max_wind', 'surface_wind',
+                    'date', 'csnow', 'cicep', 'cfrzr', 'crain', 'wgust', 'max_wind', '10m_wind',
                 ]
                 f2 = csv.DictWriter(f2, fieldnames=fieldnames, delimiter=' ')
                 f2.writeheader()

@@ -43,17 +43,17 @@ def form_gfs_download_url(lat, lon, alt, gfs_cycle, forecast_hour):
 
     for lev in LEVELS:
         params['lev_{:d}_mb'.format(lev)] = 'on'
-    params['lev_surface'] = 'on'  # CRAIN, etc. maps to level=0
+    params['lev_10_m_above_ground'] = 'on'  # wind level=10
+    params['lev_surface'] = 'on'  # CRAIN etc, GUST, maps to level=0
     params['lev_max_wind'] = 'on'  # UGRD, VGRD, maps to level=0
 
-    # lev_ that cause 500 errors: 'lev_0_mb' 'lev_0' 'lev_10_m' 'lev_20_m' 'lev_maxWind'
+    # hint: https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25_1hr.pl
+    # shows an interactive page where you can click on stuff
 
     VARIABLES = ["CLWMR", "ICMR", "HGT", "O3MR", "RH", "TMP"]  # for AM
-    #VARIABLES += ["WIND"]  # wind -- not available at all in GFS
-    VARIABLES += ["UGRD", "VGRD"]  # wind -- meters/sec -- works in levels but really we want level 0? no joy for lev_surface either
-    VARIABLES += ["CRAIN", "CFRZR", "CICEP", "CSNOW"]  # yes/no 1/0 rain, freezing rain, ice pellets, snow -- works for lev_surface
-    #VARIABLES += ["POP", "CPOFP", "CPOZP"]  # probability of precip -- not in the GFS docs, so no joy
-    VARIABLES += ["GUST"]  # works with lev_surface and then level=0
+    VARIABLES += ["UGRD", "VGRD"]  # wind
+    VARIABLES += ["CRAIN", "CFRZR", "CICEP", "CSNOW"]  # yes/no 1/0 rain, freezing rain, ice pellets, snow
+    VARIABLES += ["GUST"]  # lev_surface level=0
     '''
     these are all of the levels -- get_gfs.pl download of all variables
 

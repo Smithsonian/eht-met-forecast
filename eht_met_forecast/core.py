@@ -45,7 +45,8 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
 
     grib_problem = False
     # development hint: use delete=False to save all of these
-    with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb') as f:
+    delete = False
+    with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb', delete=delete) as f:
         f.write(grib_buffer)
         f.flush()
 
@@ -57,8 +58,9 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
             grib_problem = str(e)
             print('problem reading grib:', grib_problem, file=sys.stderr)
 
+    my_stdout = io.StringIO()
+
     if not grib_problem:
-        my_stdout = io.StringIO()
         with contextlib.redirect_stdout(my_stdout):
             try:
                 print_am_header(gfs_cycle, forecast_hour, lat, lon, alt)
@@ -69,7 +71,7 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
                 grib_problem = str(e)
                 print('problem printing am', grib_problem, file=sys.stderr)
 
-    if grib_problem:
+    if False:
         with tempfile.NamedTemporaryFile(mode='wb', prefix='layers-err-', suffix='.grb', dir='.', delete=False) as tfile:
             print('some problem turning the grib into layers, saving ', tfile.name, file=sys.stderr)
             tfile.write(grib_buffer)
@@ -106,6 +108,9 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=
         return  # no line emitted
 
     dt_forecast_hour = gfs_cycle + datetime.timedelta(hours=forecast_hour)
+    fcast_pretty = dt_forecast_hour.strftime(GFS_TIMESTAMP)
+    print_extra(fcast_pretty, extra, f2, verbose=verbose)
+
     am_problem = False
     with record_latency('run am'):
         returncode, am_output, am_error = run_am(layers_amc)

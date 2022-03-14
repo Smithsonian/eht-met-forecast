@@ -39,7 +39,7 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install --update pytest>3.7.0   # skip buggy version
+        pip install --upgrade pytest>3.7.0   # skip buggy version
         pip install . .[test]
       displayName: 'Install dependencies'
 

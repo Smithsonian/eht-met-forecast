@@ -109,7 +109,6 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=
 
     dt_forecast_hour = gfs_cycle + datetime.timedelta(hours=forecast_hour)
     fcast_pretty = dt_forecast_hour.strftime(GFS_TIMESTAMP)
-    print_extra(fcast_pretty, extra, f2, verbose=verbose)
 
     am_problem = False
     with record_latency('run am'):

@@ -14,7 +14,7 @@ requires += ['jinja2']  # webpages
 #  redhat: cairo cairo-dev (tested)
 #  debian: libcairo2-dev ?
 
-test_requires = ['pytest!=7.10.0', 'pytest-cov', 'requests_mock']
+test_requires = ['pytest!=7.1.0', 'pytest-cov', 'requests_mock']
 
 setup_requires = ['setuptools_scm', 'cython']
 

@@ -18,6 +18,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 
 import eht_met_forecast.data
+from eht_met_forecast.constants import GFS_TIMESTAMP_FULL
 from eht_met_forecast import read_stations
 import vex as vvex
 
@@ -314,7 +315,10 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             for site in stations:
                 wind_data[site] = eht_met_forecast.data.read_wind(site, gfs_cycle, basedir=datadir)
         else:
-            eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
+            eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
+            t = os.stat('./tau225.txt').st_mtime  # XXX
+            t = datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc)
+            eu_download_time = t.strftime(GFS_TIMESTAMP_FULL)
 
     some = False
     actual_sites = set()
@@ -379,8 +383,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     if not some:
         plt.close()
         return
-    if allest:
-        # vertical line at the forcast time, but only for GFS
+    if allest or name in {'00w', '00wg'}:
+        # vertical line at the forcast time, but not for EU
         plt.axvline(date0, color='black', ls='--')
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
     #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
@@ -411,7 +415,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     elif name == '00wg':
         label = 'GFS wind gust ' + gfs_cycle
     else:
-        label = 'EU'
+        label = 'EU downloaded ' + eu_download_time
     plt.gca().add_artist(AnchoredText(label, loc=2))
 
     plt.xlabel('UT date')

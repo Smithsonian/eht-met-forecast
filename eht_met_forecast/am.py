@@ -141,6 +141,9 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
 
     leftlon, rightlon, bottomlat, toplat = box(lat, lon, LATLON_DELTA)
 
+    # from a complete grib to the subset:
+    # data, lats, lons = grb.data(lat1=20,lat2=70,lon1=220,lon2=320)
+
     u = (lat - bottomlat) / LATLON_DELTA
     v = (lon - leftlon) / LATLON_DELTA
     Pbase     = []

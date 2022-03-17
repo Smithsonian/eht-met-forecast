@@ -45,7 +45,7 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
 
     grib_problem = False
     # development hint: use delete=False to save all of these
-    delete = False
+    delete = True
     with tempfile.NamedTemporaryFile(mode='wb', prefix='temp-', suffix='.grb', delete=delete) as f:
         f.write(grib_buffer)
         f.flush()

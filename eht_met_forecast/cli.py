@@ -121,13 +121,13 @@ def main(args=None):
                 f2 = None
             else:
                 f = open(outfile, 'w')
-                f2 = open(outfile+'.extra', 'w', newline='')
+                fd2 = open(outfile+'.extra', 'w', newline='')
 
-            if f2:
+            if fd2:
                 fieldnames = [
                     'date', 'csnow', 'cicep', 'cfrzr', 'crain', 'wgust', 'max_wind', '10m_wind',
                 ]
-                f2 = csv.DictWriter(f2, fieldnames=fieldnames, delimiter=' ')
+                f2 = csv.DictWriter(fd2, fieldnames=fieldnames, delimiter=' ')
                 f2.writeheader()
 
             try:
@@ -139,6 +139,9 @@ def main(args=None):
                 exit_value = 1
             if not args.stdout:
                 f.close()
+                if fd2:
+                    # can't close f2, close the underlying file
+                    fd2.close()
 
     stats['stations'] = ':'.join(sorted(stats['stations']))
     elapsed = int(time.time() - t0)

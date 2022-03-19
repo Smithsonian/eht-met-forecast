@@ -126,10 +126,8 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
 
     gfs_cycle_dt = eht_met_forecast.data.gfs_cycle_to_dt(gfs_cycle)
     if date0 != gfs_cycle_dt:
-        print('gfs_cycle and the first date in the csv disagree', file=sys.stderr)
-        print('gfs_cycle', gfs_cycle)
-        print('date0', eht_met_forecast.data.dt_to_gfs_cycle(date0))
-        raise ValueError
+        date0_str = eht_met_forecast.data.dt_to_gfs_cycle(date0)
+        raise ValueError('gfs_cycle {} and first date in csv {} disagree'.format(gfs_cycle, date0_str))
 
     # ensemble estimator with errors
     est = alldata.groupby('date').apply(wavg).reset_index()

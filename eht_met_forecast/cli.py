@@ -119,6 +119,7 @@ def main(args=None):
             if args.stdout:
                 f = sys.stdout
                 f2 = None
+                fd2 = None
             else:
                 f = open(outfile, 'w')
                 fd2 = open(outfile+'.extra', 'w', newline='')

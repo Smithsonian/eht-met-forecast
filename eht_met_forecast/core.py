@@ -17,6 +17,10 @@ table_header = ('#', 'date', 'tau255', 'Tb[K]', 'pwv[mm]', 'lwp[kg*m^-2]', 'iwp[
 
 
 def ok(outfile, verbose=False):
+    if os.path.exists(outfile+'.skip'):
+        if verbose:
+            print(outfile, 'skipping because .skip file seen')
+        return True
     if not os.path.exists(outfile):
         if verbose:
             print(outfile, 'does not exist', file=sys.stderr)

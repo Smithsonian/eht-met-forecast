@@ -4,6 +4,7 @@ from astropy import units as u
 from astropy.coordinates import EarthLocation
 
 stations = [
+    # https://github.com/Smithsonian/site-selection/blob/main/allsites.txt
     # Nq:NOEMA Pv:PV Gl:GLT Sz:SPT Ax:APEX Aa:ALMA Lm:LMT Kp:KP Mg:SMT Sw:SMA Mm:JCMT
     # SMA=SMAP (phased)
     # SMAR=SMA reference antenna

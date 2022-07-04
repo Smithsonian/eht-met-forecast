@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STATIONS="Aa Ax BAJA BOL GAM Gl HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
+STATIONS="Aa Ax BAJA BOL BRZ CAT CNI GAM Gl GLTS HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
 DEST=~/github/eht-met-data
 UPLOAD=glindahl@35.199.60.65
 

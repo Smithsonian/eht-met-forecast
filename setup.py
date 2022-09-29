@@ -16,7 +16,7 @@ requires += ['jinja2']  # webpages
 
 test_requires = ['pytest', 'pytest-cov', 'requests_mock']
 
-setup_requires = ['setuptools_scm', 'cython']
+requires += ['setuptools_scm', 'cython']
 
 extras_require = {
     'test': test_requires,  # setup no longer tests, so make them an extra that .travis.yml uses
@@ -36,7 +36,7 @@ setup(
     description='Tools to generate EHT station forecasts',
     long_description=description,
     long_description_content_type='text/markdown',
-    author='Greg Lindahl, Scott Paine, and others',
+    author='Greg Lindahl, Scott Paine, Lindy Blackburn, and others',
     author_email='glindahl@cfa.harvard.edu',
     url='https://github.com/wumpus/eht-met-forecast',
     packages=packages,
@@ -44,7 +44,6 @@ setup(
     extras_require=extras_require,
     include_package_data=True,
     package_data=package_data,
-    setup_requires=setup_requires,
     install_requires=requires,
     entry_points='''
         [console_scripts]

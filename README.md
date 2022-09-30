@@ -67,12 +67,12 @@ The am code is straightforward C and does not require any unusual libraries.
 
 The included `Makefile` has instructions to build it:
 
-`make am11`
+`make am12`
 
 Before running `eht-met-forecast`, you need to set an environment variable:
 
 ```
-export AM=./am-11.0/src/am
+export AM=./am-12.0/src/am
 $AM -v
 ```
 
@@ -85,6 +85,23 @@ pip install .
 pip install .[test]  # if you want to run tests
 pytest
 ```
+
+## Running this code for the EHT AOC
+
+- adjust station list in do-all.sh
+- clone eht-met-data and set DEST appropriately
+- examine weatherwrapper.sh
+- 15 days before the annual observation, turn on plotting, deployment, and WAIT
+- if there are a lot of retries, note RETRY_DELAY is set to the Nomads-recommended 60s
+- temporarily turn RETRY_DELAY down if you're getting behind
+- this cronjob line is optimal for GFS's cycles (assumes UTC)
+
+```
+# UTC
+3 1,7,13,19 * * * "bash ~/github/eht-met-forecast/weatherwrapper.sh"
+```
+
+## 
 
 ## Credits and similar projects
 

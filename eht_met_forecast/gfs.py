@@ -135,9 +135,9 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
 
     retry = MAX_DOWNLOAD_TRIES
     actual_tries = 0
-    quiet_retry = False
     r = None  # so we can use it even after an exception
     while retry > 0:
+        quiet_retry = False
         try:
             actual_tries += 1
             retry_duration = RETRY_DELAY
@@ -168,6 +168,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 # here's what they started sending after 4/20/2021:
                 # HTTP/1.1 302 Your allowed limit has been reached. Please go to https://www.weather.gov/abusive-user-block for more info
                 # This 302 does not have a Location: header, so we test for it to make it less likely we'll end up in an infinite loop
+                # These still happen (but very rarely) after the aug 2022 change to using a CDN
                 errflag = 1
                 if actual_tries > 1:
                     # this happens ~ 33 times per run (out of 209) so make it quieter

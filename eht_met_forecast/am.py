@@ -102,6 +102,7 @@ or you can use pygrib.open() instead, to not have an index, it's supposedly slow
 
     try:
         # appears for lev_surface at level 0
+        # if the grib comes back damaged, the crash is going to be here
         k = 'csnow'
         ret['csnow'] = (grid_interp(grbindx.select(name='Categorical snow', level=0)[0].values, u, v))
         k = 'cicep'

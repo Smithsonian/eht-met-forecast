@@ -3,6 +3,7 @@ import requests
 import sys
 import time
 import random
+import http.client
 
 from .latlon import box
 from .constants import GFS_DAYHOUR, GFS_HOUR, LATLON_GRID_STR, LATLON_DELTA, LEVELS
@@ -218,6 +219,11 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
             errflag = 1
             if stats:
                 stats['timeout_read'] += 1
+        except http.client.IncompleteRead:
+            print("Incomplete read.", file=sys.stderr, end='')
+            errflag = 1
+            if stats:
+                stats['incomplete_read'] += 1
         except requests.exceptions.RequestException as e:
             print("Surprising exception of", str(e)+".", file=sys.stderr, end='')
             errflag = 1

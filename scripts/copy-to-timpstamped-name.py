@@ -21,4 +21,4 @@ timestamp = datetime.datetime.fromtimestamp(mtime, tz=datetime.timezone.utc).str
 new_fname = fname + '.' + timestamp
 
 if not os.path.isfile(new_fname):
-    shutil.copyfile(fname, new_fname)
+    shutil.copy2(fname, new_fname)

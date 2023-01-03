@@ -42,7 +42,9 @@ def test_cli(capsys):
     # new test.grb with wind (but not 10 meter wind)
     #stdout = '00:00   1.1151e-01   3.2311e+01   2.4032e+00   0.0000e+00   0.0000e+00   2.6272e+02\n'
     # new test.grb with 10 meter wind
-    stdout = '00:00   3.2899e-02   1.2753e+01   4.5020e-01   0.0000e+00   0.0000e+00   3.2356e+02\n'
+    #stdout = '00:00   3.2899e-02   1.2753e+01   4.5020e-01   0.0000e+00   0.0000e+00   3.2356e+02\n'
+    # AM 12.2 gfs16 with wind
+    stdout = '00:00   3.2013e-02   1.2525e+01   4.5020e-01   0.0000e+00   0.0000e+00   3.2356e+02\n'
 
     stdout = '20200316+18:' + stdout
 

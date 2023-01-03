@@ -67,12 +67,12 @@ The am code is straightforward C and does not require any unusual libraries.
 
 The included `Makefile` has instructions to build it:
 
-`make am12`
+`make am12.2`
 
 Before running `eht-met-forecast`, you need to set an environment variable:
 
 ```
-export AM=./am-12.0/src/am
+export AM=./am-12.2/src/am
 $AM -v
 ```
 

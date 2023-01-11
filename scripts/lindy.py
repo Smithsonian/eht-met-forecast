@@ -211,8 +211,7 @@ def do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=None, force=Fal
     data = pd.concat(the_data, ignore_index=True)
     data['doy'] = data.date.dt.dayofyear
 
-    #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy) & (data.date.dt.year >= start.year)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
@@ -227,8 +226,7 @@ def do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=None, force=Fal
     data = pd.concat(the_data, ignore_index=True)
     data['doy'] = data.date.dt.dayofyear
 
-    #nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= 86)]
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy) & (data.date.dt.year >= start.year)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')

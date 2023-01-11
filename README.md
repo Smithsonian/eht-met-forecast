@@ -88,12 +88,8 @@ pytest
 
 ## Running this code for the EHT AOC
 
-- adjust station list in do-all.sh
-- clone eht-met-data and set DEST appropriately
-- examine weatherwrapper.sh
-- 15 days before the annual observation, turn on plotting, deployment, and WAIT
-- if there are a lot of retries, note RETRY_DELAY is set to the Nomads-recommended 60s
-- temporarily turn RETRY_DELAY down if you're getting behind
+- almost all configuration is in *.sh
+- see [ANNUAL.md] for clues about the annual cycle
 - this cronjob line is optimal for GFS's cycles (assumes UTC)
 
 ```

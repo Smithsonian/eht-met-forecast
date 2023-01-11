@@ -1,4 +1,4 @@
-.PHONY: test test_coverage
+.PHONY: am11 am12 am12.2 check_slack test test_coverage
 
 am11:
 	curl 'https://zenodo.org/record/3406483/files/am-11.0.tgz?download=1' > am-11.0.tgz
@@ -14,6 +14,9 @@ am12.2:
 	curl 'https://zenodo.org/record/6774378/files/am-12.2.tgz?download=1' > am-12.2.tgz
 	tar xf am-12.2.tgz
 	cd am-12.2/src && make serial && ./am -v
+
+check_slack:
+	jq . ~/.slack-secrets
 
 test:
 	AM=am-12.2/src/am PYTHONPATH=. pytest -v -v

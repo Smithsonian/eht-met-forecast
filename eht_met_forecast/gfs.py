@@ -219,13 +219,13 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
             errflag = 1
             if stats:
                 stats['timeout_read'] += 1
-        except http.client.IncompleteRead:
+        except requests.exceptions.ChunkedEncodingError:
             print("Incomplete read.", file=sys.stderr, end='')
             errflag = 1
             if stats:
                 stats['incomplete_read'] += 1
         except requests.exceptions.RequestException as e:
-            print("Surprising exception of", str(e)+".", file=sys.stderr, end='')
+            print("Surprising exception of", repr(e)+".", file=sys.stderr, end='')
             errflag = 1
             if stats:
                 stats['exception_'+str(e)] += 1

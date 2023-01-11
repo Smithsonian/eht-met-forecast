@@ -25,11 +25,22 @@ date -u
 #echo downloading latest with wait
 #WAIT=--wait bash do-all.sh
 
-#echo doing plots
-#bash do-plots.sh
-#bash do-deploy.sh
+if echo $GFS | grep -q 12:00:00; then
+  python scripts/slack-post eht infra_bots "12UT weather downloaded, charts in another 20 minutes"
+fi
 
-# now we'd like to notify Greg and/or slack, BUT, only for the run starting at 01 UT
+echo doing plots
+bash do-plots.sh
+bash do-deploy.sh
+
+# now we'd like to notify Greg and/or slack, BUT, only for the run starting at 13 UT
+
+if echo $GFS | grep -q 06:00:00; then
+  python scripts/slack-post eht infra_bots "06UT weather charts are available"
+fi
+if echo $GFS | grep -q 12:00:00; then
+  python scripts/slack-post eht infra_bots "12UT weather charts are available"
+fi
 
 date -u
 

@@ -26,6 +26,7 @@ date -u
 # the rest of the script is for when we are observing
 
 if echo $GFS | grep -q 12:00:00; then
+  python scripts/slack-post.py eht infra_bots "12UT weather download starting, should finish around 1720UT"
   WATCHFILE=$DEST/Aa/$GFS
   python scripts/download-watcher.py $WATCHFILE &
   jobs -l
@@ -37,7 +38,7 @@ echo downloading latest with wait
 FLUSH="--flush Aa" WAIT=--wait bash do-all.sh
 
 if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht infra_bots "12UT weather downloaded, charts in another 20 minutes"
+  python scripts/slack-post.py eht infra_bots "12UT weather download finished, charts in another 20 minutes"
 fi
 
 echo doing plots

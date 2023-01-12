@@ -52,6 +52,8 @@ def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
         me['00'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00wg', gfs_cycle)
         me['00'].append(outname)
+        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00p', gfs_cycle)
+        me['00'].append(outname)
         outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '01', gfs_cycle)
         me['00'].append(outname)
         outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
@@ -306,7 +308,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     eu_data = None
     if allest is None:
-        if name in {'00w', '00wg'}:
+        if name in {'00w', '00wg', '00p'}:
             wind_data = {}
             for site in stations:
                 wind_data[site] = eht_met_forecast.data.read_wind(site, gfs_cycle, basedir=datadir)
@@ -371,6 +373,15 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                         label = None  # but disappear the label if empty
                     plt.plot(wd.date.values, wd['wgust'], ls=ls, label=label)
                     some = True
+        elif name == '00p':
+            if wind_data is not None and site in wind_data:
+                wd = wind_data[site]
+                if wd is not None:
+                    sump = wd['csnow']
+                    for col in ('cicep', 'cfrzr', 'crain'):
+                        sump += wd[col]
+                    plt.plot(wd.date.values, sump, ls=ls, label=label + ' precip')
+                    some = True
         else:
             if eu_data is not None and site in eu_data:
                 plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
@@ -379,7 +390,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     if not some:
         plt.close()
         return
-    if allest or name in {'00w', '00wg'}:
+    if allest or name in {'00w', '00wg', '00p'}:
         # vertical line at the forcast time, but not for EU
         plt.axvline(date0, color='black', ls='--')
     #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
@@ -393,6 +404,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         plt.ylim(0, 40.0)  # 40 meters/sec ~ 90 mph
     elif name == '00wg':
         plt.ylim(0, 40.0)  # 40 meters/sec ~ 90 mph
+    elif name == '00p':
+        plt.ylim(0, 1.0)  # precip %
     else:
         plt.ylim(0, 1.0)
         plt.yticks(np.arange(0, 1.0, .1))
@@ -410,6 +423,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         label = 'GFS wind ' + gfs_cycle
     elif name == '00wg':
         label = 'GFS wind gust ' + gfs_cycle
+    elif name == '00p':
+        label = 'GFS precip ' + gfs_cycle
     else:
         label = 'EU downloaded ' + eu_download_time
     plt.gca().add_artist(AnchoredText(label, loc=2))
@@ -417,6 +432,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.xlabel('UT date')
     if name in {'00w', '00wg'}:
         plt.ylabel('meters/sec')
+    if name in {'00p'}:
+        plt.ylabel('chance')
     else:
         plt.ylabel('tau225')
     plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
@@ -495,6 +512,7 @@ for gfs_cycle in gfs_cycles:
     do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00e')
     do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00w', datadir=datadir)
     do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00wg', datadir=datadir)
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00p', datadir=datadir)
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
     do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)

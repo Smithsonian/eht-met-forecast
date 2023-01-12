@@ -34,16 +34,19 @@ if '00w' not in emphasize:
     emphasize.add('00w')
 if '00wg' not in emphasize:
     emphasize.add('00wg')
+if '00p' not in emphasize:
+    emphasize.add('00p')
 
 stations = read_stations(args.stations)
 stations['00'] = {'name': 'Current stations GFS weather'}
 stations['00e'] = {'name': 'Current stations EU weather'}
 stations['00w'] = {'name': 'Current stations GFS 10m wind'}
 stations['00wg'] = {'name': 'Current stations GFS wind gusts > 10 m/s'}
+stations['00p'] = {'name': 'Current stations GFS precip chance'}
 stations['01'] = {'name': 'Future stations'}
 
 for e in emphasize:
-    if e not in stations and e not in {'00', '00e', '00w', '00wg'}:
+    if e not in stations and e not in {'00', '00e', '00w', '00wg', '00p'}:
         raise ValueError('emphasized station {} is not known'.format(e))
 
 env = Environment(
@@ -78,6 +81,9 @@ for d in dirs:
             # a symlink
             continue
         if f == 'lindy_00wg.png':
+            # a symlink
+            continue
+        if f == 'lindy_00p.png':
             # a symlink
             continue
         parts = f.split('_')

@@ -22,15 +22,18 @@ while time.time() < start + 7200:
         break
 
 tqdm_bar = trange(210, token=token, channel=channel_id)
+#tqdm_bar = trange(210)
 tqdm_bar.set_description('GFS download')
 last = 0
 
 while True:
-    time.sleep(60)
     with open(name) as fd:
         count = len(fd.read().splitlines())
         if count != last:
             tqdm_bar.update(count - last)
+            if count - last > 5:
+                # at startup it leaves the bar at 0% even if the file is big
+                tqdm_bar.refresh()
             last = count
         if count == 210:
             break

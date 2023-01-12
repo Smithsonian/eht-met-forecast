@@ -29,6 +29,15 @@ def interpret_args(args, station_dict):
                 else:
                     print('unknown vex', v, file=sys.stderr)
                     print_vexes = True
+
+    flushers = set()
+    if args.flush:
+        for flusher in args.flush:
+            if ',' in flusher:
+                [flushers.add(x) for x in flusher.split(',')]
+            else:
+                flushers.add(flusher)
+
     if print_vexes:
         print('valid vexes are:', file=sys.stderr)
         for k, v in station_dict.items():
@@ -56,7 +65,7 @@ def interpret_args(args, station_dict):
         gfs_cycle = (gfs_starting_cycle + dt_gfs_lag)
         cycles.append(gfs_cycle)
 
-    return stations, cycles
+    return stations, flushers, cycles
 
 
 def main(args=None):
@@ -72,6 +81,7 @@ def main(args=None):
     parser.add_argument('--hours', action='store', default=385, type=int, help='Hours to compute. Used for testing')
     parser.add_argument('--stdout', action='store_true', help='Print output to stdout instead of a file')
     parser.add_argument('--log', action='store', help='File to write logging information to')
+    parser.add_argument('--flush', action='append', help='station(s) to flush output for, used for monitoring')
     parser.add_argument('--verbose', '-v', action='store_true', help='Print more information')
     args = parser.parse_args(args=args)
 
@@ -83,7 +93,7 @@ def main(args=None):
 
     station_dict = read_stations(args.stations)
 
-    stations, cycles = interpret_args(args, station_dict)
+    stations, flushers, cycles = interpret_args(args, station_dict)
 
     if not stations:
         print('no valid stations to fetch', file=sys.stderr)
@@ -99,6 +109,7 @@ def main(args=None):
     for vex in stations:
         station = station_dict[vex]
         stats['stations'].append(vex)
+        flush = True if vex in flushers else False
 
         for gfs_cycle in cycles:
             gcf = gfs_cycle.strftime(GFS_TIMESTAMP)
@@ -121,7 +132,9 @@ def main(args=None):
                 f2 = None
                 fd2 = None
             else:
+                # this file is not csv formatted, so f is the fd
                 f = open(outfile, 'w')
+                # this new file is csv formatted, we pass around f2 = csv.DictWriter
                 fd2 = open(outfile+'.extra', 'w', newline='')
 
             if fd2:
@@ -132,7 +145,7 @@ def main(args=None):
                 f2.writeheader()
 
             try:
-                make_forecast_table(station, gfs_cycle, f, f2, wait=args.wait, verbose=args.verbose, hours=args.hours, stats=stats)
+                make_forecast_table(station, gfs_cycle, f, f2, wait=args.wait, verbose=args.verbose, hours=args.hours, stats=stats, flush=flush)
             except TimeoutError:
                 # raised by gfs.py
                 print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)

@@ -89,9 +89,11 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
     return my_stdout.getvalue(), extra
 
 
-def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f, verbose=False):
+def print_final_output(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3, f, verbose=False, flush=False):
     out = table_line_floats.format(gfs_timestamp, tau, Tb, pwv, lwp, iwp, o3)
     print(out, file=f)
+    if flush:
+        f.flush()
     if verbose:
         print(out, file=sys.stderr)
         sys.stderr.flush()
@@ -103,7 +105,7 @@ def print_extra(fcast_pretty, extra, f2, verbose=False):
         f2.writerow(extra)
 
 
-def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=False, stats=None):
+def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=False, stats=None, flush=False):
     if verbose:
         print(site['name'], 'fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
@@ -142,21 +144,23 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=
             return  # no line emitted
 
     fcast_pretty = dt_forecast_hour.strftime(GFS_TIMESTAMP)
-    print_final_output(fcast_pretty, tau, Tb, pwv, lwp, iwp, o3, f, verbose=verbose)
+    print_final_output(fcast_pretty, tau, Tb, pwv, lwp, iwp, o3, f, verbose=verbose, flush=flush)
     print_extra(fcast_pretty, extra, f2, verbose=verbose)
+    # flush f -- csv writer
+    # flush f2 -- csv writer
     time.sleep(1)
 
 
-def make_forecast_table(site, gfs_cycle, f, f2, wait=False, verbose=False, hours=-1, stats=None):
+def make_forecast_table(site, gfs_cycle, f, f2, wait=False, verbose=False, hours=-1, stats=None, flush=False):
     print_table_line(table_header, f)
     for forecast_hour in range(0, 121):
         if forecast_hour >= hours:
             return
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats, flush=flush)
     for forecast_hour in range(123, 385, 3):
         if forecast_hour >= hours:
             return
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats, flush=flush)
 
 
 def read_stations(filename):

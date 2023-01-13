@@ -27,6 +27,7 @@ date -u
 
 if echo $GFS | grep -q 12:00:00; then
   python scripts/slack-post.py eht infra_bots "12UT weather download starting, should finish around 1720UT"
+  DEST=~/github/eht-met-data
   WATCHFILE=$DEST/Aa/$GFS
   python scripts/download-watcher.py $WATCHFILE &
   jobs -l

@@ -432,7 +432,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     plt.xlabel('UT date')
     if name in {'00w', '00wg'}:
         plt.ylabel('meters/sec')
-    if name in {'00p'}:
+    elif name in {'00p'}:
         plt.ylabel('chance')
     else:
         plt.ylabel('tau225')

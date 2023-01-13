@@ -4,3 +4,5 @@ eht_met_forecast.egg-info
 dist/
 build/
 output/
+.coverage
+de421.bsp

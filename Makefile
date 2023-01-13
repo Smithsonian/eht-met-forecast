@@ -22,4 +22,4 @@ test:
 	AM=am-12.2/src/am PYTHONPATH=. pytest -v -v
 
 test_coverage:
-	AM=am-12.2/src/am PYTHONPATH=. pytest --cov-report=xml --cov=eht_met_forecast -v -v
+	AM=am-12.2/src/am PYTHONPATH=. pytest --cov=eht_met_forecast -v -v

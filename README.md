@@ -97,7 +97,18 @@ pytest
 3 1,7,13,19 * * * "bash ~/github/eht-met-forecast/weatherwrapper.sh"
 ```
 
-## 
+## The European Forecast
+
+The file `tau255.txt` is downloaded from the vlbimon website at Radbaud.
+
+```
+#7 0,12 * * * bash ~/github/eht-met-forecast/eurodownload.sh # UTC
+#17 7,19 * * * bash ~/github/eht-met-forecast/eurodownload.sh # UTC
+7 4,16 * * * bash ~/github/eht-met-forecast/eurodownload.sh # PST
+17 11,23 * * * bash ~/github/eht-met-forecast/eurodownload.sh # PST
+#7 5,17 * * * bash ~/github/eht-met-forecast/eurodownload.sh # PDT
+#17 0,12 * * * bash ~/github/eht-met-forecast/eurodownload.sh # PDT
+```
 
 ## Credits and similar projects
 

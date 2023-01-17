@@ -2,7 +2,8 @@
 
 ## Before the Dress Rehearsal
 
-* check AM for new version -- if so be sure it passes "make test"
+* update ../eht-met-data/commit-finished.sh to this year
+* check Scott Paine's AM software for new version -- if so be sure it passes "make test"
 * check https://github.com/Smithsonian/sma-met-forecast for checkins / bugfixes -- none in 2022
 * update list of stations and dates -- both DR and observation, in *.sh
 * turn on plots and upload of plots

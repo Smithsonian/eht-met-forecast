@@ -49,10 +49,10 @@ bash do-deploy.sh
 # now we'd like to notify Greg and/or slack, BUT, only for the run starting at 13 UT
 
 if echo $GFS | grep -q 06:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "06UT weather charts are <https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|available>"
+  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|06UT weather charts are available>"
 fi
 if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "12UT weather charts are <https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|available>"
+  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|12UT weather charts are available>"
 fi
 
 date -u

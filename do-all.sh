@@ -8,11 +8,12 @@ UPLOAD=glindahl@35.199.60.65
 # if too large, the oldest ones see http 302 (redir)
 BACKFILL=168
 
-# use during an observation
+# use during an observation -- normally set in weatherwrapper.sh
 #WAIT="--wait"
+#FLUSH="--flush Aa"
 
 for vex in $STATIONS; do
-   eht-met-forecast --backfill $BACKFILL --dir $DEST --vex $vex $WAIT --log LOG &
+   eht-met-forecast --backfill $BACKFILL --dir $DEST --vex $vex $WAIT $FLUSH --log LOG &
 done
 
 wait

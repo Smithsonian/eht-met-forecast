@@ -37,6 +37,7 @@ tqdm_bar = trange(210, initial=count, token=token, channel=channel_id)
 tqdm_bar.set_description('GFS download')
 last = count
 
+warned = False
 while True:
     with open(fname) as fd:
         count = len(fd.read().splitlines())
@@ -45,6 +46,9 @@ while True:
         last = count
     if count == 210:
         break
+    if not warned and count < 2 and time.time() > start + 18000:
+        slack_utils.slack_message('Error: GFS download is going too slowly', webhook)
+        warned = True
     time.sleep(60)
 
 tqdm_bar.close()

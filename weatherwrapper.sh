@@ -17,6 +17,7 @@ date -u
 echo downloading in the past
 
 bash do-all.sh
+exit 0
 echo doing plots, if any
 bash do-plots.sh
 bash do-deploy.sh
@@ -45,8 +46,6 @@ fi
 echo doing plots
 bash do-plots.sh
 bash do-deploy.sh
-
-# now we'd like to notify Greg and/or slack, BUT, only for the run starting at 13 UT
 
 if echo $GFS | grep -q 06:00:00; then
   python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|06UT weather charts are available>"

@@ -1,8 +1,11 @@
 # also change in do-plots.sh
 #EHT2021="Nn:Pv:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz"
-EHT2022DR="Nn:Pv:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm"
+#EHT2022DR="Nn:Pv:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm"
+#EHT2022="Nn:Pv:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm"
+EHT2023DR="Nn:Gl:Aa:Sw:Mm:Lm"
+EHT2023="Nn:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm"
 
-python scripts/make-jumbo-webpage.py --emphasize $EHT2022DR
+python scripts/make-jumbo-webpage.py --emphasize $EHT2023DR
 
 rm -f eht-met-plots/latest
 LATEST_TIME=`cd eht-met-plots/ && ls -d 202* | tail -n 1`

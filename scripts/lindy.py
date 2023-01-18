@@ -26,8 +26,8 @@ schedule_start = '0 hours'  # midnight
 schedule_end = '15 hours'
 
 # dress rehearsal
-#schedule_start = '4.5 hours'
-#schedule_end = '6.5 hours'
+#schedule_start = '6.5 hours'
+#schedule_end = '8.75 hours'
 
 before_start = '1 day'
 after_end = '1 day'

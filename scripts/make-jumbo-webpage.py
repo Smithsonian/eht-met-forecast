@@ -42,7 +42,7 @@ stations['00'] = {'name': 'Current stations GFS weather'}
 stations['00e'] = {'name': 'Current stations EU weather'}
 stations['00w'] = {'name': 'Current stations GFS 10m wind'}
 stations['00wg'] = {'name': 'Current stations GFS wind gusts > 10 m/s'}
-stations['00p'] = {'name': 'Current stations GFS precip chance'}
+stations['00p'] = {'name': 'Current stations GFS precip chance -- new for 2023'}
 stations['01'] = {'name': 'Future stations'}
 
 for e in emphasize:

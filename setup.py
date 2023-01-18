@@ -10,6 +10,7 @@ packages = [
 requires = ['hdrhistogram', 'requests', 'pygrib']  # download
 requires += ['matplotlib', 'pycairo', 'skyfield', 'pandas', 'scipy', 'astropy', 'ply']  # plots
 requires += ['jinja2']  # webpages
+requires += ['slack-sdk']
 # pycairo needs os packages installed:
 #  redhat: cairo cairo-dev (tested)
 #  debian: libcairo2-dev ?

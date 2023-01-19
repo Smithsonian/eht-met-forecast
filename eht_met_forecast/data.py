@@ -85,8 +85,27 @@ def read_wind(vex, gfs_cycle, basedir='.'):
         data = pd.read_csv(f, **kwargs)
         data['date'] = data['date_temp']
         del data['date_temp']
-        
+
     return data
+
+
+eu_to_vex = {
+    'ALMA': 'Aa',
+    'APEX': 'Ax',
+    'SMTO': 'Mg',
+    'LMT': 'Lm',
+    'SPT': 'Sz',
+    'PICO': 'Pv',
+    'JCMT': 'Mm',
+    'KP': 'Kt',
+    'GLT': 'Gl',
+    'NOEMA': 'Nn',
+    'SMA': 'Sw',
+    # added April 10, 2021, not present in 2023
+    #'IRAM_PV': 'Pv',
+    #'SPTDUMMY': 'Sz',
+    #'IRAM_PdB': 'Nn',
+}
 
 
 def read_eu(basedir='.'):
@@ -110,26 +129,54 @@ def read_eu(basedir='.'):
         'DeBilt': '',
         'Thule': '',
         'AMT': '',
+        'Meerkat': '',
     }
 
     data.drop(columns=deletes.keys(), errors='ignore', inplace=True)
+    return data.rename(columns=eu_to_vex)
 
-    renames = {
-        'ALMA': 'Aa',
-        'APEX': 'Ax',
-        'SMTO': 'Mg',
-        'LMT': 'Lm',
-        'SPT': 'Sz',
-        'PICO': 'Pv',
-        'JCMT': 'Mm',
-        'KP': 'Kt',
-        'GLT': 'Gl',
-        'NOEMA': 'Nn',
-        'SMA': 'Sw',
-        # added April 10
-        'IRAM_PV': 'Pv',
-        'SPTDUMMY': 'Sz',
-        'IRAM_PdB': 'Nn',
-    }
 
-    return data.rename(columns=renames)
+def write_gfs_eu_style(allest, stations, gfs_cycle, basedir='.', verbose=False):
+
+    dfs = []
+    vex_to_eu = dict([(v, k) for k, v in eu_to_vex.items()])
+
+    if verbose:
+        print('write gfs eu style, cycle', gfs_cycle)
+    first = True
+    for site in stations:
+        if site not in vex_to_eu:
+            continue
+        if verbose:
+            print(' ', site)
+        est = allest[site][gfs_cycle]
+        est_cols = set(est.columns)
+        est_cols.discard('date')
+        est_cols.discard('est_mean')
+        # XXX convert date column to a float64 unixtime
+        df = est.drop(columns=list(est_cols))
+        df.rename(columns={'est_mean': site}, inplace=True)
+        if not first:
+            df = df.drop(columns='date')
+        else:
+            first = False
+            df['date'] = df.date.values.astype(float) // 1000000000
+        dfs.append(df)
+    df = pd.concat(dfs, axis=1)
+
+    # rename sites to their preferred vlbimon names
+    vex_to_eu = dict([(v, k) for k, v in eu_to_vex.items()])
+    df.rename(columns=vex_to_eu, inplace=True)
+
+    fname = expanduser(basedir) + '/' + gfs_cycle + '/tau225_gfs.txt'
+    columns = df.columns
+    with open(fname, 'w') as fd:
+        # header: 12-character fields, left justified
+        headerf = '{:12s}' * len(columns)
+        header = headerf.format('time', *vex_to_eu.values())
+        print(header, file=fd)
+
+        rowf = '{:.11f}'
+        for row in df.itertuples():
+            print('{:.0f}.'.format(row[1]), end=' ', file=fd)
+            print(' '.join(rowf.format(v) for v in list(row[2:])), file=fd)

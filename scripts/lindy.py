@@ -34,7 +34,7 @@ after_end = '1 day'
 close_sites = {'Ax': 'Aa', 'Mm': 'Sw'}
 
 
-def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
+def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False, verbose=0):
     ret = {}
     for gfs_cycle in gfs_cycles:
         me = defaultdict(list)
@@ -44,22 +44,23 @@ def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
                 continue
             outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, vex, gfs_cycle)
             me['lindy'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00', gfs_cycle)
-        me['00'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00e', gfs_cycle)
-        me['00'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00w', gfs_cycle)
-        me['00'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00wg', gfs_cycle)
-        me['00'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '00p', gfs_cycle)
-        me['00'].append(outname)
-        outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, '01', gfs_cycle)
-        me['00'].append(outname)
-        outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
-        me['forecast'].append(outname)
-        outname = '{}/{}/trackrank.csv'.format(plotdir, gfs_cycle)
-        me['trackrank'].append(outname)
+
+        plots = ('00', '00e', '00w', '00wg', '00p', '01')
+        for p in plots:
+            outname = '{}/{}/lindy_{}_{}.png'.format(plotdir, gfs_cycle, p, gfs_cycle)
+            me[p].append(outname)
+
+        csvs = ('forecast', 'trackrank')
+        for csv in csvs:
+            outname = '{}/{}/{}.csv'.format(plotdir, gfs_cycle, csv)
+            me[csv].append(outname)
+
+        outname = '{}/{}/tau225_gfs.txt'.format(plotdir, gfs_cycle)
+        me['tau225_gfs'].append(outname)
+
+        if verbose:
+            print('gfs_cycle', gfs_cycle, 'file groups to possibly generate:', me.keys())
+
         ret[gfs_cycle] = me
 
     if force:
@@ -77,6 +78,9 @@ def get_all_work(datadir, plotdir, gfs_cycles, stations, force=False):
                 del ret[gfs_cycle][key]
         if len(ret[gfs_cycle]) == 0:
             del ret[gfs_cycle]
+
+        if verbose and gfs_cycle in ret:
+            print('gfs_cycle', gfs_cycle, 'file groups to actually generate:', ret[gfs_cycle].keys())
 
     return ret
 
@@ -468,6 +472,7 @@ parser.add_argument('--verbose', '-v', action='count', help='more talking')
 args = parser.parse_args()
 datadir = os.path.expanduser(args.datadir)
 plotdir = os.path.expanduser(args.plotdir)
+verbose = args.verbose
 
 emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
@@ -481,7 +486,7 @@ for e in emphasize:
 gfs_cycles = eht_met_forecast.data.get_gfs_cycles(basedir=datadir)
 gfs_cycles = gfs_cycles[-(384//6):]  # never work on anything but the most recent 384 hours
 
-work = get_all_work(datadir, plotdir, gfs_cycles, stations, force=args.force)
+work = get_all_work(datadir, plotdir, gfs_cycles, stations, force=args.force, verbose=verbose)
 if not work:
     print('no work to do', file=sys.stderr)
     exit(0)
@@ -497,7 +502,7 @@ gfs_cycles = gfs_cycles[earliest:]
 start, end = get_dates(args)
 
 for gfs_cycle in gfs_cycles:
-    if args.verbose:
+    if verbose:
         print(gfs_cycle)
 
     do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00e')
@@ -509,7 +514,7 @@ for gfs_cycle in gfs_cycles:
     allint = defaultdict(dict)
 
     for s, station in stations.items():
-        if args.verbose:
+        if verbose:
             print(' ', s)
         try:
             do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, force=args.force)
@@ -517,12 +522,20 @@ for gfs_cycle in gfs_cycles:
             print('station {} gfs_cycle {} saw exception {}'.format(s, gfs_cycle, str(ex)), file=sys.stderr)
             print(traceback.format_exc())
 
-    if args.verbose:
+    if verbose:
         print(' ', '00')
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
-    if args.verbose:
+    if verbose:
         print(' ', 'csv')
     do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)
     do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, plotdir, include=emphasize, force=args.force)
+
+    if verbose:
+        print(' ', 'tau')
+    try:
+        eht_met_forecast.data.write_gfs_eu_style(allest, stations, gfs_cycle, plotdir, verbose=verbose)
+    except Exception as e:
+        print('saw exception calling write_gfs_eu_style: '+repr(e))
+        print(traceback.format_exc())

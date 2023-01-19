@@ -463,7 +463,7 @@ parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
 parser.add_argument('--start', action='store', help='start date of nightly labels, YYYY:MM:DD')
 parser.add_argument('--end', action='store', help='end date of nightly labels, YYYY:MM:DD')
-parser.add_argument('--verbose', action='store', help='more talking')
+parser.add_argument('--verbose', '-v', action='count', help='more talking')
 
 args = parser.parse_args()
 datadir = os.path.expanduser(args.datadir)
@@ -497,23 +497,32 @@ gfs_cycles = gfs_cycles[earliest:]
 start, end = get_dates(args)
 
 for gfs_cycle in gfs_cycles:
+    if args.verbose:
+        print(gfs_cycle)
+
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00e')
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00w', datadir=datadir)
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00wg', datadir=datadir)
+    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00p', datadir=datadir)
+
     allest = defaultdict(dict)
     allint = defaultdict(dict)
 
     for s, station in stations.items():
-
+        if args.verbose:
+            print(' ', s)
         try:
             do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, force=args.force)
         except Exception as ex:
             print('station {} gfs_cycle {} saw exception {}'.format(s, gfs_cycle, str(ex)), file=sys.stderr)
             print(traceback.format_exc())
 
+    if args.verbose:
+        print(' ', '00')
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, include=emphasize, name='00')
-    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00e')
-    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00w', datadir=datadir)
-    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00wg', datadir=datadir)
-    do_00_plot(gfs_cycle, None, start, end, plotdir, stations, force=args.force, include=emphasize, name='00p', datadir=datadir)
     do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=args.force, exclude=emphasize, name='01')
 
+    if args.verbose:
+        print(' ', 'csv')
     do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)
     do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, plotdir, include=emphasize, force=args.force)

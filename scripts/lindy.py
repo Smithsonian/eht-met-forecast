@@ -455,6 +455,53 @@ def get_dates(args):
     return start, end
 
 
+def write_gfs_eu_style(allest, stations, gfs_cycle, plotdir='.', force=False, verbose=0):
+    outname = '{}/{}/tau225_gfs.txt'.format(os.path.expanduser(plotdir), gfs_cycle)
+    if not force and os.path.exists(outname):
+        return
+
+    dfs = []
+    vex_to_eu = dict([(v, k) for k, v in eht_met_forecast.data.eu_to_vex.items()])
+
+    if verbose:
+        print('write gfs eu style, cycle', gfs_cycle)
+    first = True
+    for site in stations:
+        if site not in vex_to_eu:
+            continue
+        if verbose:
+            print(' ', site)
+        est = allest[site][gfs_cycle]
+        est_cols = set(est.columns)
+        est_cols.discard('date')
+        est_cols.discard('est_mean')
+        df = est.drop(columns=list(est_cols))
+        df.rename(columns={'est_mean': site}, inplace=True)
+        if not first:
+            df = df.drop(columns='date')
+        else:
+            first = False
+            df['date'] = df.date.values.astype(float) // 1000000000
+        dfs.append(df)
+    df = pd.concat(dfs, axis=1)
+
+    # rename sites to their preferred vlbimon names
+    vex_to_eu = dict([(v, k) for k, v in eht_met_forecast.data.eu_to_vex.items()])
+    df.rename(columns=vex_to_eu, inplace=True)
+
+    columns = df.columns
+    with open(outname, 'w') as fd:
+        # header: 12-character fields, left justified
+        headerf = '{:12s}' * len(columns)
+        header = headerf.format('time', *vex_to_eu.values())
+        print(header, file=fd)
+
+        rowf = '{:.11f}'
+        for row in df.itertuples():
+            print('{:.0f}.'.format(row[1]), end=' ', file=fd)
+            print(' '.join(rowf.format(v) for v in list(row[2:])), file=fd)
+
+
 # if columns are renamed this can crash, so let's call it first thing to see if it crashes
 eht_met_forecast.data.read_eu()  # ./tau255.txt
 
@@ -535,7 +582,7 @@ for gfs_cycle in gfs_cycles:
     if verbose:
         print(' ', 'tau')
     try:
-        eht_met_forecast.data.write_gfs_eu_style(allest, stations, gfs_cycle, plotdir, verbose=verbose)
+        write_gfs_eu_style(allest, stations, gfs_cycle, plotdir, force=args.force, verbose=verbose)
     except Exception as e:
         print('saw exception calling write_gfs_eu_style: '+repr(e))
         print(traceback.format_exc())

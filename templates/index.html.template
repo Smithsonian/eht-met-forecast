@@ -94,7 +94,7 @@
       });
     </script>
 
-    <h2>{{ stuff.year }} Stations {{ stuff.gfs_cycle}}</h2>
+    <h2>{{ stuff.year }} Stations {{ stuff.gfs_cycle}} <a href="../{{stuff.previous}}/">previous</a> <a href="../{{stuff.current}}/">current</a> <a href="../{{stuff.next}}/">next</a></h2>
 
     {% for s, files in now.items() %}
       <h3>{{ s }} {{ stuff.stations[s].name|escape }}</h3>

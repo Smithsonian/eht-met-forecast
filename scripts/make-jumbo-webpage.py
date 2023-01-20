@@ -10,6 +10,9 @@ import traceback
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from eht_met_forecast import read_stations
+from eht_met_forecast.gfs import latest_gfs_cycle_time
+from eht_met_forecast.data import gfs_cycle_to_dt
+from eht_met_forecast.constants import GFS_TIMESTAMP
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')
@@ -65,6 +68,11 @@ for d in dirs:
     prefixes = {'forecast', 'lindy'}
     groups = defaultdict(list)
 
+    t = gfs_cycle_to_dt(gfs_cycle).timestamp()
+    previous = latest_gfs_cycle_time(now=t, lag=6).strftime(GFS_TIMESTAMP)  # hours
+    current = gfs_cycle
+    next = latest_gfs_cycle_time(now=t, lag=-6).strftime(GFS_TIMESTAMP)  # hours
+
     for f in sorted(files):
         if f.endswith('.csv'):
             continue
@@ -95,6 +103,9 @@ for d in dirs:
         'stations': stations,
         'trackmin': 0.55,  # used to color the trackrank csv
         'trackmax': 0.75,
+        'previous': previous,
+        'current': current,
+        'next': next,
     }
 
     template = env.get_template('index.html.template')

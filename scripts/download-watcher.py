@@ -13,6 +13,7 @@ if os.getenv('SLACK_QUIET'):
 
 token, channel_id = slack_utils.get_slack_token('eht', 'ehtobs_bots')
 webhook = slack_utils.get_slack_webhook('eht', 'ehtobs_bots')
+webhook_urgent = slack_utils.get_slack_webhook('eht', 'ehtobs_bots_urgent')
 
 fname = sys.argv[1]
 
@@ -28,6 +29,7 @@ while time.time() < start + 14400:
         warned = True
 else:
     slack_utils.slack_message('Error: GFS download has not yet started, giving up', webhook)
+    slack_utils.slack_message('Error: GFS download has not yet started, giving up', webhook_urgent)
 
 with open(fname) as fd:
     count = len(fd.read().splitlines())
@@ -48,6 +50,7 @@ while True:
         break
     if not warned and count < 2 and time.time() > start + 18000:
         slack_utils.slack_message('Error: GFS download is going too slowly', webhook)
+        slack_utils.slack_message('Error: GFS download is going too slowly', webhook_urgent)
         warned = True
     time.sleep(60)
 

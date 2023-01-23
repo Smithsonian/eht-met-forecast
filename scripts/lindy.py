@@ -201,13 +201,16 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.close()
 
 
-def do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=None, force=False):
+def do_forecast_csv(gfs_cycle, allest, start, end, plotdir, emphasize=None, force=False):
     outname = '{}/{}/forecast.csv'.format(plotdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
 
     start_doy = start.dayofyear
+    end_doy = end.dayofyear
+    if end_doy < start_doy:
+        raise ValueError('this routine breaks if it straddles the end of the year')
 
     the_data = [allest[site][gfs_cycle]
                 for site in allest if gfs_cycle in allest[site] and (not emphasize or site in emphasize)]
@@ -217,7 +220,7 @@ def do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=None, force=Fal
     data = pd.concat(the_data, ignore_index=True)
     data['doy'] = data.date.dt.dayofyear
 
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy) & (data.date.dt.year >= start.year)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy) & (data.doy <= end_doy) & (data.date.dt.year >= start.year)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
@@ -232,7 +235,7 @@ def do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=None, force=Fal
     data = pd.concat(the_data, ignore_index=True)
     data['doy'] = data.date.dt.dayofyear
 
-    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy) & (data.date.dt.year >= start.year)]
+    nights = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start_doy) & (data.doy <= end_doy) & (data.date.dt.year >= start.year)]
     stats = nights.groupby(['site', 'doy']).median()
 
     df = stats.pivot_table(index='site', columns='doy', values='est_mean')
@@ -576,7 +579,7 @@ for gfs_cycle in gfs_cycles:
 
     if verbose:
         print(' ', 'csv')
-    do_forecast_csv(gfs_cycle, allest, start, plotdir, emphasize=emphasize, force=args.force)
+    do_forecast_csv(gfs_cycle, allest, start, end, plotdir, emphasize=emphasize, force=args.force)
     do_trackrank_csv(gfs_cycle, allint, start, end, args.vex, plotdir, include=emphasize, force=args.force)
 
     if verbose:

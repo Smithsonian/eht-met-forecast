@@ -93,11 +93,13 @@ def do_plot(station, datadir, plotdir, gfs_cycle,
 
     filenames = make_recent_filenames(datadir, name, gfs_cycle)
     if not filenames:
+        plt.close('all')
         return
 
     outname = '{}/{}/forecast_{}_{}_{}.png'.format(plotdir, gfs_cycle, name, gfs_cycle, hours)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
+        plt.close('all')
         return
 
     if verbose:

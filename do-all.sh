@@ -1,9 +1,5 @@
 #!/bin/bash
 
-STATIONS="Aa Ax BAJA BOL BRZ CAT CNI GAM Gl GLTS HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
-DEST=~/github/eht-met-data
-UPLOAD=glindahl@35.199.60.65
-
 # better set lower during an observation
 # if too large, the oldest ones see http 302 (redir)
 BACKFILL=168

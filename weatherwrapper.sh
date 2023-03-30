@@ -11,16 +11,19 @@ $AM -v > /dev/null || exit 1
 
 export GFS=$(python scripts/print-gfs-cycle.py)
 
+. config-2023.sh
+
 date -u
 
 # this will do nothing if the past was already downloaded with wait
 echo downloading in the past
 
 bash do-all.sh
-exit 0
-echo doing plots, if any
+#exit 0
+echo doing plots in the past, if any
 bash do-plots.sh
 bash do-deploy.sh
+#exit 0
 
 date -u
 

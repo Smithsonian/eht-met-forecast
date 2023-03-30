@@ -51,7 +51,7 @@
     </script>
 
     <h2>Forecast Table -- {{ stuff.year }} <a href="forecast.csv">csv</a></h2>
-    (hint: doy 16 is January 16 UT)
+    (hint: doy 102 is April 12 UT)
     <div id="forecast{{ stuff.year }}"></div>
     <script type="text/javascript" charset="utf-8">
       d3.text("forecast.csv", function(data) {

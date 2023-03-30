@@ -134,11 +134,23 @@ or you can use pygrib.open() instead, to not have an index, it's supposedly slow
 
 
 def grib2_to_am_layers(gribname, lat, lon, alt):
-    grbindx = pygrib.index(gribname, "name", "level")  # normal code
+    grbindx = pygrib.index(gribname, "name", "level")  # on-disk
+
     # in memory -- not sure what syntax actually works for this?
     # need to .index() after creation
     # gribfile = pygrib.fromstring(grib_buffer)
     # gribindx = ???
+
+    # is the grib valid? Categorical snow is our known occasional crash
+    try:
+        grbindx.select(name='Categorical snow', level=0)
+    except ValueError:
+        print('invalid grib seen', file=sys.stderr)
+        names = set()
+        for mess in pygrib.open(gribname):
+            names.add(mess['name'])
+        print(' grib names are:', sorted(names))
+        raise
 
     leftlon, rightlon, bottomlat, toplat = box(lat, lon, LATLON_DELTA)
 

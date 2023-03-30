@@ -59,8 +59,13 @@ def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=F
         except Exception as e:
             # example: RuntimeError: b'End of resource reached when reading message'
             # example: UserWarning: file temp.grb has multi-field messages, keys inside multi-field messages will not be indexed correctly
-            grib_problem = str(e)
+            # example: key: csnow exception: no matches found
+            # example: problem reading grib: ValueError('no matches found',)
+
+            grib_problem = repr(e)
             print('problem reading grib:', grib_problem, file=sys.stderr)
+            print('  problem grib length is', len(grib_buffer), file=sys.stderr)
+            # for csnow exception, example lengths 28k and 13k
 
     my_stdout = io.StringIO()
 

@@ -261,10 +261,13 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
     daysdoy = [d.dayofyear for d in daysut]
     days = np.array([d.value for d in daysut])
 
+    count_345 = 0
     for vex in vexes:
         track = os.path.splitext(os.path.basename(vex))[0]
         a = vvex.parse(open(vex).read())
         is345 = '345 GHz' in list(a['EXPER'].values())[0]['exper_description']
+        if is345:
+            count_345 += 1
         station_loc = dict((b['site_ID'], xyz2loc(b['site_position']))
                            for b in a['SITE'].values())
         source_loc = dict((b, SkyCoord(c['ra'], c['dec'], equinox=c['ref_coord_frame']))
@@ -301,6 +304,9 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
         trackrank[track] = score/total
     df = pd.DataFrame.from_dict(trackrank, orient='index', columns=daysdoy).sort_index()
     df.to_csv(outname)
+
+    if count_345 != 1:
+        raise ValueError('expected to see exactly one 345 ghz track')
 
 
 def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, include=None, exclude=None, name='00', datadir='.'):

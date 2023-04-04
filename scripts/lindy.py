@@ -367,7 +367,11 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
         if allest:
             est = allest[site][gfs_cycle]
-            plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=1.5, ls=ls)
+            lw = 1.5
+            if site in {'Aa', 'Gl', 'Mg', 'Nn', 'Sw'}:
+                # also a Remo request
+                lw = 2.25
+            plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=lw, ls=ls)
             some = True
         elif name == '00w':
             if wind_data is not None and site in wind_data:
@@ -420,8 +424,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     elif name == '00p':
         plt.ylim(0, 1.0)  # precip %
     else:
-        plt.ylim(0, 1.0)
-        plt.yticks(np.arange(0, 1.0, .1))
+        plt.ylim(0, 0.5)
+        plt.yticks(np.arange(0, 0.5, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
     # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Lindy said this was needed on cloud machines?!

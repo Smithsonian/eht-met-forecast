@@ -358,19 +358,23 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                 if other_site != other_name:
                     label += ' ' + other_name
 
-        ls_list = ['solid', 'dashed', 'dashdot']  # , 'dotted']
-        i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
-        ls = ls_list[i]
-
-        if site == 'Sw':  # Remo likes this :-D
+        ls_list = ['dashed', 'dashdot']  # , 'solid', 'dotted']
+        hz345 = {'Aa', 'Gl', 'Mg', 'Nn', 'Sw'}
+        if site in hz345:
             ls = 'solid'
+        else:
+            i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
+            ls = ls_list[i]
+
+        #if site == 'Sw':  # Remo likes this :-D
+        #    ls = 'solid'
 
         if allest:
             est = allest[site][gfs_cycle]
             lw = 1.5
             if site in {'Aa', 'Gl', 'Mg', 'Nn', 'Sw'}:
                 # also a Remo request
-                lw = 2.25
+                lw = 3.0
             plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=lw, ls=ls)
             some = True
         elif name == '00w':

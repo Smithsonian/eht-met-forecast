@@ -30,7 +30,7 @@ date -u
 # the rest of the script is for when we are observing
 
 if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "12UT weather download starting, should finish around 1720UT"
+  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download starting, should finish around 1720UT"
   DEST=~/github/eht-met-data
   WATCHFILE=$DEST/Aa/$GFS
   python scripts/download-watcher.py $WATCHFILE &
@@ -43,7 +43,7 @@ echo downloading latest with wait
 FLUSH="--flush Aa" WAIT=--wait bash do-all.sh
 
 if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "12UT weather download finished, charts in another 20 minutes"
+  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download finished, charts in another 20 minutes"
 fi
 
 echo doing plots
@@ -51,10 +51,10 @@ bash do-plots.sh
 bash do-deploy.sh
 
 if echo $GFS | grep -q 06:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|06UT weather charts are available>"
+  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|0600UT weather charts are available>"
 fi
 if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|12UT weather charts are available>"
+  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|1200UT weather charts are available>"
 fi
 
 date -u

@@ -7,6 +7,7 @@ from collections import defaultdict
 import datetime
 import hashlib
 import traceback
+import time
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -326,8 +327,15 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             for site in stations:
                 wind_data[site] = eht_met_forecast.data.read_wind(site, gfs_cycle, basedir=datadir)
         else:
-            eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
-            t = os.stat('./tau225.txt').st_mtime  # XXX
+            # the EU download happens rougly at the same time as this plot, so there's a race
+            try:
+                eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
+                t = os.stat('./tau225.txt').st_mtime  # XXX
+            except FileNotFoundError:
+                time.sleep(10)
+                eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
+                t = os.stat('./tau225.txt').st_mtime  # XXX
+
             t = datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc)
             eu_download_time = t.strftime(GFS_TIMESTAMP_FULL)
 

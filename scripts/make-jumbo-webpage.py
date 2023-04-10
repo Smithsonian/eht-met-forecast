@@ -27,7 +27,7 @@ emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
 
 not_stations = {
-    '00': 'Current stations GFS weather',
+    '00': 'Current stations GFS weather (estimators, scroll down for full details per station)',
     '00e': 'Current stations EU weather',
     '00w': 'Current stations GFS 10m wind',
     '00wg': 'Current stations GFS wind gusts > 10 m/s',

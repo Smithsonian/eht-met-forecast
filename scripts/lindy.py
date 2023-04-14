@@ -182,9 +182,9 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.ylim(0, 1.0)
     plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-    plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
-    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Lindy said this was needed on cloud machines?!
-    plt.gcf().autofmt_xdate()
+    #plt.gca().fmt_xdata = mdates.DateFormatter('%Y %a')  # this does nothing?
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b-%d\n%a'))  # this does something
+    #plt.gcf().autofmt_xdate()  # this makes the labels be angled, even if they are narrow
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')
@@ -439,9 +439,9 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         plt.ylim(0, 0.5)
         plt.yticks(np.arange(0, 0.5, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-    plt.gca().fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
-    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Lindy said this was needed on cloud machines?!
-    plt.gcf().autofmt_xdate()
+    #plt.gca().fmt_xdata = mdates.DateFormatter('%Y %a')  # this does nothign?
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b-%d\n%a'))  # this does something
+    #plt.gcf().autofmt_xdate()  # this makes the labels be angled, even if they are narrow
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
     plt.legend(loc='upper right')

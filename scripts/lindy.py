@@ -183,7 +183,7 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
     plt.yticks(np.arange(0, 1.0, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     #plt.gca().fmt_xdata = mdates.DateFormatter('%Y %a')  # this does nothing?
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b-%d\n%a'))  # this does something
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %d\n%a'))  # this does something
     #plt.gcf().autofmt_xdate()  # this makes the labels be angled, even if they are narrow
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)
@@ -440,7 +440,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         plt.yticks(np.arange(0, 0.5, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     #plt.gca().fmt_xdata = mdates.DateFormatter('%Y %a')  # this does nothign?
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b-%d\n%a'))  # this does something
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %d\n%a'))  # this does something
     #plt.gcf().autofmt_xdate()  # this makes the labels be angled, even if they are narrow
     plt.autoscale(enable=True, axis='x', tight=True)
     plt.grid(alpha=0.25)

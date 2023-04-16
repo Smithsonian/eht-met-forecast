@@ -9,6 +9,7 @@ import os.path
 import sys
 import datetime
 import shutil
+import time
 
 fname = sys.argv[1]
 result = os.stat(fname)
@@ -22,3 +23,8 @@ new_fname = fname + '.' + timestamp
 
 if not os.path.isfile(new_fname):
     shutil.copy2(fname, new_fname)
+
+delta_t_hours = round((time.time() - mtime) / 3600, 1)
+if delta_t_hours > 12.0:
+    print('EU forecast is mysteriously {} hours old'.format(delta_t_hours))
+    exit(1)

@@ -10,10 +10,10 @@ stations = [
     # SMAR=SMA reference antenna
     # PICO=PICOVEL=IRAM30M
     # NOEMA=PDBURE
-    # THULE=GLT
+    # PITUFFIK=GLT
     {'name': 'NOEMA/PDBURE', 'vex': 'Nn', 'x': 4524000.43000, 'y': 468042.14000, 'z': 4460309.76000},  # was Nq, now Nn
     {'name': 'PICOVEL/IRAM30M', 'vex': 'Pv', 'x': 5088967.74544, 'y': -301681.18586, 'z': 3825012.20561},
-    {'name': 'THULE/GLT', 'vex': 'Gl', 'x': 541547.00000, 'y': -1387978.60000, 'z': 6180982.00000},
+    {'name': 'PITUFFIK/GLT', 'vex': 'Gl', 'x': 541547.00000, 'y': -1387978.60000, 'z': 6180982.00000},
     {'name': 'SPT', 'vex': 'Sz', 'x': 0.01000, 'y': 0.01000, 'z': -6359609.70000},
     {'name': 'APEX', 'vex': 'Ax', 'x': 2225039.52970, 'y': -5441197.62920, 'z': -2479303.35970},
     {'name': 'ALMA', 'vex': 'Aa', 'x': 2225061.16360, 'y': -5440057.36994, 'z': -2481681.15054},

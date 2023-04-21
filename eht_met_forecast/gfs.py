@@ -156,7 +156,8 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
             elif r.status_code in {403, 429, 503}:
                 # 403, 429: I've never seen NOMADS send these but they are typical "slow down" status codes
                 # NOMADS behind CDN will start sending 403s Aug 23, 2022 ?? the 403 has a reference number in the content
-                # saw 503 twice in Dec 2022: "Error: An error occurred while processing your request." (wrapped in html)
+                #   this didn't happen, they are still sending 302 with no Location: for slow down
+                # 503 example: Dec 2022, Apr 2023: "Error: An error occurred while processing your request." (wrapped in html)
                 errflag = 1
                 print('Received surprising retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 #if r.status_code == 403 and r.content:

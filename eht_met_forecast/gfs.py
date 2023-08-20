@@ -153,11 +153,10 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                     retry += 1  # free retry
                     retry_duration = jiggle(FOUROHFOUR_DELAY)
                 print('Data not yet available (404)', file=sys.stderr, end='')
-            elif r.status_code in {403, 429, 503}:
+            elif r.status_code in {403, 429}:
                 # 403, 429: I've never seen NOMADS send these but they are typical "slow down" status codes
                 # NOMADS behind CDN will start sending 403s Aug 23, 2022 ?? the 403 has a reference number in the content
                 #   this didn't happen, they are still sending 302 with no Location: for slow down
-                # 503 example: Dec 2022, Apr 2023: "Error: An error occurred while processing your request." (wrapped in html)
                 errflag = 1
                 print('Received surprising retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 #if r.status_code == 403 and r.content:
@@ -167,11 +166,12 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:
                     stats['ratelimit_surprising'] += 1
-            elif r.status_code in {302} and 'Location' not in r.headers:
+            elif (r.status_code in {302} and 'Location' not in r.headers) or r.status_code in {503}:
                 # here's what they started sending after 4/20/2021:
                 # HTTP/1.1 302 Your allowed limit has been reached. Please go to https://www.weather.gov/abusive-user-block for more info
                 # This 302 does not have a Location: header, so we test for it to make it less likely we'll end up in an infinite loop
                 # These still happen (but very rarely) after the aug 2022 change to using a CDN
+                # 503 example: Dec 2022, Apr 2023: "Error: An error occurred while processing your request." (wrapped in html)
                 errflag = 1
                 if actual_tries > 1:
                     # this happens ~ 33 times per run (out of 209) so make it quieter
@@ -181,7 +181,10 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 retry += 1  # free retry
                 retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:
-                    stats['ratelimit_302_no_location'] += 1
+                    if r.status_code in {503}:
+                        stats['ratelimit_503'] += 1
+                    else:
+                        stats['ratelimit_302_no_location'] += 1
             elif r.status_code in {302}:
                 # ? this can happen if you ask for a date too far in the past
                 # allow_redirects=True is the default for .get() so by default the redir will be followed

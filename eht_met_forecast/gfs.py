@@ -242,7 +242,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                     print("  Retrying...", file=sys.stderr)
                     if r:
                         try:  # I don't think this can fail, but anyway
-                            text = r.text[:100]
+                            text = r.text[:100].replace('\n', ' ')
                             if text:
                                 print('  Text was:', text, file=sys.stderr)
                         except Exception:

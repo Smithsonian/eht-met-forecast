@@ -160,8 +160,11 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                 errflag = 1
                 print('Received surprising retryable status ({})'.format(r.status_code), file=sys.stderr, end='')
                 #if r.status_code == 403 and r.content:
-                if r.content:
-                    print(', text: '+r.text[:100], file=sys.stderr, end='')
+                if r.text:
+                    try:  # I don't think this can fail, but anyway
+                        print(', text: '+r.text[:100].replace('  ', ' '), file=sys.stderr, end='')
+                    except Exception:
+                        pass
                 retry += 1  # free retry
                 retry_duration = jiggle(RATELIMIT_DELAY)
                 if stats:
@@ -242,7 +245,7 @@ def fetch_gfs_download(url, params, wait=False, verbose=False, stats=None):
                     print("  Retrying...", file=sys.stderr)
                     if r:
                         try:  # I don't think this can fail, but anyway
-                            text = r.text[:100].replace('\n', ' ')
+                            text = r.text[:100].replace('\n', ' ').replace('  ', ' ')
                             if text:
                                 print('  Text was:', text, file=sys.stderr)
                         except Exception:

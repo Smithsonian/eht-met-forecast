@@ -176,7 +176,7 @@ def grib2_to_am_layers(gribname, lat, lon, alt):
                 name="Geopotential Height", level=lev)[0].values, u, v))
             z.append(x)
         except:
-            print('point 1', file=sys.stderr)
+            print('point 1, level=', lev, file=sys.stderr)
             raise  # XXX debug these bad gribs
             z.append(BADVAL)
         try:

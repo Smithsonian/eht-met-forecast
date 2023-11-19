@@ -1,3 +1,5 @@
+export SLACK_QUIET=1
+
 export STATIONS="Aa Ax BAJA BOL BRZ CAT CNI GAM Gl GLTS HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT"
 export START=2023:04:12  # in UT. traka starts at 2200 ut 11
 export END=2023:04:23

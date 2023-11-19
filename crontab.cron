@@ -1,0 +1,25 @@
+ SAO
+MAILTO=lindahl@pbm.com
+
+# this machine is on PST8PDT
+# UTC would have been a better choice!
+
+# PST
+3 5,11,17,23 * * * bin/mycron lindahl "GFS download" "bash ~/github/eht-met-forecast/weatherwrapper.sh"
+# PDT
+#3 0,6,12,18 * * * bin/mycron lindahl "GFS download" "bash ~/github/eht-met-forecast/weatherwrapper.sh"
+# UTC
+#3 1,7,13,19 * * * bin/mycron lindahl "GFS download" "bash ~/github/eht-met-forecast/weatherwrapper.sh"
+
+# "chronic" is in a package named "moreutils"
+# newer chronic versions have -ve flags, consider using them
+
+# PST
+7 4,16 * * * chronic bash ~/github/eht-met-forecast/eurodownload.sh
+17 11,23 * * * chronic bash ~/github/eht-met-forecast/eurodownload.sh
+# PDT
+#7 5,17 * * * bin/mycron lindahl "Euro download" "bash ~/github/eht-met-forecast/eurodownload.sh"
+#17 0,12 * * * bin/mycron lindahl "Euro download" "bash ~/github/eht-met-forecast/eurodownload.sh"
+# UTC
+#7 0,12 * * * bin/mycron lindahl "Euro download" "bash ~/github/eht-met-forecast/eurodownload.sh"
+#17 7,19 * * * bin/mycron lindahl "Euro download" "bash ~/github/eht-met-forecast/eurodownload.sh"

@@ -1,6 +1,8 @@
 #!/bin/bash
 # it is important for the above line to be bash and not sh
 
+set -e
+
 . ~/venv/eht-met-forecast/bin/activate
 cd ~/github/eht-met-forecast
 
@@ -19,11 +21,11 @@ date -u
 echo downloading in the past
 
 bash do-all.sh
-#exit 0
+#exit 0  # download in the past, no plots
 echo doing plots in the past, if any
 bash do-plots.sh
 bash do-deploy.sh
-#exit 0
+exit 0  # download in the past, yes plots
 
 date -u
 

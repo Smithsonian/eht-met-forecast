@@ -22,13 +22,10 @@ stations = [
     {'name': 'SMTO', 'vex': 'Mg', 'x': -1828796.20000, 'y': -5054406.80000, 'z': 3427865.20000},
     {'name': 'SMAP', 'vex': 'Sw', 'x': -5464555.49300, 'y': -2492927.98900, 'z': 2150797.17600},
     {'name': 'JCMT', 'vex': 'Mm', 'x': -5464584.67600, 'y': -2493001.17000, 'z': 2150653.98200},
-    # KVN Pyeonchang
+    # KVN Pyeonchang -- KPC
     # as reported by Taehyun in XYZ to Remo
-    # X = -3149221.052
-    # Y = 3966404.922
-    # Z = 3864830.701
+    {'name': 'KVN-Pyeonchang', 'x': -3149221.052, 'y': 3966404.922, 'z': 3864830.701},
     # 'lat': 37.533361044, 'lon': 128.44864971, 'alt': 541
-    {'name': 'KPC/KVN-Pyeonchang', 'x': -3149221.052, 'y': 3966404.922, 'z': 3864830.701},
 
     # don't use the numbers from this pdf, they are apparently wrong
     # https://radio.kasi.re.kr/status_report/files/KVN_status_report_2023.pdf
@@ -36,7 +33,6 @@ stations = [
     # "alt": 1201,
     # "lat": 37.231,
     # "lon": -118.283,
-
 
     # future... no vex assigned
     {'name': 'OVRO', 'x': -2409598.8669, 'y': -4478350.4481, 'z': 3838603.7849},
@@ -67,6 +63,9 @@ for s in stations:
     }
     if 'vex' in s:
         geod['vex'] = s['vex']
+    else:
+        if '/' in s['name']:
+            raise ValueError('name must be a valid directory name: '+s['name'])
     geodetic_stations.append(geod)
 
 print(json.dumps(geodetic_stations, sort_keys=True, indent=4))

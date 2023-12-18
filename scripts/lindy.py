@@ -307,7 +307,8 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
     df.to_csv(outname)
 
     if count_345 != 1:
-        raise ValueError('expected to see exactly one 345 ghz track')
+        #raise ValueError('expected to see exactly one 345 ghz track')
+        print('expected to see exactly one 345 ghz track', file=sys.stderr)
 
 
 def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, include=None, exclude=None, name='00', datadir='.'):

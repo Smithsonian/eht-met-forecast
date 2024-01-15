@@ -55,7 +55,7 @@ env = Environment(
     autoescape=select_autoescape(['html'])
 )
 
-dirs = glob.glob(args.plotdir + '/202[3456789]*')
+dirs = glob.glob(args.plotdir + '/202[456789]*')
 
 symlinks = set(['lindy_{}.png'.format(ns) for ns in not_stations.keys()])
 

@@ -30,6 +30,7 @@ exit 0  # download in the past, yes plots
 date -u
 
 # the rest of the script is for when we are observing
+# incremental download, slack notifications
 
 if echo $GFS | grep -q 12:00:00; then
   python scripts/slack-post.py eht ehtobs_bots "1200UT weather download starting, should finish around 1720UT"

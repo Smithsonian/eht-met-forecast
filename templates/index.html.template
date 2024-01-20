@@ -51,7 +51,7 @@
     </script>
 
     <h2>Forecast Table -- {{ stuff.year }} <a href="forecast.csv">csv</a></h2>
-    (hint: doy 102 is April 12 UT)
+    (hint: doy 23 is Jan 23 UT)
     <div id="forecast{{ stuff.year }}"></div>
     <script type="text/javascript" charset="utf-8">
       d3.text("forecast.csv", function(data) {
@@ -95,6 +95,7 @@
     </script>
 
     <h2>{{ stuff.year }} Stations {{ stuff.gfs_cycle}} <a href="../{{stuff.previous}}/">previous</a> <a href="../{{stuff.current}}/">current</a> <a href="../{{stuff.next}}/">next</a></h2>
+    (note: shaded area of these graphs is 0000-1200 UTC each day)
 
     {% for s, files in now.items() %}
       <h3>{{ s }} {{ stuff.stations[s].name|escape }}</h3>

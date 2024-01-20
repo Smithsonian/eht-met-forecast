@@ -24,7 +24,7 @@ from eht_met_forecast import read_stations
 import vex as vvex
 
 schedule_start = '0 hours'  # midnight
-schedule_end = '15 hours'
+schedule_end = '12 hours'
 
 # dress rehearsal
 #schedule_start = '6.5 hours'

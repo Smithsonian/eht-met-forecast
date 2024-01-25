@@ -25,7 +25,7 @@ bash do-all.sh
 echo doing plots in the past, if any
 bash do-plots.sh
 bash do-deploy.sh
-exit 0  # download in the past, yes plots
+exit 0  # download in the past, past plots
 
 date -u
 

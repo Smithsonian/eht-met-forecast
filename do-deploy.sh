@@ -23,9 +23,9 @@ rm -f eht-met-plots/latest/lindy_00p.png
 
 # this is eht-work ... the homedirs are mounted using NFS so this rsync can be
 # done to any eht cloud server
-rsync -av eht-met-plots/ glindahl@35.199.60.65:public_html/eht-met-plots/
+rsync -av eht-met-plots/ $UPLOAD:public_html/eht-met-plots/
 
 # Lindy sometimes wants to access this data, so keep it up-to-date
-ssh glindahl@35.199.60.65 "cd eht-met-data && git pull"
+ssh $UPLOAD "cd eht-met-data && git pull"
 
 # hint: https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest

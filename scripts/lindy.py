@@ -26,10 +26,6 @@ import vex as vvex
 schedule_start = '0 hours'  # midnight
 schedule_end = '12 hours'
 
-# dress rehearsal
-#schedule_start = '6.5 hours'
-#schedule_end = '8.75 hours'
-
 before_start = '1 day'
 after_end = '1 day'
 close_sites = {'Ax': 'Aa', 'Mm': 'Sw'}
@@ -333,7 +329,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             wind_data = {}
             for site in stations:
                 wind_data[site] = eht_met_forecast.data.read_wind(site, gfs_cycle, basedir=datadir)
-        else:
+        elif name == '00e':
             # the EU download happens rougly at the same time as this plot, so there's a race
             try:
                 eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
@@ -345,6 +341,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
             t = datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc)
             eu_download_time = t.strftime(GFS_TIMESTAMP_FULL)
+        else:
+            raise ValueError('00_plot does not know how to make '+name)
 
     some = False
     actual_sites = set()
@@ -361,6 +359,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         if site in close_sites and close_sites[site] in actual_sites:
             continue
 
+        # expand site names to have all possible aliases
         sname = stations[site]['name']
         label = site
         if site != sname:
@@ -373,16 +372,17 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                 if other_site != other_name:
                     label += ' ' + other_name
 
+        # XXX consider moving this list outside the script?
+        # used to pick line style/width
+        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Nn', 'Pv', 'Sw'}
+
+        # pick line styles and line widths for each station, keeping them consistent
         ls_list = ['dashed', 'dashdot']  # , 'solid', 'dotted']
-        hz345 = {'Aa', 'Gl', 'Mg', 'Nn', 'Sw'}
         if site in hz345:
             ls = 'solid'
         else:
             i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
             ls = ls_list[i]
-
-        #if site == 'Sw':  # Remo likes this :-D
-        #    ls = 'solid'
 
         if allest:
             est = allest[site][gfs_cycle]
@@ -418,19 +418,27 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                         sump += wd[col]
                     plt.plot(wd.date.values, sump, ls=ls, label=label + ' precip')
                     some = True
+        elif name == '00e':
+            if eu_data is not None:
+                if site in eu_data:
+                    plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
+                    some = True
+                else:
+                    # XXX if site is not in eu_data, we should still plot something and then disappear the label
+                    # to keep the station colors the same
+                    pass
         else:
-            if eu_data is not None and site in eu_data:
-                plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
-                some = True
+            raise ValueError('00_plot does not know how to make '+name)
 
     if not some:
         plt.close()
         return
+
+    # vertical line at the forcast time
+    # but not for EU, because we don't know when the forecast was run
     if allest or name in {'00w', '00wg', '00p'}:
-        # vertical line at the forcast time, but not for EU
         plt.axvline(date0, color='black', ls='--')
-    #(first, last) = (pd.Timestamp(2020, 3, 26), pd.Timestamp(2020, 4, 6))
-    #(first, last) = (pd.Timestamp(2021, 1, 28), pd.Timestamp(2021, 1, 29))
+
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
         plt.axvspan(d+pd.Timedelta(schedule_start), d+pd.Timedelta(schedule_end), color='black', alpha=0.05, zorder=-10)
@@ -443,7 +451,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     elif name == '00p':
         plt.ylim(0, 1.0)  # precip %
     else:
-        plt.ylim(0, 0.5)
+        plt.ylim(0, 0.5)  # tau plot
         plt.yticks(np.arange(0, 0.5, .1))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     #plt.gca().fmt_xdata = mdates.DateFormatter('%Y %a')  # this does nothign?
@@ -461,9 +469,12 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         label = 'GFS wind gust ' + gfs_cycle
     elif name == '00p':
         label = 'GFS precip ' + gfs_cycle
-    else:
+    elif name == '00e':
         label = 'EU downloaded ' + eu_download_time
-    plt.gca().add_artist(AnchoredText(label, loc=2))
+    else:
+        raise ValueError('00_plot does not know how to make '+name)
+
+    plt.gca().add_artist(AnchoredText(label, loc=2))  # upper left
 
     plt.xlabel('UT date')
     if name in {'00w', '00wg'}:
@@ -471,7 +482,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
     elif name in {'00p'}:
         plt.ylabel('chance')
     else:
-        plt.ylabel('tau225')
+        plt.ylabel('tau225')  # GFS and EU
+
     plt.xlim(days[0]-pd.Timedelta(before_start), days[-1]+pd.Timedelta(after_end))
     wide(14, 5)
     plt.savefig(outname, dpi=150)

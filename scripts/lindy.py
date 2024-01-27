@@ -378,7 +378,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
         # pick line styles and line widths for each station, keeping them consistent
         ls_list = ['dashed', 'dashdot']  # , 'solid', 'dotted']
-        if site in hz345:
+        if site not in hz345:
             ls = 'solid'
         else:
             i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
@@ -387,9 +387,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
         if allest:
             est = allest[site][gfs_cycle]
             lw = 1.5
-            if site in {'Aa', 'Gl', 'Mg', 'Nn', 'Sw'}:
-                # also a Remo request
-                lw = 3.0
+            if site in hz345:
+                lw = 3.0  # Remo request to really emphasize 345
             plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=lw, ls=ls)
             some = True
         elif name == '00w':

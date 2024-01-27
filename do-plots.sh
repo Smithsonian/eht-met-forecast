@@ -8,7 +8,7 @@ DATA=~/github/eht-met-data-prod
 python scripts/scott.py --verbose --plotdir ./eht-met-plots/ --datadir $DATA 384 &
 python scripts/scott.py --verbose --plotdir ./eht-met-plots/ --datadir $DATA 120 &
 
-python scripts/lindy.py --vex $VEX --emphasize $EMPHASIZE --start "$START" --end "$END" --datadir $DATA &
+python scripts/lindy.py $VEX --emphasize $EMPHASIZE --start "$START" --end "$END" --datadir $DATA &
 
 wait
 date -u

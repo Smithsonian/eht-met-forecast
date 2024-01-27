@@ -248,6 +248,12 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):
         return
+    if not vexes:
+        # when we aren't observing, the vexes are optional
+        # create empty output
+        with open(outname, mode='w', encoding='utf8') as fd:
+            pass
+
 
     fmt_in = '%Yy%jd%Hh%Mm%Ss'
     # ['4524000.43000 m', '468042.14000 m', '4460309.76000 m']
@@ -473,11 +479,18 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
 
 def get_dates(args):
-    def get_one(s):
+    def get_parts(s):
         return [int(part) for part in s.split(':')]
 
-    start = pd.Timestamp(*get_one(args.start))
-    end = pd.Timestamp(*get_one(args.end))
+    def interpret_date(s):
+        if ' ' not in s:
+            return pd.Timestamp(*get_parts(s))
+        else:
+            # when not observing, we pass in start "0 days" end "14 days"
+            return pd.Timestamp('now') + pd.Timedelta(s)
+
+    start = interpret_date(args.start)
+    end = interpret_date(args.end)
     return start, end
 
 

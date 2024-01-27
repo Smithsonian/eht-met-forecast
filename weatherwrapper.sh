@@ -13,7 +13,7 @@ $AM -v > /dev/null || exit 1
 
 export GFS=$(python scripts/print-gfs-cycle.py)
 
-. config-2024dr.sh
+. config-nonobs.sh
 
 date -u
 

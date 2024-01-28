@@ -384,7 +384,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
             ls = ls_list[i]
 
-        if allest:
+        if allest:  # GFS tau
             est = allest[site][gfs_cycle]
             lw = 1.5
             if site in hz345:
@@ -423,9 +423,13 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                     plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
                     some = True
                 else:
-                    # XXX if site is not in eu_data, we should still plot something and then disappear the label
+                    # if site is not in eu_data, we should still plot something and then disappear the label
                     # to keep the station colors the same
-                    pass
+                    somesite = eu_data.columns[1]  # I think [0] is 'date' ?
+                    something = eu_data[somesite].copy(deep=True)
+                    something[:] = np.NAN
+                    plt.plot(eu_data.date.values, something, ls=ls, label=None)
+                    some = True
         else:
             raise ValueError('00_plot does not know how to make '+name)
 

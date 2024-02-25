@@ -240,6 +240,8 @@ def do_forecast_csv(gfs_cycle, allest, start, end, plotdir, emphasize=None, forc
 
 
 def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None, force=False):
+    if not vexes:
+        return
     outname = '{}/{}/trackrank.csv'.format(plotdir, gfs_cycle)
     os.makedirs(os.path.dirname(outname), exist_ok=True)
     if not force and os.path.exists(outname):

@@ -9,4 +9,5 @@ export VEX=
 export EMPHASIZE="Nn:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm:Pv:KVN-Pyeonchang"
 
 export DEST=~/github/eht-met-data
+# eht-work -- NFS mounts homedirs from eht-filer
 export UPLOAD=glindahl@35.199.60.65

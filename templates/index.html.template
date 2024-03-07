@@ -133,6 +133,8 @@
 
     <h2>Future Stations</h2>
 
+    <p>Clues: BAJA (Mexico), CNI (Canary Islands), GAM (Namibia), GLTS (Greenland summit), HAY (Haystack), JELM (Wyoming), LAS (Chile), LLA (Argentina), OVRO (California)
+
     {% for s, files in future.items() %}
       <h3>{{ s }} {{ stuff.stations[s].name }}</h3>
       {%- for f in files -%}

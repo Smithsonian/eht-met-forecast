@@ -1,4 +1,4 @@
-export STATIONS="Aa Ax BAJA BOL BRZ CAT CNI GAM Gl GLTS HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT KVN-Pyeonchang"
+export STATIONS="Aa Ax BAJA BOL BRZ CAT CNI GAM Gl GLTS HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT KVN-Pyeongchang"
 export START=2024:01:23  # in UT.
 export END=2024:01:25
 export VEX=dr2024-schedules/*.vex

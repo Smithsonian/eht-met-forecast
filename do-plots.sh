@@ -1,8 +1,5 @@
 date -u
 
-# this data directory should be the checked in data, with no partial files
-DATA=~/github/eht-met-data-prod
-
 (cd $DATA && git pull)
 
 python scripts/scott.py --verbose --plotdir ./eht-met-plots/ --datadir $DATA 384 &

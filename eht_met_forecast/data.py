@@ -16,7 +16,8 @@ def dt_to_gfs_cycle(gfs_cycle_dt):
 
 
 def get_gfs_cycles(basedir='.'):
-    files = glob.glob(expanduser('{}/*/*'.format(basedir)))
+    # don't be confused by pre2024 etc
+    files = glob.glob(expanduser('{}/*/2*'.format(basedir)))
     if not files:
         raise ValueError('no files')
 

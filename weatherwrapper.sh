@@ -21,11 +21,11 @@ date -u
 echo downloading in the past
 
 bash do-all.sh
-#exit 0  # download in the past, no plots
+#exit 0  # only download in the past, no plots
 echo doing plots in the past, if any
 bash do-plots.sh
 bash do-deploy.sh
-exit 0  # download in the past, past plots
+exit 0  # only download in the past, past plots
 
 date -u
 

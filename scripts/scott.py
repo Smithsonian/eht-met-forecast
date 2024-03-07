@@ -12,7 +12,6 @@
 
 import argparse
 import datetime
-import glob
 import os
 from os.path import expanduser
 import sys

@@ -53,7 +53,7 @@ def read_one(vex, gfs_cycle, basedir='.'):
     if data.empty:
         return
 
-    data.set_index('date').resample('1H').interpolate('linear').reset_index()
+    data = data.set_index('date').resample('1H').interpolate('linear').reset_index()
 
     data['date0'] = data.iloc[0]['date']
     data['age'] = data['date'] - data['date0']

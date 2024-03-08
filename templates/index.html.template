@@ -98,6 +98,31 @@
     (note: shaded area of these graphs is 0000-1200 UTC each day)
 
     {% for s, files in now.items() %}
+      {% if s == 'Aa' %}
+<br>
+Vlbimon links:
+<a target="_blank" href="https://vlbimon1.science.ru.nl/overview.html">Overview</a>
+·
+<a target="_blank" href="https://vlbimon1.science.ru.nl/weathermapcolumns.html">Weather tool (2 col wind and clouds)</a>
+·
+<a target="_blank" href="https://vlbimon1.science.ru.nl/map.html">World map</a>
+·
+<a target="_blank" href="https://vlbimon1.science.ru.nl/celestial.html">Celestial map</a>
+·
+<a target="_blank" href="https://vlbimon1.science.ru.nl/weather.html">Tau plots</a>
+·
+<a target="_blank" href="https://vlbimon1.science.ru.nl/schedule.html">Schedule</a>
+<br>
+
+Meteoblue forecasts:
+<a target="_blank" href="https://www.meteoblue.com/en/weather/forecast/multimodel/plateau-de-bure_frankreich_3029537?fcstlength=168">NOEMA</a>
+·
+<a target="_blank" href="https://www.meteoblue.com/en/weather/forecast/multimodel/37.066N-3.393E2847_Europe%2FMadrid?fcstlength=168">PICO</a>
+·
+<a target="_blank" href="https://www.meteoblue.com/en/weather/forecast/multimodel/-23.024N-67.754E5034_America%2FSantiago?fcstlength=168">ALMA/APEX</a>
+<br>
+
+      {% endif %}
       <h3>{{ s }} {{ stuff.stations[s].name|escape }}</h3>
       {%- for f in files -%}
         {% if f.startswith('lindy') %}

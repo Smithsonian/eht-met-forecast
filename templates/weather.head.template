@@ -1,0 +1,29 @@
+  <style>
+    .wimage {
+      display: none;
+      width: 344px;
+      height: 215px;
+    }
+    .wbutton_open {
+      display: inline;
+      vertical-align: top;
+    }
+    .wbutton_close {
+      display: none;
+      vertical-align: bottom;
+    }
+  </style>
+  <script>
+    function show_weather(image, button) {
+      document.getElementById(image).style.display = "inline";
+      document.getElementById(button).style.display = "none";
+      document.getElementById(button+'_close').style.display = "inline";
+      document.getElementById(button+'_close_br').style.display = "inline";
+    }
+    function unshow_weather(image, button) {
+      document.getElementById(image).style.display = "none";
+      document.getElementById(button).style.display = "inline";
+      document.getElementById(button+'_close').style.display = "none";
+      document.getElementById(button+'_close_br').style.display = "none";
+    }
+  </script>

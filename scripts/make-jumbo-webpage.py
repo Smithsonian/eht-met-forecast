@@ -35,6 +35,21 @@ not_stations = {
     '01': 'Future stations',
 }
 
+vex_to_vlbimon_weather = {  # for the animated gifs
+    'Sz': 'SPT',
+    'Nn': 'NOEMA',
+    'Pv': 'PICO',
+    'Gl': 'GLT',
+    'Aa': 'ALMA',
+    'Ax': 'APEX',
+    'Lm': 'LMT',
+    'Mg': 'SMTO',
+    'Kt': 'KP',
+    'Sw': 'SMA',
+    'Mm': 'JCMT',
+    'GAM': 'AMT',  # no vex yet
+}
+
 for ns in not_stations.keys():
     if ns == '01':
         continue
@@ -106,6 +121,7 @@ for d in dirs:
         'previous': previous,
         'current': current,
         'next': next,
+        'vex_to_vlbimon_weather': vex_to_vlbimon_weather,
     }
 
     template = env.get_template('index.html.template')

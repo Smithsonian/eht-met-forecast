@@ -1,16 +1,17 @@
   <style>
     .wimage {
+/*      vertical-align: top;*/
       display: none;
       width: 344px;
       height: 215px;
     }
     .wbutton_open {
-      display: inline;
+/*      display: inline;*/
       vertical-align: top;
     }
     .wbutton_close {
       display: none;
-      vertical-align: bottom;
+/*      vertical-align: bottom;*/
     }
   </style>
   <script>

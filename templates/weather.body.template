@@ -1,19 +1,19 @@
 {%- if s in stuff.vex_to_vlbimon_weather -%}
-  {%- set weather = stuff.vex_to_vlbimon_weather[s] -%}
+  {%- set name = stuff.vex_to_vlbimon_weather[s].name -%}
+  {%- set showname = stuff.vex_to_vlbimon_weather[s].showname -%}
   <span>
-    <img id="image_{{ weather }}_cloud" class="wimage" src="https://vlbimon1.science.ru.nl/img/weatherMaps/{{ weather }}.cloud.gif">
-    <button id="button_{{ weather }}_cloud" class="wbutton_open" type="button" onclick="show_weather('image_{{ weather }}_cloud', 'button_{{ weather }}_cloud')">
-      Click for {{ weather }} cloud animation
+    <img id="image_{{ showname }}_cloud" class="wimage" src="https://vlbimon1.science.ru.nl/img/weatherMaps/{{ name }}.cloud.gif">
+    <button id="button_{{ showname }}_cloud" class="wbutton_open" type="button" onclick="show_weather('image_{{ showname }}_cloud', 'button_{{ showname }}_cloud')">
+      Click for {{ showname }} cloud animation
     </button>
-    <button id="button_{{ weather }}_cloud_close" class="wbutton_close" type="button" onclick="unshow_weather('image_{{ weather }}_cloud', 'button_{{ weather }}_cloud')">
+    <button id="button_{{ showname }}_cloud_close" class="wbutton_close" type="button" onclick="unshow_weather('image_{{ showname }}_cloud', 'button_{{ showname }}_cloud')">
       close
     </button>
-    <br>
-    <img id="image_{{ weather }}_wind" class="wimage" src="https://vlbimon1.science.ru.nl/img/weatherMaps/{{ weather }}.wind.gif">
-    <button id="button_{{ weather }}_wind" class="wbutton_open" type="button" onclick="show_weather('image_{{ weather }}_wind', 'button_{{ weather }}_wind')">
-      Click for {{ weather }} wind animation
+    <img id="image_{{ showname }}_wind" class="wimage" src="https://vlbimon1.science.ru.nl/img/weatherMaps/{{ name }}.wind.gif">
+    <button id="button_{{ showname }}_wind" class="wbutton_open" type="button" onclick="show_weather('image_{{ showname }}_wind', 'button_{{ showname }}_wind')">
+      Click for {{ showname }} wind animation
     </button>
-    <button id="button_{{ weather }}_wind_close" class="wbutton_close" type="button" onclick="unshow_weather('image_{{ weather }}_wind', 'button_{{ weather }}_wind')">
+    <button id="button_{{ showname }}_wind_close" class="wbutton_close" type="button" onclick="unshow_weather('image_{{ showname }}_wind', 'button_{{ showname }}_wind')">
       close
     </button>
   </span>

@@ -103,9 +103,12 @@
       {% if s == 'Aa' %}
         {% include 'vlbimon-links.template' %}
         {% include 'weather-links.template' %}
+        <br>
       {% endif %}
 
-      <h3>{{ s }} {{ stuff.stations[s].name|escape }}</h3>
+      <b>{{ s }} {{ stuff.stations[s].name|escape }}</b>
+      {%- include 'weather.body.template' %}
+      <br>
       {%- for f in files -%}
         {% if f.startswith('lindy') %}
           <img style="width:1050px;" src="{{ f }}">
@@ -115,7 +118,7 @@
           <img src="{{ f }}">
         {% endif %}
       {%- endfor -%}
-      {%- include 'weather.body.template' %}
+      <br>
     {% endfor %}
 
     <h2>Forecast Table -- Future <a href="forecast_future.csv">csv</a></h2>

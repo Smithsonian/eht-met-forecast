@@ -36,18 +36,18 @@ not_stations = {
 }
 
 vex_to_vlbimon_weather = {  # for the animated gifs
-    'Sz': 'SPT',
-    'Nn': 'NOEMA',
-    'Pv': 'PICO',
-    'Gl': 'GLT',
-    'Aa': 'ALMA',
-    'Ax': 'APEX',
-    'Lm': 'LMT',
-    'Mg': 'SMTO',
-    'Kt': 'KP',
-    'Sw': 'SMA',
-    'Mm': 'JCMT',
-    'GAM': 'AMT',  # no vex yet
+    'Sz': {'name': 'SPT', 'showname': 'SPT'},
+    'Nn': {'name': 'NOEMA', 'showname': 'NOEMA'},
+    'Pv': {'name': 'PICO', 'showname': 'PICO'},
+    'Gl': {'name': 'GLT', 'showname': 'GLT'},
+    'Aa': {'name': 'APEX', 'showname': 'ALMA'},
+    'Ax': {'name': 'APEX', 'showname': 'APEX'},
+    'Lm': {'name': 'LMT', 'showname': 'LMT'},
+    'Mg': {'name': 'SMTO', 'showname': 'SMTO'},
+    'Kt': {'name': 'KP', 'showname': 'KP'},
+    'Sw': {'name': 'SMA', 'showname': 'SMA'},
+    'Mm': {'name': 'SMA', 'showname': 'JCMT'},
+    'GAM': {'name':  'AMT', 'showname': 'AMT'},  # no vex yet
 }
 
 for ns in not_stations.keys():

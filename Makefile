@@ -18,6 +18,9 @@ am12.2:
 check_slack:
 	jq . ~/.slack-secrets
 
+eht_met_forecast/data/stations.json:
+	python scripts/stations-to-geodetic.py > eht_met_forecast/data/stations.json
+
 test:
 	AM=am-12.2/src/am PYTHONPATH=. pytest -v -v
 

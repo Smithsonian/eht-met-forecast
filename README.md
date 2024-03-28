@@ -26,6 +26,23 @@ EHT Array Operations Center for daily GO/NO-GO decisions during our observations
 % eht-met-forecast --backfill 168 --dir . --vex Sw --wait --log LOG
 ```
 
+## Renaming a station
+
+The output of this package is in directories named by the 2-letter Vex
+code. These sometimes change. For example, the EHT used to call
+Kitt Peak Kp, and then Kt, but Kt is used in the SCHED database for
+KVN Tamna, and so on and so on. So it's necessary to document
+how to rename a station here.
+
+Change the name in `scripts/stations-to-geodetic.py` and regenerate
+`data/stations.json`. Grep the configuration files and make changes
+as needed.
+
+To fix up the data, cd to the data repo, and pull. `git mv` the
+directory to its new name. Then commit both the old and new
+names. This causes git to create rename operations instead of
+duplicating the data.
+
 ## Installation Clues
 
 This code depends on two dependencies, `pygrib` and `am`. The [azure

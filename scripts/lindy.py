@@ -446,6 +446,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
     days = pd.date_range(start=start, end=end, freq='D')
     for d in days:
+        # night markings, light grey fill
         plt.axvspan(d+pd.Timedelta(schedule_start), d+pd.Timedelta(schedule_end), color='black', alpha=0.05, zorder=-10)
 
     # formatting

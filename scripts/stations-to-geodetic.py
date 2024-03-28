@@ -25,7 +25,7 @@ stations = [
 
     # vex not yet assigned (2024 obs)
     {'name': 'KVN-Pyeongchang', 'x': -3149221.052, 'y': 3966404.922, 'z': 3864830.701},
-    {'name': 'KVN-Yonsei', 'x': -3042281.0183, 'y': 4045902.6730, 'z': 3867374.3296},
+    {'name': 'KVN-Yonsei', 'vex': 'Ky', 'x': -3042281.0183, 'y': 4045902.6730, 'z': 3867374.3296},
 
     # ngEHT values
     # KVNPC,KC,Korea,37.534119,128.449676,504,Korean VLBI Network Pyeongchang,21,70,ALT-AZ,0,

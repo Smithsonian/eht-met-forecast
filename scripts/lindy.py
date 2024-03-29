@@ -506,7 +506,8 @@ def get_dates(args):
             return pd.Timestamp(*get_parts(s))
         else:
             # when not observing, we pass in start "0 days" end "14 days"
-            return pd.Timestamp('now') + pd.Timedelta(s)
+            midnight = pd.Timestamp(pd.Timestamp('today').date())
+            return midnight + pd.Timedelta(s)
 
     start = interpret_date(args.start)
     end = interpret_date(args.end)

@@ -1,9 +1,9 @@
 export SLACK_QUIET=1
 
 export STATIONS="Aa Ax BAJA CNI GAM Gl GLTS HAY JELM Kt LAS LLA Lm Mg Mm Nn OVRO Pv Sw Sz KVN-Pyeongchang Ky"
-export START=2024:04:02  # actually starts 04:04
+export START=2024:04:04
 export END=2024:04:15
-export VEX=2024/*.vex
+export VEX="--vex 2024/*.vex"
 export EMPHASIZE="Nn:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm:Ky"
 
 export DEST=~/github/eht-met-data

@@ -252,7 +252,6 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
         with open(outname, mode='w', encoding='utf8') as fd:
             pass
 
-
     fmt_in = '%Yy%jd%Hh%Mm%Ss'
     # ['4524000.43000 m', '468042.14000 m', '4460309.76000 m']
 

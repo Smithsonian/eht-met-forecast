@@ -1,4 +1,4 @@
-export SLACK_QUIET=1
+#export SLACK_QUIET=1
 
 export STATIONS="Aa Ax BAJA CNI GAM Gl GLTS HAY JELM Kt LAS LLA Lm Mg Mm Nn OVRO Pv Sw Sz KVN-Pyeongchang Ky"
 export START=2024:04:04

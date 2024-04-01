@@ -47,7 +47,7 @@ echo downloading latest with wait
 FLUSH="--flush Aa" WAIT=--wait bash do-all.sh
 
 if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download finished, charts in another 20 minutes"
+  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download finished, charts in another 30 minutes"
 fi
 
 echo doing plots

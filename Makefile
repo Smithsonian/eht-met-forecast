@@ -18,7 +18,7 @@ am12.2:
 check_slack:
 	jq . ~/.slack-secrets
 
-eht_met_forecast/data/stations.json:
+eht_met_forecast/data/stations.json: scripts/stations-to-geodetic.py
 	python scripts/stations-to-geodetic.py > eht_met_forecast/data/stations.json
 
 test:

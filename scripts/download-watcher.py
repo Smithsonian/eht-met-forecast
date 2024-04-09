@@ -34,8 +34,9 @@ else:
 with open(fname) as fd:
     count = len(fd.read().splitlines())
 
-#   ascii = [':hole:', ':ultra_slow_parrot:', ':eht-parrot:', ':ultra_fast_parrot:', ':excited-m87:']
-tqdm_bar = trange(210, initial=count, token=token, channel=channel_id)
+ascii_ = [':hole:', ':ultra_slow_parrot:', ':eht-parrot:', ':ultra_fast_parrot:', ':excited-m87:']
+#ascii_ = false
+tqdm_bar = trange(210, initial=count, token=token, channel=channel_id, ascii=ascii_)
 #tqdm_bar = trange(210, initial=count)
 tqdm_bar.set_description('GFS download')
 last = count

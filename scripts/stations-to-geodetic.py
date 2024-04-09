@@ -49,6 +49,8 @@ stations = [
     {'name': 'OVRO', 'lat': 37.231409, 'lon': -118.282436, 'alt': 1207},
     # GLT summit
     {'name': 'GLTS', 'x': 1500559.643, 'y': -1191855.397, 'z': 6066429.689},
+    # H.E.S.S. for the mwl folks, yes it is near GAM
+    {'name': 'HESS', 'lat': -23.27133, 'lon': 16.5, 'alt': 1900},
 
     # values I had from 2020
     #{'name': 'BAJA', 'x': -2352576.31173, 'y': -4940331.41122, 'z': 3271508.49374},

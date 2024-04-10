@@ -116,7 +116,7 @@ pytest
 
 ## The European Forecast
 
-The file `tau255.txt` is downloaded from the vlbimon website at Radbaud.
+The file `tau255.txt` is downloaded from the vlbimon website at Radboud.
 
 ```
 #7 0,12 * * * bash ~/github/eht-met-forecast/eurodownload.sh # UTC

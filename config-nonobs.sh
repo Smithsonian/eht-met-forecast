@@ -7,8 +7,8 @@ export STATIONS="Aa Ax BAJA CNI GAM Gl GLTS HAY JELM Kt LAS LLA Lm Mg Mm Nn OVRO
 
 export START="0 days"
 export END="14 days"
-#export VEX=
-export VEX="--vex 2024/*.vex"
+export VEX=
+#export VEX="--vex 2024/*.vex"
 export EMPHASIZE="Nn:Gl:Ax:Aa:Kt:Mg:Sw:Mm:Sz:Lm:Pv:Ky"
 
 # this is where we put the downloaded data, it is only checked in if complete 210 lines

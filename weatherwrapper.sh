@@ -13,8 +13,8 @@ $AM -v > /dev/null || exit 1
 
 export GFS=$(python scripts/print-gfs-cycle.py)
 
-#. config-nonobs.sh
-. config-2024.sh
+. config-nonobs.sh
+#. config-2024.sh
 
 date -u
 
@@ -26,7 +26,7 @@ bash do-all.sh
 echo doing plots in the past, if any
 bash do-plots.sh
 bash do-deploy.sh
-#exit 0  # only download in the past, past plots
+exit 0  # only download in the past, past plots
 
 date -u
 

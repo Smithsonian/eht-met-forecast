@@ -6,7 +6,7 @@ set -e
 . ~/venv/eht-met-forecast/bin/activate
 cd ~/github/eht-met-forecast
 
-rm tau225.txt
+rm -f tau225.txt
 
 RETRIES="--waitretry=1m -t 60"  # linear backoff, this is a total of 30 minutes
 #RETRY_THINGS="--retry-connrefused --retry-on-http-error=404 --retry-on-http-error=500 --retry-on-http-error=502"  # needs more recent wget than I have

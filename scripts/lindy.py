@@ -337,8 +337,11 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                 t = os.stat('./tau225.txt').st_mtime  # XXX
             except FileNotFoundError:
                 time.sleep(10)
-                eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
-                t = os.stat('./tau225.txt').st_mtime  # XXX
+                try:
+                    eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
+                    t = os.stat('./tau225.txt').st_mtime  # XXX
+                except FileNotFoundError:
+                    return
 
             t = datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc)
             eu_download_time = t.strftime(GFS_TIMESTAMP_FULL)

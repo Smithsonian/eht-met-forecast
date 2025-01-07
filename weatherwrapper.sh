@@ -7,7 +7,7 @@ set -e
 cd ~/github/eht-met-forecast
 
 # die early if this isn't present or somehow won't start
-export AM=./am-12.2/src/am
+export AM=./am-14.0/src/am
 # -bash: -v: command not found
 $AM -v > /dev/null || exit 1
 

@@ -378,7 +378,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
         # XXX consider moving this list outside the script?
         # used to pick line style/width
-        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Nn', 'Pv', 'Sw'}
+        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Pv', 'Sw'}
 
         # pick line styles and line widths for each station, keeping them consistent
         ls_list = ['dashed', 'dashdot']  # , 'solid', 'dotted']

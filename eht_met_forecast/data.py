@@ -119,11 +119,23 @@ def read_eu(basedir='.'):
     fname = expanduser(basedir) + '/tau225.txt'
 
     if not exists(fname):
+        print('eu tau225.txt does not exist')
         return
 
     with open(fname) as f:
-        data = pd.read_csv(f, **kwargs)
+        try:
+            data = pd.read_csv(f, **kwargs)
+        except NotImplementedError as e:
+            # this started happening when new columns were added
+            print('eu read failure: '+repr(e))
+            return
+        except Exception as e:
+            # catchall, just in case
+            print('eu read failure: '+repr(e))
+            return
+
     if data.empty:
+        print('eu tau225.txt was empty')
         return
 
     deletes = {

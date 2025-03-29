@@ -170,9 +170,12 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
 
     # EU forecast
     eu_data = eht_met_forecast.data.read_eu()  # ./tau255.txt
+    print('eu tau225 was found')
     if eu_data is not None and site in eu_data:
         # coming through orange?
         plt.plot(eu_data.date.values, eu_data[site], ls='--', label=station['name'] + ' EU')
+    if eu_data is not None and site not in eu_data:
+        print('site', site, 'not found in eu_data')
 
     # formatting
     plt.ylim(0, 1.0)
@@ -336,11 +339,13 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                 eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
                 t = os.stat('./tau225.txt').st_mtime  # XXX
             except FileNotFoundError:
+                print('eu tau225.txt raised FileNotFound')
                 time.sleep(10)
                 try:
                     eu_data = eht_met_forecast.data.read_eu()  # ./tau225.txt
                     t = os.stat('./tau225.txt').st_mtime  # XXX
                 except FileNotFoundError:
+                    print('eu tau225.txt raised FileNotFound twice')
                     return
 
             t = datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc)
@@ -428,6 +433,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                     plt.plot(eu_data.date.values, eu_data[site], ls=ls, label=label + ' EU')
                     some = True
                 else:
+                    print('00e', site, 'not found in columns:', eu_data.columns)
                     # if site is not in eu_data, we should still plot something and then disappear the label
                     # to keep the station colors the same
                     somesite = eu_data.columns[1]  # I think [0] is 'date' ?
@@ -565,6 +571,7 @@ def write_gfs_eu_style(allest, stations, gfs_cycle, plotdir='.', force=False, ve
 
 # if columns are renamed this can crash, so let's call it first thing to see if it crashes
 eht_met_forecast.data.read_eu()  # ./tau255.txt
+print('eu tau225 was found')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')

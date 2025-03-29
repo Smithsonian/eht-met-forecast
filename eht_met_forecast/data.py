@@ -106,6 +106,8 @@ eu_to_vex = {
     #'IRAM_PV': 'Pv',
     #'SPTDUMMY': 'Sz',
     #'IRAM_PdB': 'Nn',
+    # added 2025
+    'KVN_YS': 'Ky',
 }
 
 

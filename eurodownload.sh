@@ -17,4 +17,12 @@ if [ ! -f tau225.txt ]; then
   wget $RETRY_THINGS $RETRIES https://vlbimon2.science.ru.nl/img/plots/tau225.txt > /dev/null
 fi
 
+if [ ! -f tau225.txt ]; then
+  echo "All download attempts failed" >&2
+  exit 1
+fi
+
+cat tau225.txt | sed 's/:/ /' > tau225.txt.fixed
+mv tau225.txt.fixed tau225.txt
+
 python scripts/copy-to-timpstamped-name.py tau225.txt

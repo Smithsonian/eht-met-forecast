@@ -290,6 +290,11 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
             except IndexError:
                 # when there is only 1 station in a scan, the data structure is just a list instead of a list of lists
                 stations = {b['station'][0].replace('Ax', 'Aa').replace('Mm', 'Sw')}
+
+            # XXX 2025 Pc needs to be removed from the schedule
+            # stations is a set
+            stations.discard('Pc')
+
             try:
                 taus = np.array([allint[s][gfs_cycle](dtimes) for s in stations])
             except KeyError:

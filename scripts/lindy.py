@@ -383,7 +383,10 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
 
         # XXX consider moving this list outside the script?
         # used to pick line style/width
-        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Pv', 'Sw'}
+        # 2024
+        #hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Pv', 'Sw'}
+        # 2025
+        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Nn', 'Pv', 'Sw'}
 
         # pick line styles and line widths for each station, keeping them consistent
         ls_list = ['dashed', 'dashdot']  # , 'solid', 'dotted']
@@ -399,6 +402,8 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             if site in hz345:
                 lw = 2.0  # Remo request to really emphasize 345
                 # increasing the width also increases the length, so dash dot looks like solid at lw=3.0
+            if site == 'Lm':
+                lw = 1.5
             plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=lw, ls=ls)
             some = True
         elif name == '00w':

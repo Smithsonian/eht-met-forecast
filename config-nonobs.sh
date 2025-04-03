@@ -4,6 +4,8 @@ export SLACK_QUIET=1
 #export STATIONS="Aa Ax BAJA BOL BRZ CAT CNI GAM Gl GLTS HAY Kt LAS Lm Mg Mm Nn OVRO PIKES Pv Sw Sz VLA VLT KVN-Pyeonchang"
 # 2024
 export STATIONS="Aa Ax BAJA CNI GAM Gl GLTS HAY JELM Kt LAS LLA Lm Mg Mm Nn OVRO Pv Sw Sz KVN-Pyeongchang Ky"
+# 2025
+export STATIONS="Aa Ax BAJA CNI GAM Gl GLTS HAY JELM Kt LAS LLA Lm Mg Mm Nn OVRO Pv Sw Sz KVN-Pyeongchang Ky"
 
 export START="0 days"
 export END="14 days"

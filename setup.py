@@ -15,7 +15,7 @@ requires += ['slack-sdk']
 #  redhat: cairo cairo-dev (tested)
 #  debian: libcairo2-dev ?
 
-test_requires = ['pytest', 'pytest-cov', 'requests_mock']
+test_requires = ['pytest!=7.1.0', 'pytest-cov', 'requests_mock']
 
 requires += ['setuptools_scm', 'cython']
 

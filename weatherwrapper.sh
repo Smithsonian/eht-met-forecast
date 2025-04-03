@@ -22,43 +22,48 @@ date -u
 echo downloading in the past
 
 bash do-all.sh
-#exit 0  # only download in the past, no plots
 echo doing plots in the past, if any
 bash do-plots.sh
 bash do-deploy.sh
-exit 0  # only download in the past, past plots
+####exit 0  # only download in the past, past plots
 
 date -u
 
 # the rest of the script is for when we are observing
 # incremental download, slack notifications
 
-if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download starting, should finish around 1720UT"
-  DEST=~/github/eht-met-data
-  WATCHFILE=$DEST/Aa/$GFS
-  python scripts/download-watcher.py $WATCHFILE &
-  jobs -l
-  disown -a
-  jobs -l
-fi
+#GREGif echo $GFS | grep -q 12:00:00; then
+#GREG  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download starting, should finish around 1720UT"
+#GREG  DEST=~/github/eht-met-data
+#GREG  WATCHFILE=$DEST/Aa/$GFS
+#GREG  python scripts/download-watcher.py $WATCHFILE &
+#GREG  jobs -l
+#GREG  disown -a
+#GREG  jobs -l
+#GREGfi
 
 echo downloading latest with wait
 FLUSH="--flush Aa" WAIT=--wait bash do-all.sh
 
-if echo $GFS | grep -q 12:00:00; then
-  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download finished, charts in another 30 minutes"
-fi
+#GREGif echo $GFS | grep -q 12:00:00; then
+#GREG  python scripts/slack-post.py eht ehtobs_bots "1200UT weather download finished, charts in another 30 minutes"
+#GREGfi
 
 echo doing plots
 bash do-plots.sh
 bash do-deploy.sh
 
+if echo $GFS | grep -q 00:00:00; then
+  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|0000UT weather charts are available>"
+fi
 if echo $GFS | grep -q 06:00:00; then
   python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|0600UT weather charts are available>"
 fi
 if echo $GFS | grep -q 12:00:00; then
   python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|1200UT weather charts are available>"
+fi
+if echo $GFS | grep -q 18:00:00; then
+  python scripts/slack-post.py eht ehtobs_bots "<https://wiki.ehtcc.org/~glindahl/eht-met-plots/latest/|1800UT weather charts are available>"
 fi
 
 date -u

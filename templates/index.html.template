@@ -25,7 +25,7 @@
           var e = Math.max(.05, d);
           e = Math.min(0.5, e);
           e = (0.45 - (e - 0.05)) / 0.45;
-          return d3.interpolateRdYlGn(e);
+          return d3.color(d3.interpolateRdYlGn(e)).copy({ opacity: 0.5 }).formatRgb();
         }
       }
     function colorTrackCell(d)
@@ -35,7 +35,7 @@
           var e = Math.max({{stuff.trackmin}}, d);
           e = Math.min({{stuff.trackmax}}, e);
           e = ({{stuff.trackmax}} - {{stuff.trackmin}} - (e - {{stuff.trackmin}})) / ({{stuff.trackmax}} - {{stuff.trackmin}});
-          return d3.interpolateRdYlGn(1.0 - e);
+          return d3.color(d3.interpolateRdYlGn(1.0 - e)).copy({ opacity: 0.5 }).formatRgb();
         }
       }
     function formatCell(d)

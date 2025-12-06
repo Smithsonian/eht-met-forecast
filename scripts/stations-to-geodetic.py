@@ -52,6 +52,21 @@ stations = [
     # H.E.S.S. for the mwl folks, yes it is near GAM
     #{'name': 'HESS', 'lat': -23.27133, 'lon': 16.5, 'alt': 1900},
 
+    # VLBA (Club86)
+    {'name': 'VLBBR', 'lat': 48.1312, 'lon': -119.68327, 'alt': 257},
+    {'name': 'VLBFD', 'lat': 30.63499, 'lon': -103.94485, 'alt': 1614},
+    {'name': 'VLBHN', 'lat': 42.933592, 'lon': -71.986636, 'alt': 309},
+    {'name': 'VLBKP', 'lat': 31.956327, 'lon': -111.612423, 'alt': 1918},
+    {'name': 'VLBLA', 'lat': 35.775122, 'lon': -106.245605, 'alt': 1968},
+    {'name': 'VLBMK', 'lat': 19.8015, 'lon': -155.4556, 'alt': 3726},
+    {'name': 'VLBNL', 'lat': 41.77148, 'lon': -91.57422, 'alt': 241},
+    {'name': 'VLBOV', 'lat': 37.231652, 'lon': -118.277053, 'alt': 1208},
+    {'name': 'VLBPT', 'lat': 34.301002, 'lon': -108.119211, 'alt': 2373},
+    {'name': 'VLBSC', 'lat': 17.75652, 'lon': -64.58376, 'alt': 13,},
+
+    # GBT (Club86)
+    {'name': 'GBT', 'lat': 38.433502, 'lon': -79.83967, 'alt': 807},
+
     # values I had from 2020
     #{'name': 'BAJA', 'x': -2352576.31173, 'y': -4940331.41122, 'z': 3271508.49374},
     #{'name': 'CNI', 'x': 5327340.914, 'y': -1719123.635, 'z': 3051442.006},  # moved a bit in 2024

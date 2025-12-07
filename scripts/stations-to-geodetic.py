@@ -62,7 +62,7 @@ stations = [
     {'name': 'VLBNL', 'lat': 41.77148, 'lon': -91.57422, 'alt': 241},
     {'name': 'VLBOV', 'lat': 37.231652, 'lon': -118.277053, 'alt': 1208},
     {'name': 'VLBPT', 'lat': 34.301002, 'lon': -108.119211, 'alt': 2373},
-    {'name': 'VLBSC', 'lat': 17.75652, 'lon': -64.58376, 'alt': 13,},
+    {'name': 'VLBSC', 'lat': 17.75652, 'lon': -64.58376, 'alt': 13},
 
     # GBT (Club86)
     {'name': 'GBT', 'lat': 38.433502, 'lon': -79.83967, 'alt': 807},

@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--stations', action='store', help='location of stations.json file')
 parser.add_argument('--emphasize', action='store', nargs='+', help='colon-delimited list of stations to emphasize, i.e. this year\'s array')
 parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help='output directory for plots')
+parser.add_argument('--template', action='store', default='./index.html.template', help='template for index.html')
 parser.add_argument('--force', action='store_true', help='generate index.html even if it already exists')
 
 args = parser.parse_args()
@@ -124,7 +125,7 @@ for d in dirs:
         'vex_to_vlbimon_weather': vex_to_vlbimon_weather,
     }
 
-    template = env.get_template('index.html.template')
+    template = env.get_template(args.template)
     with open(d + '/index.html', 'w') as f:
         try:
             f.write(template.render(stuff=stuff, now=now, future=future))

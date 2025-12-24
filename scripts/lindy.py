@@ -19,6 +19,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 
 import eht_met_forecast.data
+#import eht_met_forecast.colors
 from eht_met_forecast.constants import GFS_TIMESTAMP_FULL
 from eht_met_forecast import read_stations
 import vex as vvex
@@ -291,8 +292,6 @@ def do_trackrank_csv(gfs_cycle, allint, start, end, vexes, plotdir, include=None
                 # when there is only 1 station in a scan, the data structure is just a list instead of a list of lists
                 stations = {b['station'][0].replace('Ax', 'Aa').replace('Mm', 'Sw')}
 
-            # XXX 2025 Pc needs to be removed from the schedule
-            # stations is a set
             stations.discard('Pc')
 
             try:
@@ -386,29 +385,25 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                 if other_site != other_name:
                     label += ' ' + other_name
 
-        # XXX consider moving this list outside the script?
-        # used to pick line style/width
-        # 2024
-        #hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Pv', 'Sw'}
-        # 2025
-        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Nn', 'Pv', 'Sw'}
+        # pick line style/width -- EHT
+        #hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Pv', 'Sw'}  # 2024
+        hz345 = {'Aa', 'Ax', 'Gl', 'Mg', 'Mm', 'Nn', 'Pv', 'Sw'}  # 2025
 
         # pick line styles and line widths for each station, keeping them consistent
         ls_list = ['dashed', 'dashdot']  # , 'solid', 'dotted']
         if site not in hz345:
             ls = 'solid'
+            lw = 1.0
+            if site == 'Lm':  # 2nd most important, emphasize it
+                lw = 1.5
         else:
             i = int(hashlib.md5(site.encode('utf8')).hexdigest()[:8], 16) % len(ls_list)
             ls = ls_list[i]
+            lw = 2.0  # Remo request to really emphasize 345
+            # lw=3 no bueno, increasing the width also increases the length, so dash dot looks like solid
 
         if allest:  # GFS tau
             est = allest[site][gfs_cycle]
-            lw = 1.0
-            if site in hz345:
-                lw = 2.0  # Remo request to really emphasize 345
-                # increasing the width also increases the length, so dash dot looks like solid at lw=3.0
-            if site == 'Lm':
-                lw = 1.5
             plt.plot(est.date.values, est.est_mean, label=label, alpha=0.75, lw=lw, ls=ls)
             some = True
         elif name == '00w':
@@ -560,6 +555,8 @@ def write_gfs_eu_style(allest, stations, gfs_cycle, plotdir='.', force=False, ve
             first = False
             df['date'] = df.date.values.astype(float) // 1000000000
         dfs.append(df)
+    if not dfs:
+        return  # dfs can be empty if none of the stations are in the EU data
     df = pd.concat(dfs, axis=1)
 
     # rename sites to their preferred vlbimon names
@@ -584,8 +581,9 @@ eht_met_forecast.data.read_eu()  # ./tau255.txt
 print('eu tau225 was found')
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--stations', action='store', help='location of stations.json file')
+parser.add_argument('--stations', action='store', help='sites to plot')
 parser.add_argument('--vex', action='store', nargs='+', help='list of vex files')
+parser.add_argument('--stations-file', action='store', help='location of stations.json file')
 parser.add_argument('--emphasize', action='store', nargs='+', help='colon-delimited list of stations to emphasize, i.e. this year\'s array')
 parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
 parser.add_argument('--plotdir', action='store', default='./eht-met-plots', help='output directory for plots')
@@ -602,7 +600,14 @@ verbose = args.verbose
 emphasize = set(station for station in args.emphasize if ':' not in station)
 [emphasize.add(s) for station in args.emphasize if ':' in station for s in station.split(':')]
 
-stations = read_stations(args.stations)
+stations = read_stations(args.stations_file)
+
+if args.stations:
+    # copy over the ones we really want
+    trimmed = {}
+    for vex in args.stations.split(' '):
+        trimmed[vex] = stations[vex]
+    stations = trimmed
 
 for e in emphasize:
     if e not in stations:

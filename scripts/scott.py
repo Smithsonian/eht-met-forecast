@@ -314,8 +314,8 @@ Atmospheric state data are from the NOAA/NCEP Global Forecast System (GFS), with
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--stations', action='store', help='site to plot')
-parser.add_argument('--vex', action='store', help='site to plot')
+parser.add_argument('--stations', action='store', help='sites to plot')
+parser.add_argument('--stations-file', action='store', help='json file with station details')
 parser.add_argument('--datadir', action='store', default='~/github/eht-met-data', help='data directory')
 parser.add_argument('--plotdir', action='store', default='~/eht-met-plots', help='output directory for plots')
 parser.add_argument('--force', action='store_true', help='make the plot even if the output file already exists')
@@ -327,12 +327,12 @@ args = parser.parse_args()
 datadir = expanduser(args.datadir)
 plotdir = expanduser(args.plotdir)
 
-station_dict = eht_met_forecast.read_stations(args.stations)
+station_dict = eht_met_forecast.read_stations(args.stations_file)
 
-if not args.vex:
-    stations = station_dict.keys()
+if args.stations:
+    stations = args.stations.split(' ')  # .split(':')  # allow both delimiters
 else:
-    stations = (args.vex,)
+    stations = station_dict.keys()
 
 if (args.hours < 0 or args.hours > 384):
     parser.error("invalid number of hours")

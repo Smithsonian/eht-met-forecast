@@ -1,4 +1,3 @@
- SAO
 MAILTO=lindahl@pbm.com
 
 # this machine is on PST8PDT
@@ -6,6 +5,7 @@ MAILTO=lindahl@pbm.com
 
 # PST
 3 5,11,17,23 * * * bin/mycron lindahl "GFS download" "bash ~/github/eht-met-forecast/weatherwrapper.sh"
+3 5,11,17,23 * * * bin/mycron lindahl "GFS download" "bash ~/github/eht-met-forecast/weatherwrapper-club86.sh"
 # PDT
 #3 0,6,12,18 * * * bin/mycron lindahl "GFS download" "bash ~/github/eht-met-forecast/weatherwrapper.sh"
 # UTC

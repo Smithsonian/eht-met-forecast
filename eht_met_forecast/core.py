@@ -29,7 +29,7 @@ def ok(outfile, verbose=False):
         count = len(f.readlines())
         if count != expected_lines:
             if verbose:
-                print(outfile, 'saw', count, 'lines, not good', file=sys.stderr)
+                print(outfile, 'saw', count, 'lines, starting over', file=sys.stderr)
             return False
     if verbose:
         print(outfile, 'exists and has the correct count')
@@ -44,7 +44,7 @@ def print_table_line(fields, f):
     print(table_line_string.format(*fields), file=f)
 
 
-def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, wait=False, verbose=False, stats=None):
+def gfs15_to_am10(lat, lon, alt, gfs_cycle, forecast_hour, frequency=None, wait=False, verbose=False, stats=None):
     grib_buffer = download_gfs(lat, lon, alt, gfs_cycle, forecast_hour, wait=wait, verbose=verbose, stats=stats)
 
     grib_problem = False
@@ -110,7 +110,7 @@ def print_extra(fcast_pretty, extra, f2, verbose=False):
         f2.writerow(extra)
 
 
-def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=False, stats=None, flush=False):
+def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, frequency=None, wait=False, verbose=False, stats=None, flush=False):
     if verbose:
         print(site['name'], 'fetching for hour', forecast_hour, file=sys.stderr)
     with record_latency('fetch gfs data'):
@@ -123,7 +123,7 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=
 
     am_problem = False
     with record_latency('run am'):
-        returncode, am_output, am_error = run_am(layers_amc)
+        returncode, am_output, am_error = run_am(layers_amc, frequency)
     if returncode not in (0, 1):
         # am exits 1 for warnings: '! Warning: Water ice was encountered on a layer where models were'
         am_problem = 'saw returncode of {}'.format(returncode)
@@ -156,16 +156,16 @@ def compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=False, verbose=
     time.sleep(1)
 
 
-def make_forecast_table(site, gfs_cycle, f, f2, wait=False, verbose=False, hours=-1, stats=None, flush=False):
+def make_forecast_table(site, gfs_cycle, f, f2, hours=-1, frequency=None, stats=None, flush=False, wait=False, verbose=False):
     print_table_line(table_header, f)
     for forecast_hour in range(0, 121):
         if forecast_hour >= hours:
             return
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats, flush=flush)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, frequency=frequency, wait=wait, verbose=verbose, stats=stats, flush=flush)
     for forecast_hour in range(123, 385, 3):
         if forecast_hour >= hours:
             return
-        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, wait=wait, verbose=verbose, stats=stats, flush=flush)
+        compute_one_hour(site, gfs_cycle, forecast_hour, f, f2, frequency=frequency, wait=wait, verbose=verbose, stats=stats, flush=flush)
 
 
 def read_stations(filename):

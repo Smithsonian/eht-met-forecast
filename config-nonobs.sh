@@ -19,5 +19,7 @@ export DEST=~/github/eht-met-data
 # this data directory should be the checked in data, with no partial files
 export DATA=~/github/eht-met-data-prod
 
+export PLOTS=eht-met-plots
+
 # eht-work -- NFS mounts homedirs from eht-filer
 export UPLOAD=glindahl@35.199.60.65

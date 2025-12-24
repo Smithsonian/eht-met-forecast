@@ -70,6 +70,7 @@ def interpret_args(args, station_dict):
 
 def main(args=None):
     parser = ArgumentParser(description='eht-met-forecast command line tool')
+    parser.add_argument('--frequency', action='store', type=float, default=225, help='frequency')
     parser.add_argument('--vex', action='append', help='station(s) to fetch')
     parser.add_argument('--stations', action='store', help='station configuration file (default: builtin list)')
     parser.add_argument('--backfill', action='store', default=0, type=int, help='hours to backfill')
@@ -145,7 +146,10 @@ def main(args=None):
                 f2.writeheader()
 
             try:
-                make_forecast_table(station, gfs_cycle, f, f2, wait=args.wait, verbose=args.verbose, hours=args.hours, stats=stats, flush=flush)
+                make_forecast_table(
+                    station, gfs_cycle, f, f2, hours=args.hours, frequency=args.frequency,
+                    stats=stats, flush=flush, wait=args.wait, verbose=args.verbose
+                )
             except TimeoutError:
                 # raised by gfs.py
                 print('Gave up on {} {}'.format(station, gfs_cycle), file=sys.stderr)

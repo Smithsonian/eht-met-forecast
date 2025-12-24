@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      {{ stuff.title }}
+    </title>
+  {#{% include 'weather.head.template' %}#}
+  </head>
+  <body>
+    <h1>{{ stuff.title }}</h1>
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3-color.v2.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v2.min.js"></script>
+    <script>
+    function IsNumeric(input)
+      {
+	  return (input - 0) == input && (''+input).trim().length > 0;
+      };
+    function colorCell(d)
+      {
+        // header day of year is an integer, data cells are not integers
+        if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
+          var e = Math.max(.05, d);
+          e = Math.min(0.5, e);
+          e = (0.45 - (e - 0.05)) / 0.45;
+          return d3.color(d3.interpolateRdYlGn(e)).copy({ opacity: 0.4 }).formatRgb();
+        }
+      }
+    function colorTrackCell(d)
+      {
+        // header day of year is an integer, data cells are not integers
+        if (IsNumeric(d) && ! Number.isInteger(d - 0)) {
+          var e = Math.max({{stuff.trackmin}}, d);
+          e = Math.min({{stuff.trackmax}}, e);
+          e = ({{stuff.trackmax}} - {{stuff.trackmin}} - (e - {{stuff.trackmin}})) / ({{stuff.trackmax}} - {{stuff.trackmin}});
+          return d3.color(d3.interpolateRdYlGn(1.0 - e)).copy({ opacity: 0.5 }).formatRgb();
+        }
+      }
+    function formatCell(d)
+      {
+        if (IsNumeric(d)) {
+          if (Number.isInteger(d - 0)) {
+            return d;
+          } else {
+	    return (d - 0).toFixed(2);
+          }
+        } else {
+          return d;
+        }
+      }
+    </script>
+
+    <h2>Forecast Table -- {{ stuff.year }} <a href="forecast.csv">csv</a></h2>
+    <div id="forecast{{ stuff.year }}"></div>
+    <script type="text/javascript" charset="utf-8">
+      d3.text("forecast.csv", function(data) {
+          var parsedCSV = d3.csv.parseRows(data);
+
+          var container = d3.select("#forecast{{ stuff.year }}")
+              .append("table")
+
+              .selectAll("tr")
+              .data(parsedCSV).enter()
+              .append("tr")
+
+              .selectAll("td")
+              .data(function(d) { return d; }).enter()
+              .append("td")
+              .text(function(d) { return formatCell(d); })
+	      .style("background-color", function(d) {return colorCell(d);});
+      });
+    </script>
+
+    <h2>TrackRank Table <a href="trackrank.csv">csv</a></h2>
+    (bigger is better)
+    <div id="trackrank"></div>
+    <script type="text/javascript" charset="utf-8">
+      d3.text("trackrank.csv", function(data) {
+          var parsedCSV = d3.csv.parseRows(data);
+
+          var container = d3.select("#trackrank")
+              .append("table")
+
+              .selectAll("tr")
+              .data(parsedCSV).enter()
+              .append("tr")
+
+              .selectAll("td")
+              .data(function(d) { return d; }).enter()
+              .append("td")
+              .text(function(d) { return formatCell(d); })
+	      .style("background-color", function(d) {return colorTrackCell(d);});
+      });
+    </script>
+
+    <h2>{{ stuff.year }} Stations {{ stuff.gfs_cycle}} <a href="../{{stuff.previous}}/">previous</a> <a href="../{{stuff.current}}/">current</a> <a href="../{{stuff.next}}/">next</a></h2>
+    (note: shaded area of these graphs is 0000-1200 UTC each day)<br>
+
+    {% for s, files in now.items() %}
+      {% if s == 'Aa' %}
+        {% include 'vlbimon-links.template' %}
+        {% include 'weather-links.template' %}
+        <br>
+      {% endif %}
+
+      <b>{{ s }} {{ stuff.stations[s].name|escape }}</b>
+      {#{%- include 'weather.body.template' %}#}
+      <br>
+      {%- for f in files -%}
+        {% if f.startswith('lindy') %}
+          <img style="width:1050px;" src="{{ f }}">
+	{% elif f.startswith('forecast') %}
+          <img style="width:450px;" src="{{ f }}">
+	{% else %}
+          <img src="{{ f }}">
+        {% endif %}
+      {%- endfor -%}
+      <br>
+    {% endfor %}
+
+    <h2>Forecast Table -- Future <a href="forecast_future.csv">csv</a></h2>
+    <div id="forecast_future"></div>
+    <script type="text/javascript" charset="utf-8">
+      d3.text("forecast_future.csv", function(data) {
+          var parsedCSV = d3.csv.parseRows(data);
+
+          var container = d3.select("#forecast_future")
+              .append("table")
+
+              .selectAll("tr")
+              .data(parsedCSV).enter()
+              .append("tr")
+
+              .selectAll("td")
+              .data(function(d) { return d; }).enter()
+              .append("td")
+              .text(function(d) { return formatCell(d); })
+	      .style("background-color", function(d) {return colorCell(d);});
+      });
+    </script>
+
+    <h2>Future Stations</h2>
+
+    <p>Clues: BAJA (Mexico), CNI (Canary Islands), GAM (Namibia), GLTS (Greenland summit), HAY (Haystack), JELM (Wyoming), LAS (Chile), LLA (Argentina), OVRO (California)
+
+    {% for s, files in future.items() %}
+      <h3>{{ s }} {{ stuff.stations[s].name }}</h3>
+      {%- for f in files -%}
+        {% if f.startswith('lindy') %}
+          <img style="width:1050px;" src="{{ f }}">
+	{% elif f.startswith('forecast') %}
+          <img style="width:450px;" src="{{ f }}">
+	{% else %}
+          <img src="{{ f }}">
+        {% endif %}
+      {%- endfor -%}
+    {% endfor %}
+
+  </body>
+</html>

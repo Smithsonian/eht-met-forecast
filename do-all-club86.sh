@@ -10,7 +10,7 @@ BACKFILL=168
 
 for vex in $STATIONS; do
    echo $vex
-   eht-met-forecast -v --backfill $BACKFILL --dir $DEST --vex $vex $WAIT $FLUSH --log LOG --frequency $FREQUENCY &
+   eht-met-forecast --backfill $BACKFILL --dir $DEST --vex $vex $WAIT $FLUSH --log LOG --frequency $FREQUENCY &
 done
 
 wait

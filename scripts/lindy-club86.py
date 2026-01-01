@@ -61,7 +61,7 @@ def trim_dates(data, start, end):
             ((data.doy <= end.dayofyear) & (data.date.dt.year == end.year))
         )
     else:
-        days = data[(data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start.dayofyear) & (data.doy <= end.dayofyear) & (data.date.dt.year == start.year)]
+        days = (data.date.dt.hour >= 0) & (data.date.dt.hour < 12) & (data.doy >= start.dayofyear) & (data.doy <= end.dayofyear) & (data.date.dt.year == start.year)
 
     return night & days
 

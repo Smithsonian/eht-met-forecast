@@ -17,4 +17,4 @@ wait
 
 (cd $DEST && bash ./commit-finished.sh)
 
-ssh $UPLOAD "cd eht-met-data && git pull"
+#ssh $UPLOAD "cd eht-met-data && git pull"

@@ -36,12 +36,9 @@ partial_sums = defaultdict(list)
 def read_one(vex, gfs_cycle, basedir='.'):
     utc = datetime.timezone.utc
     kwargs = {
-        'delim_whitespace': True,
+        'sep': r'\s+',
         'comment': '#',
-        'names': 'datestr tau225 Tb pwv lwp iwp o3'.split(),
-        'parse_dates': {'date': [0]},
-        'keep_date_col': True,
-        'date_parser': lambda x: datetime.datetime.strptime(x, '%Y%m%d_%H:%M:%S').replace(tzinfo=utc)
+        'names': 'date tau225 Tb pwv lwp iwp o3'.split(),
     }
 
     fname = expanduser('{}/{}/{}'.format(basedir, vex, gfs_cycle))
@@ -53,7 +50,9 @@ def read_one(vex, gfs_cycle, basedir='.'):
     if data.empty:
         return
 
-    data = data.set_index('date').resample('1H').interpolate('linear').reset_index()
+    data['date'] = pd.to_datetime(data['date'], format='%Y%m%d_%H:%M:%S', utc=True)
+
+    data = data.set_index('date').resample('1h').interpolate('linear').reset_index()
 
     data['date0'] = data.iloc[0]['date']
     data['age'] = data['date'] - data['date0']
@@ -72,10 +71,8 @@ def read_accumulated(vex, gfs_cycle, basedir='.'):
 def read_wind(vex, gfs_cycle, basedir='.'):
     utc = datetime.timezone.utc
     kwargs = {
-        'delim_whitespace': True,
+        'sep': r'\s+',
         'header': 0,
-        'parse_dates': {'date_temp': [0]},
-        'date_parser': lambda x: datetime.datetime.strptime(x, '%Y%m%d_%H:%M:%S').replace(tzinfo=utc)
     }
 
     fname = expanduser('{}/{}/{}.extra'.format(basedir, vex, gfs_cycle))
@@ -84,8 +81,7 @@ def read_wind(vex, gfs_cycle, basedir='.'):
 
     with open(fname) as f:
         data = pd.read_csv(f, **kwargs)
-        data['date'] = data['date_temp']
-        del data['date_temp']
+        data['date'] = pd.to_datetime(data['date'], format='%Y%m%d_%H:%M:%S', utc=True)
 
     return data
 
@@ -113,10 +109,8 @@ eu_to_vex = {
 
 def read_eu(basedir='.'):
     kwargs = {
-        'delim_whitespace': True,
+        'sep': r'\s+',
         'header': 0,
-        'parse_dates': {'date': [0]},
-        'date_parser': lambda x: datetime.datetime.utcfromtimestamp(int(x.replace('.', ''))),
     }
     fname = expanduser(basedir) + '/tau225.txt'
 
@@ -139,6 +133,10 @@ def read_eu(basedir='.'):
     if data.empty:
         print('eu tau225.txt was empty')
         return
+
+    # this is different because it's unixtime. pandas handles the trailing period.
+    data['date'] = pd.to_datetime(data['time'], unit='s', utc=True)
+    del data['time']
 
     deletes = {
         'DeBilt': '',

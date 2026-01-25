@@ -141,7 +141,7 @@ def do_plot(station, datadir, plotdir, gfs_cycle,
             #
             for axes in axes_arr:
                 axes.grid(
-                        b=True,
+                        #b=True,  # no longer needed, starting somewhere in Pandas 2.X
                         which="major",
                         dashes=(1.0, 1.0),
                         color="0.8")

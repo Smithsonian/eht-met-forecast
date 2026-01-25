@@ -168,7 +168,9 @@ def do_plot(station, gfs_cycle, allest, allint, start, end, datadir, plotdir, fo
         raise ValueError('gfs_cycle {} and first date in csv {} disagree'.format(gfs_cycle, date0_str))
 
     # ensemble estimator with errors
-    est = alldata.groupby('date').apply(wavg).reset_index()
+    cols = ['tau225', 'sigma']
+    est = alldata.groupby('date', group_keys=True)[cols].apply(wavg).reset_index()
+
     est['site'] = site
     allest[site][gfs_cycle] = est
     allint[site][gfs_cycle] = interp1d(est.date.values.astype(int),
@@ -454,7 +456,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
             if wind_data is not None and site in wind_data:
                 wd = wind_data[site]
                 if wd is not None and 'wgust' in wd:
-                    wd['wgust'].mask(wd['wgust'] < 10., np.NAN, inplace=True)
+                    wd['wgust'] = wd['wgust'].mask(wd['wgust'] < 10., np.nan)
                     # always do the plot so that the colors/styles are consistent with the wind speed
                     label = label + ' wind gust'
                     if wd['wgust'].count() == 0:
@@ -481,7 +483,7 @@ def do_00_plot(gfs_cycle, allest, start, end, plotdir, stations, force=False, in
                     # to keep the station colors the same
                     somesite = eu_data.columns[1]  # I think [0] is 'date' ?
                     something = eu_data[somesite].copy(deep=True)
-                    something[:] = np.NAN
+                    something[:] = np.nan
                     plt.plot(eu_data.date.values, something, ls=ls, label=None)
                     some = True
         else:

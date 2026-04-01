@@ -9,8 +9,21 @@ color_list = [  # IBM palette for color-blindness
     '#FFB000',  # dark yellow
 ]
 
+# Wong colors https://davidmathlogic.com/colorblind/
+color_list = [
+    '#000000',  # black
+    '#0072b2',  # blue -- most successful line
+    '#56b4e9',  # sky-blue
+    '#009e73',  # bluish-green
+    '#f0e442',  # yellow
+    '#d55e00',  # vermillion
+    '#cc79a7',  # reddish-purple
+    '#e69f00',  # organge -- least successful line
+]
+
+
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html to add more
-ls_list = ['solid', 'dashed', 'dotted', 'dashdot']
+ls_list = ['solid', 'dashed', 'dashdot', 'dotted']
 #marker_list = ['o', 'v', '^', 's', 'd']
 
 color_count = len(color_list)

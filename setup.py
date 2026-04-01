@@ -41,7 +41,7 @@ setup(
     author_email='glindahl@cfa.harvard.edu',
     url='https://github.com/wumpus/eht-met-forecast',
     packages=packages,
-    python_requires=">=3.6.*",
+    python_requires=">=3.6",
     extras_require=extras_require,
     include_package_data=True,
     package_data=package_data,
